@@ -1,0 +1,91 @@
+{
+  "weapons": {
+    "minecraft:wooden_sword": {
+      "damage": 5,
+      "attack_speed": 1.6,
+      "durability": 59,
+      "reason": "Базовое оружие, слабое"
+    },
+    "minecraft:stone_sword": {
+      "damage": 6,
+      "attack_speed": 1.6,
+      "durability": 131,
+      "reason": "Раннее оружие"
+    },
+    "minecraft:iron_sword": {
+      "damage": 8,
+      "attack_speed": 1.6,
+      "durability": 250,
+      "reason": "Среднее оружие, доступное"
+    },
+    "minecraft:golden_sword": {
+      "damage": 5,
+      "attack_speed": 1.6,
+      "durability": 32,
+      "reason": "Слабое, но быстрое"
+    },
+    "minecraft:diamond_sword": {
+      "damage": 10,
+      "attack_speed": 1.6,
+      "durability": 1561,
+      "reason": "Сильное оружие позднего этапа"
+    },
+    "minecraft:netherite_sword": {
+      "damage": 12,
+      "attack_speed": 1.6,
+      "durability": 2031,
+      "reason": "Лучшее ванильное оружие"
+    },
+    "minecraft:bow": {
+      "damage": 10,
+      "draw_speed": 1.0,
+      "durability": 384,
+      "range": 64,
+      "reason": "Дальнобойное оружие"
+    },
+    "minecraft:crossbow": {
+      "damage": 12,
+      "draw_speed": 1.25,
+      "durability": 326,
+      "range": 80,
+      "reason": "Медленное, но мощное"
+    },
+    "tacz:ak47": {
+      "damage": 8,
+      "fire_rate": 600,
+      "magazine_size": 30,
+      "reload_time": 2.5,
+      "range": 100,
+      "recoil": 0.3,
+      "reason": "Автомат, средний урон, высокая скорострельность"
+    },
+    "tacz:m4a1": {
+      "damage": 7,
+      "fire_rate": 700,
+      "magazine_size": 30,
+      "reload_time": 2.2,
+      "range": 90,
+      "recoil": 0.25,
+      "reason": "Точная винтовка, низкая отдача"
+    },
+    "tacz:awp": {
+      "damage": 35,
+      "fire_rate": 40,
+      "magazine_size": 5,
+      "reload_time": 3.5,
+      "range": 200,
+      "recoil": 0.8,
+      "reason": "Снайперская винтовка, один выстрел - один убийство"
+    },
+    "tacz:shotgun": {
+      "damage": 6,
+      "pellets": 8,
+      "fire_rate": 60,
+      "magazine_size": 6,
+      "reload_time": 4.0,
+      "range": 30,
+      "spread": 0.5,
+      "reason": "Дробовик, высокий урон на близкой дистанции"
+    }
+  }
+}

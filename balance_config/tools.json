@@ -1,0 +1,56 @@
+{
+  "tools": {
+    "minecraft:wooden_pickaxe": {
+      "mining_speed": 2.0,
+      "durability": 59,
+      "mining_level": 0,
+      "reason": "Базовый инструмент"
+    },
+    "minecraft:stone_pickaxe": {
+      "mining_speed": 4.0,
+      "durability": 131,
+      "mining_level": 1,
+      "reason": "Ранний инструмент"
+    },
+    "minecraft:iron_pickaxe": {
+      "mining_speed": 6.0,
+      "durability": 250,
+      "mining_level": 2,
+      "reason": "Средний инструмент"
+    },
+    "minecraft:diamond_pickaxe": {
+      "mining_speed": 8.0,
+      "durability": 1561,
+      "mining_level": 3,
+      "reason": "Быстрый инструмент"
+    },
+    "minecraft:netherite_pickaxe": {
+      "mining_speed": 9.0,
+      "durability": 2031,
+      "mining_level": 4,
+      "reason": "Лучший инструмент"
+    },
+    "minecraft:iron_axe": {
+      "mining_speed": 6.0,
+      "damage": 9,
+      "durability": 250,
+      "reason": "Универсальный инструмент/оружие"
+    },
+    "minecraft:diamond_axe": {
+      "mining_speed": 8.0,
+      "damage": 10,
+      "durability": 1561,
+      "reason": "Сильный топор"
+    },
+    "minecraft:iron_shovel": {
+      "mining_speed": 6.0,
+      "durability": 250,
+      "reason": "Быстрая копка"
+    },
+    "minecraft:diamond_shovel": {
+      "mining_speed": 8.0,
+      "durability": 1561,
+      "reason": "Очень быстрая копка"
+    }
+  }
+}

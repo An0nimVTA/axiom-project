@@ -1,0 +1,137 @@
+{
+  "recipes": {
+    "minecraft:iron_sword": {
+      "original": [
+        {"item": "minecraft:iron_ingot", "count": 2},
+        {"item": "minecraft:stick", "count": 1}
+      ],
+      "modified": [
+        {"item": "minecraft:iron_ingot", "count": 3},
+        {"item": "minecraft:stick", "count": 2},
+        {"item": "minecraft:diamond", "count": 1}
+      ],
+      "reason": "Усложнён для баланса, требует алмаз"
+    },
+    "minecraft:diamond_sword": {
+      "original": [
+        {"item": "minecraft:diamond", "count": 2},
+        {"item": "minecraft:stick", "count": 1}
+      ],
+      "modified": [
+        {"item": "minecraft:diamond", "count": 4},
+        {"item": "minecraft:stick", "count": 2},
+        {"item": "minecraft:netherite_scrap", "count": 1}
+      ],
+      "reason": "Сильно усложнён, требует незерит"
+    },
+    "minecraft:diamond_pickaxe": {
+      "original": [
+        {"item": "minecraft:diamond", "count": 3},
+        {"item": "minecraft:stick", "count": 2}
+      ],
+      "modified": [
+        {"item": "minecraft:diamond", "count": 5},
+        {"item": "minecraft:stick", "count": 3},
+        {"item": "minecraft:iron_block", "count": 1}
+      ],
+      "reason": "Усложнён, требует больше ресурсов"
+    },
+    "minecraft:diamond_chestplate": {
+      "original": [
+        {"item": "minecraft:diamond", "count": 8}
+      ],
+      "modified": [
+        {"item": "minecraft:diamond", "count": 12},
+        {"item": "minecraft:iron_ingot", "count": 8},
+        {"item": "minecraft:gold_ingot", "count": 4}
+      ],
+      "reason": "Сильно усложнён, дорогая броня"
+    },
+    "create:mechanical_press": {
+      "original": [
+        {"item": "minecraft:iron_block", "count": 1},
+        {"item": "create:andesite_casing", "count": 1}
+      ],
+      "modified": [
+        {"item": "minecraft:iron_block", "count": 2},
+        {"item": "create:andesite_casing", "count": 2},
+        {"item": "minecraft:piston", "count": 1},
+        {"item": "minecraft:redstone", "count": 4}
+      ],
+      "reason": "Усложнён для баланса Create"
+    },
+    "create:crushing_wheel": {
+      "original": [
+        {"item": "minecraft:stone", "count": 8},
+        {"item": "create:andesite_alloy", "count": 4}
+      ],
+      "modified": [
+        {"item": "minecraft:stone", "count": 16},
+        {"item": "create:andesite_alloy", "count": 8},
+        {"item": "minecraft:iron_block", "count": 2},
+        {"item": "minecraft:diamond", "count": 2}
+      ],
+      "reason": "Очень усложнён, мощная машина"
+    },
+    "create:steam_engine": {
+      "original": [
+        {"item": "minecraft:copper_block", "count": 2},
+        {"item": "create:andesite_alloy", "count": 4},
+        {"item": "minecraft:piston", "count": 1}
+      ],
+      "modified": [
+        {"item": "minecraft:copper_block", "count": 4},
+        {"item": "create:andesite_alloy", "count": 8},
+        {"item": "minecraft:piston", "count": 2},
+        {"item": "minecraft:iron_block", "count": 2},
+        {"item": "minecraft:gold_ingot", "count": 4}
+      ],
+      "reason": "Сильно усложнён, генератор энергии"
+    },
+    "mekanism:enrichment_chamber": {
+      "original": [
+        {"item": "minecraft:iron_ingot", "count": 4},
+        {"item": "minecraft:redstone", "count": 2},
+        {"item": "mekanism:steel_casing", "count": 1}
+      ],
+      "modified": [
+        {"item": "minecraft:iron_ingot", "count": 8},
+        {"item": "minecraft:redstone", "count": 8},
+        {"item": "mekanism:steel_casing", "count": 2},
+        {"item": "minecraft:diamond", "count": 2},
+        {"item": "minecraft:gold_ingot", "count": 4}
+      ],
+      "reason": "Очень усложнён, x2 выход руд"
+    },
+    "mekanism:purification_chamber": {
+      "original": [
+        {"item": "mekanism:enrichment_chamber", "count": 1},
+        {"item": "minecraft:iron_ingot", "count": 4},
+        {"item": "mekanism:alloy_infused", "count": 2}
+      ],
+      "modified": [
+        {"item": "mekanism:enrichment_chamber", "count": 1},
+        {"item": "minecraft:iron_ingot", "count": 8},
+        {"item": "mekanism:alloy_infused", "count": 4},
+        {"item": "minecraft:diamond", "count": 4},
+        {"item": "minecraft:gold_block", "count": 2}
+      ],
+      "reason": "Максимально усложнён, x3 выход руд"
+    },
+    "mekanism:gas_burning_generator": {
+      "original": [
+        {"item": "minecraft:iron_ingot", "count": 4},
+        {"item": "mekanism:steel_casing", "count": 1},
+        {"item": "mekanism:electrolytic_core", "count": 1}
+      ],
+      "modified": [
+        {"item": "minecraft:iron_ingot", "count": 8},
+        {"item": "mekanism:steel_casing", "count": 2},
+        {"item": "mekanism:electrolytic_core", "count": 2},
+        {"item": "minecraft:diamond", "count": 2},
+        {"item": "minecraft:gold_ingot", "count": 8}
+      ],
+      "reason": "Сильно усложнён, мощный генератор"
+    }
+  }
+}

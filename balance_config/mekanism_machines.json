@@ -1,0 +1,79 @@
+{
+  "mekanism_machines": {
+    "mekanism:energized_smelter": {
+      "processing_speed": 200,
+      "energy_consumption": 50,
+      "energy_storage": 10000,
+      "reason": "Электрическая печь, x2 скорость"
+    },
+    "mekanism:enrichment_chamber": {
+      "processing_speed": 200,
+      "energy_consumption": 50,
+      "energy_storage": 10000,
+      "output_multiplier": 2.0,
+      "reason": "Обогащение руд, x2 выход"
+    },
+    "mekanism:crusher": {
+      "processing_speed": 200,
+      "energy_consumption": 50,
+      "energy_storage": 10000,
+      "output_multiplier": 2.0,
+      "reason": "Дробление, x2 выход"
+    },
+    "mekanism:purification_chamber": {
+      "processing_speed": 200,
+      "energy_consumption": 100,
+      "energy_storage": 20000,
+      "output_multiplier": 3.0,
+      "reason": "Очистка руд, x3 выход, высокое потребление"
+    },
+    "mekanism:chemical_injection_chamber": {
+      "processing_speed": 200,
+      "energy_consumption": 200,
+      "energy_storage": 40000,
+      "output_multiplier": 4.0,
+      "reason": "Химическая обработка, x4 выход, очень высокое потребление"
+    },
+    "mekanism:heat_generator": {
+      "power_output": 160,
+      "fuel_consumption": 1.0,
+      "reason": "Базовый генератор, низкий выход"
+    },
+    "mekanism:gas_burning_generator": {
+      "power_output": 800,
+      "fuel_consumption": 1.0,
+      "reason": "Газовый генератор, высокий выход"
+    },
+    "mekanism:wind_generator": {
+      "power_output": 400,
+      "height_multiplier": 1.5,
+      "reason": "Ветряк, зависит от высоты"
+    },
+    "mekanism:solar_generator": {
+      "power_output": 200,
+      "reason": "Солнечная панель, работает днём"
+    },
+    "mekanism:advanced_solar_generator": {
+      "power_output": 600,
+      "reason": "Улучшенная панель, x3 выход"
+    },
+    "mekanism:electrolytic_separator": {
+      "processing_speed": 100,
+      "energy_consumption": 100,
+      "energy_storage": 20000,
+      "reason": "Разделение воды на водород и кислород"
+    },
+    "mekanism:chemical_oxidizer": {
+      "processing_speed": 200,
+      "energy_consumption": 100,
+      "energy_storage": 20000,
+      "reason": "Окисление материалов в газ"
+    },
+    "mekanism:rotary_condensentrator": {
+      "processing_speed": 200,
+      "energy_consumption": 50,
+      "energy_storage": 10000,
+      "reason": "Преобразование газ ↔ жидкость"
+    }
+  }
+}

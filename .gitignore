@@ -1,0 +1,67 @@
+# Java
+*.class
+*.jar
+!gradle-wrapper.jar
+*.war
+*.ear
+*.log
+
+# Gradle
+.gradle/
+build/
+out/
+bin/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+
+# Minecraft
+server/world/
+server/world_nether/
+server/world_the_end/
+server/logs/
+server/crash-reports/
+server/debug/
+server/*.log
+server/usercache.json
+server/usernamecache.json
+server/ops.json
+server/whitelist.json
+server/banned-*.json
+
+# AXIOM data
+server/plugins/AXIOM/data/
+server/plugins/AXIOM/*.db
+server/plugins/AXIOM/backups/
+
+# Launcher
+axiom-launcher-kotlin/.gradle/
+axiom-launcher-kotlin/build/
+axiom-launcher-kotlin/installer.log
+
+# Mod
+axiom-mod-integration/.gradle/
+axiom-mod-integration/build/
+axiom-mod-integration/run/
+
+# Plugin
+axiom-plugin/.gradle/
+axiom-plugin/build/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary
+*.tmp
+*.bak
+*.swp
+*~.nib

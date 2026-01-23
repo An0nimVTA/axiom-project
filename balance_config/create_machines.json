@@ -1,0 +1,56 @@
+{
+  "create_machines": {
+    "create:mechanical_press": {
+      "processing_speed": 100,
+      "stress_impact": 8,
+      "reason": "Базовая обработка, средняя скорость"
+    },
+    "create:mechanical_mixer": {
+      "processing_speed": 120,
+      "stress_impact": 4,
+      "reason": "Смешивание, быстрее пресса"
+    },
+    "create:millstone": {
+      "processing_speed": 80,
+      "stress_impact": 4,
+      "reason": "Измельчение, медленное"
+    },
+    "create:crushing_wheel": {
+      "processing_speed": 200,
+      "stress_impact": 16,
+      "output_multiplier": 2.0,
+      "reason": "Дробление, x2 выход, высокая нагрузка"
+    },
+    "create:encased_fan": {
+      "processing_speed": 150,
+      "stress_impact": 2,
+      "range": 16,
+      "reason": "Обработка воздухом, большой радиус"
+    },
+    "create:mechanical_saw": {
+      "processing_speed": 180,
+      "stress_impact": 4,
+      "damage": 5,
+      "reason": "Распиловка, быстрая"
+    },
+    "create:deployer": {
+      "processing_speed": 100,
+      "stress_impact": 4,
+      "reach": 3,
+      "reason": "Автоматизация действий"
+    },
+    "create:steam_engine": {
+      "power_output": 2048,
+      "fuel_consumption": 1.0,
+      "reason": "Генератор энергии, средний выход"
+    },
+    "create:water_wheel": {
+      "power_output": 512,
+      "reason": "Возобновляемая энергия, низкий выход"
+    },
+    "create:windmill_bearing": {
+      "power_output": 1024,
+      "reason": "Ветряная энергия, средний выход"
+    }
+  }
+}

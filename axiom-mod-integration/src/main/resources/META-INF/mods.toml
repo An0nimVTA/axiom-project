@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="axiomui"
+version="0.1.0"
+displayName="AXIOM UI"
+description='''Client-side UI screens for AXIOM.'''
+displayTest="IGNORE_SERVER_VERSION"
+
+[[dependencies.axiomui]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.axiomui]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1]"
+    ordering="NONE"
+    side="CLIENT"

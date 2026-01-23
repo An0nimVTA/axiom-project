@@ -1,0 +1,104 @@
+{
+  "armor": {
+    "minecraft:leather_helmet": {
+      "armor": 1,
+      "toughness": 0,
+      "durability": 55,
+      "reason": "Самая слабая броня"
+    },
+    "minecraft:leather_chestplate": {
+      "armor": 3,
+      "toughness": 0,
+      "durability": 80,
+      "reason": "Базовая защита"
+    },
+    "minecraft:leather_leggings": {
+      "armor": 2,
+      "toughness": 0,
+      "durability": 75,
+      "reason": "Базовая защита"
+    },
+    "minecraft:leather_boots": {
+      "armor": 1,
+      "toughness": 0,
+      "durability": 65,
+      "reason": "Базовая защита"
+    },
+    "minecraft:iron_helmet": {
+      "armor": 3,
+      "toughness": 0,
+      "durability": 165,
+      "reason": "Средняя броня"
+    },
+    "minecraft:iron_chestplate": {
+      "armor": 7,
+      "toughness": 0,
+      "durability": 240,
+      "reason": "Хорошая защита"
+    },
+    "minecraft:iron_leggings": {
+      "armor": 6,
+      "toughness": 0,
+      "durability": 225,
+      "reason": "Хорошая защита"
+    },
+    "minecraft:iron_boots": {
+      "armor": 3,
+      "toughness": 0,
+      "durability": 195,
+      "reason": "Средняя защита"
+    },
+    "minecraft:diamond_helmet": {
+      "armor": 4,
+      "toughness": 2,
+      "durability": 363,
+      "reason": "Сильная броня"
+    },
+    "minecraft:diamond_chestplate": {
+      "armor": 9,
+      "toughness": 2,
+      "durability": 528,
+      "reason": "Очень сильная защита"
+    },
+    "minecraft:diamond_leggings": {
+      "armor": 7,
+      "toughness": 2,
+      "durability": 495,
+      "reason": "Сильная защита"
+    },
+    "minecraft:diamond_boots": {
+      "armor": 4,
+      "toughness": 2,
+      "durability": 429,
+      "reason": "Сильная защита"
+    },
+    "minecraft:netherite_helmet": {
+      "armor": 4,
+      "toughness": 3,
+      "knockback_resistance": 0.1,
+      "durability": 407,
+      "reason": "Лучшая броня, сопротивление отбрасыванию"
+    },
+    "minecraft:netherite_chestplate": {
+      "armor": 9,
+      "toughness": 3,
+      "knockback_resistance": 0.1,
+      "durability": 592,
+      "reason": "Максимальная защита"
+    },
+    "minecraft:netherite_leggings": {
+      "armor": 7,
+      "toughness": 3,
+      "knockback_resistance": 0.1,
+      "durability": 555,
+      "reason": "Максимальная защита"
+    },
+    "minecraft:netherite_boots": {
+      "armor": 4,
+      "toughness": 3,
+      "knockback_resistance": 0.1,
+      "durability": 481,
+      "reason": "Максимальная защита"
+    }
+  }
+}

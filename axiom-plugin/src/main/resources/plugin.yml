@@ -1,0 +1,143 @@
+name: AXIOM
+version: 1.0.0
+main: com.axiom.AXIOM
+api-version: 1.20
+depend: [WorldEdit]
+softdepend: [PlaceholderAPI, Vault]
+authors: [AxiomTeam]
+description: Comprehensive geopolitical and economic engine for Minecraft servers with 165+ systems
+website: https://axiom.multiverse
+
+commands:
+  axiom:
+    description: Main AXIOM command
+    usage: /axiom <subcommand>
+    aliases: [ax]
+  nation:
+    description: Nation management commands
+    usage: /nation <subcommand>
+    aliases: [n, country]
+  claim:
+    description: Claim territory for your nation
+    usage: /claim
+  unclaim:
+    description: Unclaim territory from your nation
+    usage: /unclaim
+  testbot:
+    description: Test bot commands for auto testing
+    usage: /testbot <subcommand>
+    aliases: [tb, autotest]
+  technology:
+    description: Technology tree menu
+    usage: /technology
+    aliases: [tech]
+  modpack:
+    description: Mod pack builder and manager
+    usage: /modpack [create|list|info|enable|disable|build|download]
+    aliases: [mp, modbuilder]
+  econom:
+    description: Economic indicators and statistics
+    usage: /econom [global|gdp|development|inflation|unemployment|trade|budget|my|trends|help]
+    aliases: [economic, economy, indicators]
+  mapvisual:
+    description: Map boundary visualization system
+    usage: /mapvisual [stats|nations|cities|enable|disable|reload]
+    aliases: [mapvis, boundaryvis]
+  capture:
+    description: Dynamic capture system for countries and cities
+    usage: /capture [begin_siege|damage_core|capture_chunk|info|trenches|list_cores]
+    aliases: [conquest, siege]
+  military:
+    description: New military management commands (Architecture 2.0)
+    usage: /military <recruit|stats|disband|upgrade>
+    aliases: [mil, army]
+  war:
+    description: Advanced warfare and conflict systems
+    usage: /war [declare|status|peace|mobilize|strategy]
+    aliases: [conflict, battle]
+  diplomacy:
+    description: International relations and diplomacy
+    usage: /diplomacy [relations|treaties|allies|embassies|summits]
+    aliases: [diplomat, foreign]
+  culture:
+    description: Cultural heritage and artistic systems
+    usage: /culture [heritage|festival|exchanges|arts]
+    aliases: [arts, heritage]
+  environment:
+    description: Environmental protection and policies
+    usage: /environment [pollution|conservation|climate|green]
+    aliases: [eco, climate, conservation]
+  media:
+    description: News and media broadcasting
+    usage: /media [publish|news|broadcast|journalist]
+    aliases: [news, press, journalism]
+  election:
+    description: Political elections and campaigns
+    usage: /election [vote|candidates|campaign|results|positions]
+    aliases: [vote, politics, democracy]
+  crime:
+    description: Crime detection and justice system
+    usage: /crime [detect|justice|court|police|investigation]
+    aliases: [justice, police, law]
+
+permissions:
+  axiom.use:
+    description: Use basic AXIOM commands
+    default: true
+  axiom.admin:
+    description: Admin access to all AXIOM features
+    default: op
+  axiom.nation.create:
+    description: Create a new nation
+    default: true
+  axiom.nation.claim:
+    description: Claim land for a nation
+    default: true
+  axiom.economy.use:
+    description: Use economic features
+    default: true
+  axiom.diplomacy.use:
+    description: Use diplomatic features
+    default: true
+  axiom.testbot.use:
+    description: Use test bot features
+    default: op
+  axiom.economic.indicators:
+    description: View economic indicators
+    default: true
+  axiom.war.declare:
+    description: Declare war on other nations
+    default: op
+  axiom.war.mobilize:
+    description: Mobilize military forces
+    default: op
+  axiom.diplomacy.manage:
+    description: Manage diplomatic relations
+    default: op
+  axiom.spy.use:
+    description: Access to espionage systems
+    default: op
+  axiom.modpack.builder:
+    description: Access to mod pack builder
+    default: op
+  axiom.map.visualize:
+    description: Access to map visualization
+    default: true
+  axiom.technology.research:
+    description: Research new technologies
+    default: true
+  axiom.culture.manage:
+    description: Manage cultural aspects
+    default: true
+  axiom.environment.manage:
+    description: Manage environmental policies
+    default: true
+  axiom.media.publish:
+    description: Publish news and media content
+    default: op
+  axiom.election.vote:
+    description: Participate in elections
+    default: true
+  axiom.election.run:
+    description: Run for election positions
+    default: true
