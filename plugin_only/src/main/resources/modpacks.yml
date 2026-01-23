@@ -1,0 +1,328 @@
+# AXIOM Mod Pack Configuration
+# Defines different mod pack configurations and their settings
+
+modPacks:
+  enabled: true
+  
+  # Default modpack settings
+  defaultModPack: "balanced"
+  
+  # Available modpack definitions
+  definitions:
+    # Warfare Expansion Pack - Military-focused
+    warfare_expansion:
+      id: "warfare_expansion"
+      name: "Warfare Expansion Pack"
+      description: "Military mods: TACZ, PointBlank, Superb Warfare, Ballistix, Warium"
+      enabled: true
+      requiredMods:
+        - "tacz"
+        - "pointblank"
+        - "superbwarfare"
+      optionalMods:
+        - "ballistix"
+        - "warium"
+        - "capsawims"
+        - "mcsp"
+        - "ashvehicle"
+      compatibilityLevel: "balanced"
+      recommendedPlayers: 10
+      settings:
+        militaryBonuses: 0.2
+        productionCostReduction: 0.1
+        energyRequirements: 1.1
+        resourceConsumption: 1.2
+      integrationRules:
+        - sourceMod: "tacz"
+          targetMod: "pointblank"
+          conversionType: "ammo_compatibility"
+          conversionRate: 1.0
+        - sourceMod: "superbwarfare"
+          targetMod: "ballistix"
+          conversionType: "munition_exchange"
+          conversionRate: 0.85
+        - sourceMod: "capsawims"
+          targetMod: "tacz"
+          conversionType: "equipment_synergy"
+          conversionRate: 1.15
+      economyModifiers:
+        militaryProductionMultiplier: 1.3
+        resourceConsumptionMultiplier: 1.2
+        energyConsumptionMultiplier: 1.1
+        researchCostMultiplier: 0.9
+
+    # Industrial Revolution Pack - Industrial-focused
+    industrial_revolution:
+      id: "industrial_revolution"
+      name: "Industrial Revolution Pack"
+      description: "Industrial mods: Industrial Upgrade, Immersive Engineering, Applied Energistics 2"
+      enabled: true
+      requiredMods:
+        - "industrialupgrade"
+        - "immersiveengineering"
+        - "appliedenergistics2"
+      optionalMods:
+        - "mekanism"
+        - "thermal"
+        - "simplyquarries"
+        - "quantumgenerators"
+      compatibilityLevel: "balanced"
+      recommendedPlayers: 15
+      settings:
+        industrialBonuses: 0.3
+        energyEfficiency: 1.2
+        resourceProcessingSpeed: 1.4
+        automationBonus: 1.25
+      integrationRules:
+        - sourceMod: "industrialupgrade"
+          targetMod: "immersiveengineering"
+          conversionType: "energy_exchange"
+          conversionRate: 1.0
+        - sourceMod: "immersiveengineering"
+          targetMod: "appliedenergistics2"
+          conversionType: "automation_synergy"
+          conversionRate: 1.15
+        - sourceMod: "appliedenergistics2"
+          targetMod: "mekanism"
+          conversionType: "processing_integration"
+          conversionRate: 1.1
+      economyModifiers:
+        productionMultiplier: 1.5
+        energyEfficiencyMultiplier: 1.3
+        resourceProcessingMultiplier: 1.4
+        automationCostReduction: 0.15
+
+    # Technology Revolution Pack - High-tech focused
+    technology_revolution:
+      id: "technology_revolution"
+      name: "Technology Revolution Pack"
+      description: "High-tech mods: Applied Energistics 2, Mekanism, Quantum Generators, etc."
+      enabled: true
+      requiredMods:
+        - "appliedenergistics2"
+        - "mekanism"
+        - "industrialupgrade"
+      optionalMods:
+        - "quantumgenerators"
+        - "immersiveengineering"
+        - "thermal"
+        - "voltaic"
+      compatibilityLevel: "hardcore"
+      recommendedPlayers: 20
+      settings:
+        techBonuses: 0.4
+        researchSpeedBoost: 1.3
+        energyEfficiency: 1.5
+        processingSpeed: 1.5
+      integrationRules:
+        - sourceMod: "appliedenergistics2"
+          targetMod: "mekanism"
+          conversionType: "network_integration"
+          conversionRate: 1.2
+        - sourceMod: "mekanism"
+          targetMod: "quantumgenerators"
+          conversionType: "power_scalability"
+          conversionRate: 1.3
+        - sourceMod: "industrialupgrade"
+          targetMod: "immersiveengineering"
+          conversionType: "automation_synergy"
+          conversionRate: 1.1
+      economyModifiers:
+        researchEfficiencyMultiplier: 1.4
+        energyProductionMultiplier: 1.6
+        processingEfficiencyMultiplier: 1.5
+        resourceOptimization: 0.2
+
+    # Balanced Experience Pack - Mixed focus
+    balanced_experience:
+      id: "balanced_experience"
+      name: "Balanced Experience Pack"
+      description: "Well-balanced combination of military, industrial, and technology mods"
+      enabled: true
+      requiredMods:
+        - "industrialupgrade"
+        - "immersiveengineering"
+        - "appliedenergistics2"
+        - "tacz"
+      optionalMods:
+        - "pointblank"
+        - "superbwarfare"
+        - "ballistix"
+        - "mekanism"
+        - "thermal"
+        - "capsawims"
+      compatibilityLevel: "balanced"
+      recommendedPlayers: 25
+      settings:
+        overallBalance: 1.0
+        resourceDiversity: 1.2
+        crossModSynergy: 1.15
+        progressionRate: 1.0
+      integrationRules:
+        - sourceMod: "industrialupgrade"
+          targetMod: "tacz"
+          conversionType: "material_supply"
+          conversionRate: 1.1
+        - sourceMod: "appliedenergistics2"
+          targetMod: "immersiveengineering"
+          conversionType: "logistics_integration"
+          conversionRate: 1.2
+        - sourceMod: "tacz"
+          targetMod: "pointblank"
+          conversionType: "weapon_compatibility"
+          conversionRate: 1.0
+        - sourceMod: "superbwarfare"
+          targetMod: "immersiveengineering"
+          conversionType: "vehicle_materials"
+          conversionRate: 1.15
+      economyModifiers:
+        militaryProductionMultiplier: 1.1
+        industrialProductionMultiplier: 1.2
+        researchEfficiencyMultiplier: 1.1
+        energyEfficiencyMultiplier: 1.15
+
+    # Hardcore Military Pack - Maximum military focus
+    hardcore_military:
+      id: "hardcore_military"
+      name: "Hardcore Military Pack"
+      description: "Maximum military power: All warfare mods with enhanced effects"
+      enabled: false  # Disabled by default - too powerful
+      requiredMods:
+        - "tacz"
+        - "pointblank"
+        - "ballistix"
+        - "superbwarfare"
+        - "warium"
+      optionalMods:
+        - "capsawims"
+        - "mcsp"
+        - "ashvehicle"
+      compatibilityLevel: "hardcore"
+      recommendedPlayers: 30
+      settings:
+        militaryBonuses: 0.4
+        weaponPowerMultiplier: 1.5
+        armorEffectiveness: 1.4
+        vehicleDurability: 1.3
+      integrationRules:
+        - sourceMod: "ballistix"
+          targetMod: "warium"
+          conversionType: "explosive_synergy"
+          conversionRate: 1.3
+        - sourceMod: "tacz"
+          targetMod: "superbwarfare"
+          conversionType: "munition_compatibility"
+          conversionRate: 1.2
+        - sourceMod: "superbwarfare"
+          targetMod: "capsawims"
+          conversionType: "equipment_synergy"
+          conversionRate: 1.25
+      economyModifiers:
+        militaryCostReduction: 0.25
+        weaponProductionMultiplier: 1.6
+        armorProductionMultiplier: 1.5
+        ammunitionCostReduction: 0.3
+
+    # Optimized Performance Pack - Optimization-focused
+    optimized_performance:
+      id: "optimized_performance"
+      name: "Optimized Performance Pack"
+      description: "Performance optimization mods combined with essential gameplay mods"
+      enabled: true
+      requiredMods:
+        - "embeddium"
+        - "entityculling"
+        - "ferritecore"
+        - "industrialupgrade"
+        - "immersiveengineering"
+      optionalMods:
+        - "appliedenergistics2"
+        - "tacz"
+        - "pointblank"
+      compatibilityLevel: "balanced"
+      recommendedPlayers: 5
+      settings:
+        performanceBoost: 0.3
+        memoryEfficiency: 1.2
+        renderingOptimization: 1.25
+        entityProcessing: 1.15
+      integrationRules:
+        - sourceMod: "embeddium"
+          targetMod: "immersiveengineering"
+          conversionType: "rendering_optimization"
+          conversionRate: 1.0
+        - sourceMod: "entityculling"
+          targetMod: "superbwarfare"
+          conversionType: "vehicle_optimization"
+          conversionRate: 1.1
+      economyModifiers:
+        performanceCostReduction: 0.1
+        optimizationBonuses: 1.1
+
+  # Nation-specific modpack assignments
+  nationAssignments:
+    default: "balanced_experience"
+    # Example: Large military nation gets warfare pack
+    # "war_nation": "warfare_expansion"
+    # "tech_corp": "technology_revolution"
+    # "industrial_empire": "industrial_revolution"
+
+  # Global modpack settings
+  globalSettings:
+    # Whether nations can change modpacks frequently
+    allowModPackSwitching: true
+    # Cooldown between modpack changes (in hours)
+    modPackSwitchingCooldownHours: 24
+    # Cost to change modpack (as percentage of nation treasury)
+    modPackSwitchingCostPercent: 0.05  # 5% of treasury
+    # Resource preservation during modpack changes
+    preserveResourcesDuringSwitch: true
+    # Notification settings
+    announceModPackChanges: true
+    
+  # Modpack balancing settings
+  balancing:
+    # Penalties for inappropriate modpack selection
+    mismatchPenalty:
+      enabled: true
+      penaltyMultiplier: 0.8  # 20% penalty if modpack doesn't match nation size
+      triggerThreshold: 2.0   # If nation is 2x larger/smaller than recommended
+      
+    # Bonuses for appropriate modpack selection
+    appropriateBonus:
+      enabled: true
+      bonusMultiplier: 1.15   # 15% bonus for appropriate modpack
+      triggerThreshold: 0.8   # If nation size is within 20% of recommendation
+      
+  # Modpack progression system
+  progression:
+    unlockConditions:
+      # Minimum requirements to unlock certain modpacks
+      - modPackId: "technology_revolution"
+        minNations: 3
+        minMembers: 20
+        requiredTechnology: "advanced_industry"
+      - modPackId: "hardcore_military"
+        minNations: 5
+        minMembers: 30
+        requiredTechnology: "advanced_warfare"
+        
+  # Integration with other AXIOM systems
+  integration:
+    # Link modpacks to technology trees
+    technologyLinking: true
+    # Link modpacks to economy systems
+    economyIntegration: true
+    # Link modpacks to military systems
+    militaryIntegration: true
+    # Link modpacks to diplomacy systems
+    diplomacyIntegration: true
+    
+  # Performance settings
+  performance:
+    # How often to check nation compatibility (in minutes)
+    compatibilityCheckIntervalMinutes: 30
+    # Maximum number of active modpacks allowed
+    maxActiveModPacks: 100
+    # Enable modpack statistics tracking
+    enableStatistics: true

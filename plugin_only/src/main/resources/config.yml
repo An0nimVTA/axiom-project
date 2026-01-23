@@ -1,0 +1,186 @@
+# AXIOM Geopolitical Engine Configuration
+
+branding:
+  pluginName: "AXIOM Geopolitical Engine"
+  motto: "В AXIOM вы не играете в мире — вы его строите"
+
+storage:
+  baseFolder: "plugins/AXIOM" # Overridden by Bukkit's data folder at runtime
+  prettyPrintJson: true
+
+economy:
+  defaultCurrencyCode: "AXC"
+  startingTreasury: 10000.0
+  maxPrintAmountPerCommand: 1000000.0
+  incomeTaxPercent: 10
+  salesTaxPercent: 5
+  moddedResourceValueMultiplier: 1.0  # Multiplier for modded resource values
+  moddedProductionBonus: 0.2  # 20% bonus for modded production
+
+territory:
+  protectionEnabled: true
+  allowNationMembersToBuild: true
+  chunkClaimCooldownSeconds: 60
+  maxChunksPerPlayer: 100
+
+events:
+  newsBroadcastIntervalSeconds: 900
+
+autosave:
+  intervalSeconds: 300
+
+pvp:
+  requireToggle: true
+
+modIntegration:
+  enabled: true
+  modDetectionIntervalMinutes: 30
+  energySystem:
+    # FE (Forge Energy) will be used as standard across all mods
+    standardUnit: "FE"
+    conversionRates:
+      # Conversion rates relative to standard (FE = 1.0)
+      rf: 1.0  # Redstone Flux
+      eu: 0.25  # IndustrialCraft EU (4 FE = 1 EU)
+  modCompatibility:
+    # Specify which mod combinations are restricted
+    restricted_combinations:
+      - ["tacz", "pointblank"]  # Both provide firearms
+      - ["ballistix", "superbwarfare", "warium"]  # All provide heavy explosives
+    synergy_bonus: 0.1  # 10% bonus for compatible mod combinations
+    conflict_penalty: 0.15  # 15% penalty for conflicting combinations
+
+recipeIntegration:
+  enabled: true
+  # Balancing settings for cross-mod recipes
+  balancing:
+    maximum_recipe_cost_multiplier: 2.0  # Recipe costs can't exceed vanilla by more than 2x
+    minimum_resource_efficiency: 0.5  # Recipes must be at least 50% efficient compared to vanilla
+    cross_mod_synergy_bonus: 0.15  # 15% bonus for using compatible mod recipes together
+    conflicting_mod_penalty: 0.2  # 20% penalty for using conflicting mod components
+  # Allowed substitutions between mod resources
+  resourceSubstitutions:
+    steel:
+      - "immersiveengineering:ingot_steel"
+      - "industrialupgrade:steel_ingot"
+      - "mekanism:ingot_steel"
+    copper:
+      - "immersiveengineering:ingot_copper"
+      - "minecraft:copper_ingot"
+      - "thermal:copper_ingot"
+    electronic:
+      - "appliedenergistics2:certus_quartz_crystal"
+      - "immersiveengineering:component_electronic"
+      - "industrialupgrade:electronic_component"
+
+modPackManagement:
+  enabled: true
+  # Default modpack assignments for new nations
+  defaultModpackAssignments:
+    smallNations: "balanced"  # Nations with <10 players
+    mediumNations: "balanced"  # Nations with 10-25 players
+    largeNations: "technology"  # Nations with >25 players
+  # Modpack-specific settings
+  modpacks:
+    warfare:
+      enabled: true
+      resourceMultiplier: 1.0
+      productionBonus: 0.1
+      militaryEfficiency: 0.2
+    industrial:
+      enabled: true
+      resourceMultiplier: 1.2
+      productionBonus: 0.3
+      energyEfficiency: 0.15
+    technology:
+      enabled: true
+      resourceMultiplier: 0.9
+      productionBonus: 0.15
+      researchSpeed: 0.25
+    balanced:
+      enabled: true
+      resourceMultiplier: 1.0
+      productionBonus: 0.2
+      militaryEfficiency: 0.1
+      energyEfficiency: 0.1
+      researchSpeed: 0.1
+
+balancing:
+  # General balance settings
+  inflationControl:
+    maxDailyMoneyPrint: 0.2  # Max 20% of nation treasury per day
+    penaltyMultiplier: 0.95  # Reduce print efficiency if overused
+  territoryLimits:
+    maxChunksPerCitizen: 2  # Max 2 chunks per citizen
+    capitalDistanceLimit: 100  # Max distance from capital in chunks
+  militaryBalance:
+    maxMilitaryPowerMultiplier: 3.0  # Military power can't exceed average by 3x
+    warDurationLimitHours: 24  # Wars automatically end after 24 hours
+    mobilizationCostMultiplier: 1.0
+  economyBalance:
+    maxTreasuryMultiplier: 10.0  # Max 10x average nation wealth
+    tradeVolumeLimit: 100000.0  # Max daily trade volume per nation
+    productionEfficiencyCap: 5.0  # Max 5x vanilla production efficiency
+
+modEconomicBalance:
+  # Economic balance for mod items and resources
+  resourceValuation:
+    # Base value multipliers for different mod categories
+    tacz: 1.8  # Military technology
+    pointblank: 1.8  # Alternative military
+    ballistix: 2.5  # Heavy explosives
+    appliedenergistics2: 2.2  # Automation/logistics
+    immersiveengineering: 1.5  # Industrial foundation
+    industrialupgrade: 1.7  # Advanced industry
+    simplyquarries: 1.4  # Automation
+    quantumgenerators: 2.0  # Energy
+    mekanism: 1.6  # Industrial automation
+    thermal: 1.3  # Resource processing
+    superbwarfare: 2.0  # Military vehicles
+    warium: 2.3  # Advanced warfare
+    capsawims: 1.4  # Tactical equipment
+  # Cross-mod price balancing
+  priceBalancing:
+    enabled: true
+    sensitivity: 0.3  # How quickly prices adjust (0.0-1.0)
+    stabilizationIntervalMinutes: 15
+    maximumPriceVariation: 3.0  # Prices can't vary more than 3x from base
+    minimumPriceVariation: 0.3  # Prices can't fall below 0.3x base
+
+debug: false
+
+roles:
+  LEADER:
+    permissions:
+      - "claim_chunk"
+      - "unclaim_chunk"
+      - "print_money"
+      - "declare_war"
+      - "manage_citizens"
+      - "set_taxes"
+      - "manage_alliances"
+      - "manage_budget"
+      - "manage_modpacks"
+  MINISTER:
+    permissions:
+      - "claim_chunk"
+      - "manage_citizens"
+      - "manage_alliances"
+      - "manage_budget"
+      - "view_modpacks"
+  GENERAL:
+    permissions:
+      - "declare_war"
+      - "mobilize"
+      - "manage_military"
+  GOVERNOR:
+    permissions:
+      - "claim_chunk"
+      - "unclaim_chunk"
+      - "manage_citizens"
+      - "manage_territories"
+  CITIZEN:
+    permissions:
+      - "vote"
+      - "chat_nation"
+      - "view_modpack_info"

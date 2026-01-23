@@ -1,0 +1,104 @@
+package com.axiom.service;
+
+import com.axiom.model.Nation;
+import org.bukkit.Chunk;
+import org.bukkit.plugin.Plugin;
+import org.dynmap.DynmapAPI;
+import org.dynmap.markers.MarkerAPI;
+import org.dynmap.markers.MarkerSet;
+import org.dynmap.markers.AreaMarker;
+
+import java.awt.Color;
+import java.util.Set;
+
+/**
+ * Service for integrating with Dynmap to visualize geopolitical data.
+ */
+public class MapIntegrationService {
+
+    private final DynmapAPI dynmap;
+    private final MarkerAPI markerApi;
+    private MarkerSet nationMarkerSet;
+
+    private static final String NATION_MARKER_SET_ID = "axiom.nations";
+    private static final String NATION_MARKER_SET_LABEL = "Nations";
+
+    public MapIntegrationService(Plugin axiomPlugin, DynmapAPI dynmap) {
+        this.dynmap = dynmap;
+        this.markerApi = dynmap.getMarkerAPI();
+        setupMarkerSet();
+    }
+
+    /**
+     * Sets up the marker set for nations. If it doesn't exist, it will be created.
+     */
+    private void setupMarkerSet() {
+        nationMarkerSet = markerApi.getMarkerSet(NATION_MARKER_SET_ID);
+        if (nationMarkerSet == null) {
+            nationMarkerSet = markerApi.createMarkerSet(NATION_MARKER_SET_ID, NATION_MARKER_SET_LABEL, null, false);
+        } else {
+            nationMarkerSet.setMarkerSetLabel(NATION_MARKER_SET_LABEL);
+        }
+        nationMarkerSet.setLayerPriority(10);
+        nationMarkerSet.setHideByDefault(false);
+    }
+
+    /**
+     * Updates the full territory of a nation on the map by drawing all its claimed chunks.
+     * @param nation The nation to update.
+     */
+    public void updateNationTerritory(Nation nation) {
+        if (nationMarkerSet == null || nation == null) {
+            return;
+        }
+
+        // First, remove all existing markers for this nation to redraw them
+        clearNationTerritory(nation.getId());
+
+        String worldName = nation.getWorldName(); // Assuming Nation has a method to get the world name
+        if (worldName == null) return;
+
+        Set<Chunk> claimedChunks = nation.getClaimedChunks(); // Assuming this method exists and returns Set<Chunk>
+        Color nationColor = nation.getColor(); // Assuming this method exists
+
+        for (Chunk chunk : claimedChunks) {
+            // Calculate corner coordinates for the chunk
+            double[] xCoords = new double[4];
+            double[] zCoords = new double[4];
+            xCoords[0] = chunk.getX() * 16;
+            zCoords[0] = chunk.getZ() * 16;
+            xCoords[1] = xCoords[0] + 16;
+            zCoords[1] = zCoords[0];
+            xCoords[2] = xCoords[1];
+            zCoords[2] = zCoords[0] + 16;
+            xCoords[3] = xCoords[0];
+            zCoords[3] = zCoords[2];
+
+            String markerId = "nation_" + nation.getId() + "_chunk_" + chunk.getX() + "_" + chunk.getZ();
+            
+            AreaMarker areaMarker = nationMarkerSet.createAreaMarker(markerId, nation.getName(), false, worldName, xCoords, zCoords, false);
+            
+            if (areaMarker != null) {
+                areaMarker.setLineStyle(1, 0.8, nationColor.getRGB());
+                areaMarker.setFillStyle(0.3, nationColor.getRGB());
+                areaMarker.setDescription("Nation: " + nation.getName());
+            }
+        }
+    }
+
+    /**
+     * Removes all visual territory markers for a given nation.
+     * @param nationId The unique ID of the nation.
+     */
+    public void clearNationTerritory(String nationId) {
+        if (nationMarkerSet == null) return;
+
+        // AreaMarkers in Dynmap don't have a good way to be searched by a common prefix,
+        // so we have to iterate over them.
+        for (AreaMarker marker : nationMarkerSet.getAreaMarkers()) {
+            if (marker.getMarkerID().startsWith("nation_" + nationId + "_chunk_")) {
+                marker.deleteMarker();
+            }
+        }
+    }
+}

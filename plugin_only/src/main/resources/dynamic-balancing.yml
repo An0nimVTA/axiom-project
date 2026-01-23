@@ -1,0 +1,259 @@
+# AXIOM Dynamic Mod Balancing Configuration
+# Auto-adapts mod difficulty based on player usage and engagement
+
+dynamicBalancing:
+  enabled: true
+  balancingIntervalMinutes: 30
+  activityTrackingEnabled: true
+  activityUpdateIntervalMinutes: 5
+  
+  # Thresholds for mod popularity
+  popularityThresholds:
+    low: 20.0      # Below this % = low popularity
+    medium: 60.0   # Between low-medium = medium popularity
+    high: 100.0    # Above medium = high popularity
+  
+  # Sensitivity for adjustments (how much to adjust per cycle)
+  adjustmentSensitivity:
+    difficulty: 0.1     # 10% max adjustment per cycle
+    resources: 0.15     # 15% max adjustment per cycle
+    crafting: 0.2       # 20% max adjustment per cycle
+    energy: 0.12        # 12% max adjustment per cycle
+    combat: 0.18        # 18% max adjustment per cycle
+  
+  # Action thresholds (when to intervene)
+  actionThresholds:
+    popularityDrop: -15.0    # If usage drops by 15%, take action
+    popularitySurge: 25.0    # If usage surges by 25%, take action
+    engagementLow: 10.0      # Low engagement action threshold
+    engagementHigh: 80.0     # High engagement action threshold
+  
+  # Modpack-specific balancing rules
+  modPackBalancing:
+    warfare:
+      baseDifficulty: 1.0
+      resourceMultiplier: 1.0
+      craftingTimeMultiplier: 1.0
+      combatEffectiveness: 1.0
+      integrationRules:
+        tacz_pointblank_compatibility: true
+        ballistix_supplementary: true
+        warfare_vehicle_integration: true
+    industrial:
+      baseDifficulty: 0.9
+      resourceMultiplier: 1.1
+      craftingTimeMultiplier: 0.9
+      combatEffectiveness: 0.8
+      integrationRules:
+        ie_iu_energy_compatibility: true
+        ae2_ie_automation_synergy: true
+        quarry_industrial_efficiency: true
+    technology:
+      baseDifficulty: 1.1
+      resourceMultiplier: 0.9
+      craftingTimeMultiplier: 1.1
+      combatEffectiveness: 0.7
+      integrationRules:
+        ae2_ie_high_tech_synergy: true
+        quantum_energy_superiority: true
+        automation_priority_scaling: true
+    balanced:
+      baseDifficulty: 1.0
+      resourceMultiplier: 1.0
+      craftingTimeMultiplier: 1.0
+      combatEffectiveness: 1.0
+      integrationRules:
+        cross_mod_efficiency_scaling: true
+        mixed_pack_synergy_boost: true
+        anti_specialization_penalties: false
+  
+  # Mod-specific configuration overrides
+  modSpecific:
+    tacz:
+      difficultyMultiplier: 1.0
+      resourceCostMultiplier: 1.0
+      craftingComplexity: 1.0
+      combatEffectiveness: 1.0
+      integrationWith:
+        - "pointblank"  # Compatible with pointblank
+        - "appliedenergistics2"  # Can use AE2 materials
+        - "immersiveengineering"  # Can use IE components
+    pointblank:
+      difficultyMultiplier: 1.0
+      resourceCostMultiplier: 1.0
+      craftingComplexity: 1.0
+      combatEffectiveness: 1.0
+      integrationWith:
+        - "tacz"
+        - "capsawims"
+        - "industrialupgrade"
+    ballistix:
+      difficultyMultiplier: 1.2  # More difficult/expensive
+      resourceCostMultiplier: 1.5
+      craftingComplexity: 1.3
+      combatEffectiveness: 1.1  # More powerful
+      integrationWith:
+        - "industrialupgrade"
+        - "immersiveengineering"
+        - "mekanism"  # Gets efficiency bonuses with Mekanism
+    immersiveengineering:
+      difficultyMultiplier: 0.9  # Easier to get started
+      resourceCostMultiplier: 0.8
+      craftingComplexity: 0.9
+      combatEffectiveness: 0.7  # Less combat-focused
+      integrationWith:
+        - "industrialupgrade"
+        - "appliedenergistics2"
+        - "mekanism"
+    appliedenergistics2:
+      difficultyMultiplier: 1.1  # High-tech, more complex
+      resourceCostMultiplier: 1.2
+      craftingComplexity: 1.4
+      combatEffectiveness: 0.6  # Primarily logistical
+      integrationWith:
+        - "immersiveengineering"
+        - "industrialupgrade"
+        - "mekanism"
+    industrialupgrade:
+      difficultyMultiplier: 1.0
+      resourceCostMultiplier: 1.0
+      craftingComplexity: 1.0
+      combatEffectiveness: 0.8
+      integrationWith:
+        - "immersiveengineering"
+        - "appliedenergistics2"
+        - "mekanism"
+        - "thermal"
+    superbwarfare:
+      difficultyMultiplier: 1.3
+      resourceCostMultiplier: 1.4
+      craftingComplexity: 1.2
+      combatEffectiveness: 1.1
+      integrationWith:
+        - "tacz"
+        - "pointblank"
+        - "immersivevehicles"
+    warium:
+      difficultyMultiplier: 1.4
+      resourceCostMultiplier: 1.6
+      craftingComplexity: 1.5
+      combatEffectiveness: 1.3
+      integrationWith:
+        - "ballistix"
+        - "superbwarfare"
+        - "industrialupgrade"
+    mekanism:
+      difficultyMultiplier: 1.1
+      resourceCostMultiplier: 1.1
+      craftingComplexity: 1.1
+      combatEffectiveness: 0.5
+      integrationWith:
+        - "industrialupgrade"
+        - "immersiveengineering"
+        - "appliedenergistics2"
+    thermal:
+      difficultyMultiplier: 1.0
+      resourceCostMultiplier: 0.9
+      craftingComplexity: 0.95
+      combatEffectiveness: 0.6
+      integrationWith:
+        - "industrialupgrade"
+        - "immersiveengineering"
+        - "mekanism"
+    simplyquarries:
+      difficultyMultiplier: 0.8  # Automation should be accessible
+      resourceCostMultiplier: 0.7
+      craftingComplexity: 0.8
+      combatEffectiveness: 0.3
+      integrationWith:
+        - "industrialupgrade"
+        - "immersiveengineering"
+    quantumgenerators:
+      difficultyMultiplier: 1.3  # Very high-tech
+      resourceCostMultiplier: 1.8
+      craftingComplexity: 1.6
+      combatEffectiveness: 0.4
+      integrationWith:
+        - "industrialupgrade"
+        - "mekanism"
+  
+  # Integration rules between mod pairs
+  integrationRules:
+    # Technology mods integration
+    appliedenergistics2_immersiveengineering:
+      enabled: true
+      energyConversionRate: 1.0  # 1 AE2 energy = 1 IE energy
+      craftingSynergyBonus: 0.15  # 15% bonus when used together
+      materialCompatibility:
+        certus_crystal: true
+        engineering_materials: true
+    immersiveengineering_industrialupgrade:
+      enabled: true
+      energyConversionRate: 1.0
+      craftingSynergyBonus: 0.12
+      materialCompatibility: true
+      automationSynergy: true
+    appliedenergistics2_industrialupgrade:
+      enabled: true
+      energyConversionRate: 0.9
+      craftingSynergyBonus: 0.18
+      materialCompatibility: true
+      storageIntegration: true
+    
+    # Warfare mods integration
+    tacz_pointblank:
+      enabled: true
+      ammoCompatibility: true
+      componentSharing: true
+      crossCrafting: true
+      effectivenessMultiplier: 1.05  # 5% bonus for using together
+    pointblank_capsawims:
+      enabled: true
+      equipmentCompatibility: true
+      tacticalIntegration: true
+      effectivenessMultiplier: 1.10
+    tacz_capsawims:
+      enabled: true
+      equipmentCompatibility: true
+      weaponIntegration: true
+      effectivenessMultiplier: 1.08
+    
+    # Industrial integration
+    immersiveengineering_mekanism:
+      enabled: true
+      energyCompatibility: true
+      materialProcessingSynergy: 0.20  # 20% processing bonus
+      sharedRecipes: true
+    mekanism_thermal:
+      enabled: true
+      energyCompatibility: true
+      resourceProcessingSynergy: 0.15
+      sharedMachines: true
+      
+  # Balancing mechanisms
+  balancingMechanisms:
+    # Prevent any single mod from becoming dominant
+    antiDominance:
+      enabled: true
+      popularityLimit: 75.0  # No mod should exceed 75% usage
+      penaltyMultiplier: 0.9  # 10% penalty when exceeding limit
+      
+    # Encourage diverse mod usage
+    diversityRewards:
+      enabled: true
+      bonusPerModUsed: 0.05  # 5% bonus per different mod type used
+      maxBonus: 0.25  # 25% max diversity bonus
+      
+    # Nation specialization balancing
+    specializationBalancing:
+      enabled: true
+      militarySpecializationPenalty: 0.1  # 10% penalty for pure military focus
+      industrialSpecializationBonus: 0.05  # 5% bonus for industrial focus
+      technologySpecializationRequirement: 0.7  # Need 70% tech usage for full benefit
+      
+  # Performance tuning
+  performance:
+    maxActiveRules: 1000
+    cacheTimeoutMinutes: 30
+    updateBatchSize: 10  # Number of records to update per tick
+    enableAsyncProcessing: true

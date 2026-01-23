@@ -1,0 +1,32 @@
+name: AXIOM
+main: com.axiom.AXIOM
+version: 2.0.0
+api-version: 1.20
+author: AXIOM Team
+description: AXIOM Geopolitical Engine — nations, economy, diplomacy, religion, events.
+website: https://example.com/axiom
+
+commands:
+  axiom:
+    description: AXIOM root command
+    usage: /axiom <subcommand>
+    aliases: [ax]
+    permission: axiom.use
+  nation:
+    description: Open nation menu
+    usage: /nation
+    aliases: [na, n]
+    permission: axiom.use
+  testbot:
+    description: Run automated AXIOM tests
+    usage: /testbot start
+    permission: axiom.admin
+
+permissions:
+  axiom.use:
+    description: Allows usage of AXIOM commands
+    default: true
+  axiom.admin:
+    description: Allows administrative AXIOM commands
+    default: op
+

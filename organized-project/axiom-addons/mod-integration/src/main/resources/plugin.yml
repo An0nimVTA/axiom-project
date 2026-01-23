@@ -1,0 +1,71 @@
+name: AXIOM-Mod-Integration
+version: ${project.version}
+main: com.axiom.addons.modintegration.AXIOMModIntegrationAddon
+api-version: 1.20
+depend: [AXIOM]
+author: AXIOM Team
+description: Advanced mod integration addon for AXIOM Geopolitical Engine
+website: https://axiom.multiverse
+
+commands:
+  modintegration:
+    description: Main command for mod integration features
+    usage: /modintegration <subcommand>
+    aliases: [mi, modint]
+  economics:
+    description: Economic indicators with mod integration
+    usage: /economics <subcommand>
+    aliases: [econ, indicators]
+  diplomacy:
+    description: Diplomatic features with mod resources
+    usage: /diplomacy <subcommand>
+    aliases: [diplo]
+  propaganda:
+    description: Propaganda system using mod items
+    usage: /propaganda <subcommand>
+    aliases: [prop]
+  migration:
+    description: Migration system with mod entities
+    usage: /migration <subcommand>
+    aliases: [migrate]
+  disaster:
+    description: Disaster management with mod events
+    usage: /disaster <subcommand>
+    aliases: [ds]
+  spy:
+    description: Espionage operations with mod tools
+    usage: /spy <subcommand>
+    aliases: [covert, espionage]
+  funding:
+    description: Funding system using mod resources
+    usage: /funding <subcommand>
+    aliases: [fund, crowdfund]
+
+permissions:
+  axiom.modintegration.use:
+    description: Use basic mod integration commands
+    default: true
+  axiom.modintegration.admin:
+    description: Use admin mod integration commands
+    default: op
+  axiom.economics.view:
+    description: View economic indicators
+    default: true
+  axiom.diplomacy.use:
+    description: Use diplomatic features
+    default: true
+  axiom.propaganda.use:
+    description: Use propaganda system
+    default: true
+  axiom.migration.use:
+    description: Use migration system
+    default: true
+  axiom.disaster.manage:
+    description: Manage disasters
+    default: op
+  axiom.spy.use:
+    description: Use spy operations
+    default: op
+  axiom.funding.initiate:
+    description: Initiate funding campaigns
+    default: true

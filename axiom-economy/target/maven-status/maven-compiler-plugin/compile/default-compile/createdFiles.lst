@@ -1,0 +1,9 @@
+com/axiom/economy/repository/EconomyRepository.class
+com/axiom/economy/model/EconomyData.class
+com/axiom/economy/service/TreasuryUpdatedEvent.class
+com/axiom/economy/service/InflationRateUpdatedEvent.class
+com/axiom/economy/EconomyModule.class
+com/axiom/economy/service/EconomyService.class
+com/axiom/economy/service/GdpUpdatedEvent.class
+com/axiom/economy/service/UnemploymentRateUpdatedEvent.class
+com/axiom/economy/service/FundTransferEvent.class

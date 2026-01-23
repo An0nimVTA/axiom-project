@@ -1,0 +1,56 @@
+# AXIOM Mod Integration Configuration
+
+# Economic Integration Settings
+economic:
+  enable-mod-resource-tracking: true
+  mod-resource-values-multiplier: 1.5
+  computer-mod-economy-bonus: 1.2
+  
+# Diplomatic Integration Settings  
+diplomatic:
+  enable-mod-diplomacy: true
+  treaty-mod-bonuses: true
+  alliance-mod-benefits: true
+  
+# Propaganda System Settings
+propaganda:
+  enable-mod-influence: true
+  mod-item-effectiveness: 1.3
+  tech-propaganda-bonus: 1.1
+  
+# Migration Settings
+migration:
+  enable-mod-migration: true
+  entity-migration-cost: 100.0
+  mod-population-absorption: true
+  
+# Disaster Management Settings
+disaster:
+  enable-mod-disasters: true
+  mod-event-frequency: 0.7
+  recovery-with-mods: true
+  
+# Cyber Security Settings
+cyber-security:
+  enable-computercraft-integration: true
+  enable-oc-integration: true
+  network-attack-modifiers: true
+  
+# Espionage Settings
+espionage:
+  enable-mod-stealth: true
+  mod-spy-equipment-bonus: 1.4
+  detection-modifiers: true
+  
+# Funding Settings
+funding:
+  enable-mod-funding: true
+  mod-resource-contribution: true
+  campaign-mod-multiplier: 1.2
+  
+# General Integration Settings
+general:
+  mod-detection-delay: 30000  # 30 seconds in milliseconds
+  integration-update-interval: 60000  # 1 minute in milliseconds
+  compatibility-mode: false
+  debug-mode: false

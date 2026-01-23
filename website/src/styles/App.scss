@@ -1,0 +1,5 @@
+.app { display: flex; flex-direction: column; min-height: 100vh; background: #1a1a2e; }
+.app-content { display: flex; flex: 1; }
+.main-content { flex: 1; padding: 20px; }
+.loading-container { display: flex; justify-content: center; align-items: center; height: 100vh; }
+.loading-spinner { color: #e94560; font-size: 18px; }

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXIOM Launcher - Official Website</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>AXIOM</h1>
+                    <span class="subtitle">LAUNCHER v2.0</span>
+                </div>
+                <nav class="nav" id="navMenu">
+                    <a href="#home" class="nav-link active">Главная</a>
+                    <a href="#servers" class="nav-link">Серверы</a>
+                    <a href="#news" class="nav-link">Новости</a>
+                    <a href="#download" class="nav-link">Скачать</a>
+                </nav>
+                <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                    <span class="hamburger"></span>
+                </button>
+                <div class="header-actions">
+                    <button class="btn btn-outline" id="loginBtn">Войти</button>
+                    <button class="btn btn-primary" id="registerBtn">Регистрация</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="hero-title">AXIOM LAUNCHER v2.0</h2>
+                <p class="hero-subtitle">Закрытый, безопасный лаунчер для серверов AXIOM</p>
+                <div class="hero-features fade-in">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <div class="feature-text">Безопасная аутентификация</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 12c0-5.25-4.25-9.5-9.5-9.5S2.5 6.75 2.5 12s4.25 9.5 9.5 9.5s9.5-4.25 9.5-9.5z"></path><path d="M12 2.5C6.75 2.5 2.5 6.75 2.5 12"></path></svg>
+                        </div>
+                        <div class="feature-text">Динамические темы</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </div>
+                        <div class="feature-text">RU/EN локализация</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        </div>
+                        <div class="feature-text">Автообновление</div>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a href="#download" class="btn btn-large btn-primary">Скачать лаунчер</a>
+                    <a href="#servers" class="btn btn-large btn-outline">Посмотреть серверы</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servers Section -->
+    <section id="servers" class="servers">
+        <div class="container">
+            <h2 class="section-title fade-in">Серверы</h2>
+            <div class="servers-grid" id="serversGrid">
+                <!-- Серверы загружаются через JS -->
+                <div class="loading">Загрузка серверов...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section id="news" class="news">
+        <div class="container">
+            <h2 class="section-title fade-in">Новости</h2>
+            <div class="news-grid" id="newsGrid">
+                <!-- Новости загружаются через JS -->
+                <div class="loading">Загрузка новостей...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <div class="container">
+            <h2 class="section-title fade-in">Скачать лаунчер</h2>
+            <div class="download-content">
+                <div class="download-card fade-in">
+                    <h3>Windows</h3>
+                    <p>AXIOM_Launcher.exe</p>
+                    <button class="btn btn-primary" disabled title="Скоро будет доступно">Скачать</button>
+                </div>
+                <div class="download-card fade-in">
+                    <h3>Linux</h3>
+                    <p>AXIOM_Launcher</p>
+                    <button class="btn btn-primary" disabled title="Скоро будет доступно">Скачать</button>
+                </div>
+                <div class="download-card fade-in">
+                    <h3>macOS</h3>
+                    <p>AXIOM_Launcher</p>
+                    <button class="btn btn-primary" disabled title="Скоро будет доступно">Скачать</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>AXIOM</h4>
+                    <p>Геополитический симулятор для Minecraft</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Ссылки</h4>
+                    <a href="#home">Главная</a>
+                    <a href="#servers">Серверы</a>
+                    <a href="#news">Новости</a>
+                    <a href="#download">Скачать</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Поддержка</h4>
+                    <a href="#">Документация</a>
+                    <a href="#">Discord</a>
+                    <a href="#">GitHub</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AXIOM Project. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Вход в систему</h2>
+            <form id="loginForm">
+                <input type="text" placeholder="Логин" id="loginInput" required>
+                <input type="password" placeholder="Пароль" id="passwordInput" required>
+                <button type="submit" class="btn btn-primary">Войти</button>
+            </form>
+            <p id="loginError" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Регистрация</h2>
+            <form id="registerForm">
+                <input type="text" placeholder="Логин (3-20 символов)" id="registerLoginInput" required>
+                <input type="password" placeholder="Пароль (минимум 8 символов)" id="registerPasswordInput" required>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            </form>
+            <p id="registerError" class="error-message"></p>
+        </div>
+    </div>
+
+    <div id="notification-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+

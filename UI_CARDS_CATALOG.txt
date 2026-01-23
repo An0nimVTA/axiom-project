@@ -1,0 +1,217 @@
+КАТАЛОГ КАРТОЧЕК ДЛЯ НОВОГО UI (клиентский мод)
+
+Формат: Меню -> список карточек (название) + короткое действие/смысл.
+Если карточка динамическая (генерируется по данным), отмечено как [динамич].
+
+1) NationMainMenu (Национальная система)
+  - (если игрок НЕ в нации):
+    - "Создать нацию" -> сообщение /nation create
+    - "Присоединиться к нации" -> сообщение /nation join
+  - (если игрок в нации):
+    - "Профиль нации" -> ProfileMenu
+    - "Территория" -> TerritoryMenu
+    - "Гражданство" -> CitizenshipMenu
+    - "Экономика" -> EconomyMenu
+    - "Дипломатия" -> DiplomacyMenu
+    - "Религия" -> ReligionMenu
+    - "Города" -> CitiesMenu
+    - "Технологии" -> AdvancedTechnologyTreeMenu (проверка tech)
+    - "Выборы" -> ElectionMenu
+    - "История" -> HistoryMenu
+    - "Война" -> /axiom war (только если AdvancedWarSystem != null)
+    - "Расширенные функции" -> AdvancedFeaturesMenu
+
+2) EconomyMenu (Экономическая система)
+  - "Кошелёк" -> Wallet GUI + сообщение баланса
+  - "Банковский счёт" -> BankingMenu (требует tech banking)
+  - "Перевод" -> /wallet pay
+  - "Торговля" -> TradingPost GUI
+  - "Налоги" -> /nation taxes (только лидер)
+  - "Биржа" -> StockMarket GUI (требует tech stock_market)
+
+3) DiplomacyMenu (Дипломатическая система)
+  - "Договоры" -> /treaty list (лидер + tech diplomacy)
+  - "Союзы" -> /ally list (tech advanced_diplomacy)
+  - "Война" -> /war declare (tech basic_military)
+  - "Шпионаж" -> /spy intel (tech espionage_tech)
+  - "Отношения" -> /diplomacy status
+  - "Посольства" -> /diplomacy embassy (tech advanced_diplomacy)
+
+4) TerritoryMenu (Управление территорией)
+  - "Захват" -> /claim (tech territory_claim)
+  - "Освободить" -> /unclaim
+  - "Карта" -> /nation map
+  - "Защита" -> /territory protection
+  - "Условия" -> /territory rules (лидер)
+  - "Налоги" -> /territory taxes (лидер)
+  - "Строительство" -> /territory build
+  - "Зоны" -> /territory zones
+
+5) CitiesMenu (Городская система)
+  - "Мой город" -> /city me
+  - "Строительство" -> /city build (tech basic_construction)
+  - "Транспорт" -> /transport road (tech roads)
+  - "Энергия" -> /energy manage (tech basic_industry)
+  - "Население" -> /city population
+  - "Инфраструктура" -> /infrastructure upgrade
+
+6) ReligionMenu (Религиозная система)
+  - "Моя вера" -> /religion me
+  - "Создать религию" -> /religion create (tech religion)
+  - "Образование" -> /education learn (tech education)
+  - "Культура" -> /culture artifacts
+  - "Ритуалы" -> /religion ritual (tech advanced_religion)
+  - "Святыни" -> /religion shrine
+
+7) ProfileMenu (Профиль игрока)
+  - "Профиль" -> /profile me
+  - "Статистика" -> /stats me
+  - "История" -> /history me
+  - "Настройки" -> /settings player
+  - "Достижения" -> /achievement list
+  - "Репутация" -> /reputation me
+
+8) CitizenshipMenu (Гражданство нации)
+  - "Мои права" -> /citizen rights
+  - "Пригласить" -> /nation invite (лидер/офицер)
+  - "Граждане" -> /nation citizens
+  - "Исключить" -> /nation kick (лидер/офицер)
+  - "Роли" -> /nation roles (лидер/офицер)
+  - "Присяга" -> /citizen oath
+  - "Репутация" -> /citizen reputation
+  - "Статистика" -> /citizen stats
+
+9) BankingMenu (Банковская система)
+  - "Открыть счёт" -> /bank open (tech banking)
+  - "Депозит" -> /bank deposit
+  - "Снятие" -> /bank withdraw
+  - "История" -> /bank history
+  - "Кредиты" -> /bank loan (tech advanced_banking)
+  - "Инвестиции" -> /bank invest (tech investment_system)
+
+10) AdvancedFeaturesMenu (Расширенные функции)
+  - "Войны и конфликты" -> /war status (tech basic_military)
+  - "Банковская система" -> BankingMenu (tech banking)
+  - "Образование" -> /education school (tech education)
+  - "Инфраструктура" -> /infrastructure build (tech basic_construction)
+  - "Экология" -> /environment protect (в нации)
+  - "Культура" -> /culture festival
+  - "Наука" -> /science lab (tech basic_research)
+  - "Шпионаж" -> /spy mission (tech espionage_tech)
+
+11) EconomicIndicatorsMenu (Экономические показатели)
+  - "Назад" -> NationMainMenu
+  - "Статистика экономики" -> глобальная статистика
+  - "ВВП наций" -> рейтинг
+  - "Развитие наций" -> рейтинг
+  - "Инфляция и безработица" -> статистика
+  - "Торговля и бюджет" -> статистика
+  - "Моя нация" -> личная статистика
+  - "Настройки" -> настройки отображения
+  - "Справка" -> справка
+
+12) HistoryMenu (История нации)
+  - "Хронология" -> /history timeline
+  - "Войны" -> /history wars
+  - "Договоры" -> /history treaties
+  - "Выборы" -> /history elections
+  - "Экономика" -> /history economics
+  - "Культура" -> /history culture
+  - "Катаклизмы" -> /history disasters
+  - "Запись события" -> /history add (лидер)
+
+13) ElectionMenu (Система выборов)
+  - "Активные выборы" -> /election active
+  - "Голосование" -> /election vote
+  - "Кандидаты" -> /election candidates
+  - "Создать выборы" -> /election create (лидер)
+  - "Лидер нации" -> /election leader
+  - "Парламент" -> /election parliament
+  - "Законы" -> /election laws
+  - "Референдум" -> /election referendum (лидер)
+
+14) CaptureSystemMenu (Система захвата)
+  - Главное:
+    - "Ядра стран" -> список ядер [динамич]
+    - "Ядра городов" -> список ядер [динамич]
+    - "Укрепления" -> список окопов [динамич]
+    - "Начать осаду" -> /capture begin_siege
+    - "Информация" -> текст справки
+  - Вид "Ядра стран":
+    - "Назад"
+    - Карточка каждой страны [динамич] (стабильность/сила)
+  - Вид "Ядра городов":
+    - "Назад"
+    - Карточка каждого города [динамич] (уровень/хп)
+  - Вид "Укрепления":
+    - "Назад"
+    - "Создать укрепления" -> /capture capture_chunk
+    - Карточки укреплений [динамич] или "Нет укреплений"/"Не в нации"
+
+15) MapBoundaryVisualizationMenu (Визуализация границ)
+  - "Назад" -> NationMainMenu
+  - "Статистика границ"
+  - "Границы наций"
+  - "Границы городов"
+  - "Настройки отображения"
+  - "Реальное время"
+  - "Справка"
+
+16) ModPackBuilderMenu (Конструктор модпака)
+  - "Назад" -> NationMainMenu
+  - "Создать модпак" -> /modpack create
+  - "Мои модпаки" -> список модпаков
+  - "Управление модами" -> включение/выключение (требует выбранный модпак)
+  - "Совместимость"
+  - "Настройки"
+  - "Инфо: <имя>" [условно, если выбран модпак]
+  - "Собрать модпак" [условно, если выбран]
+  - "Справка"
+
+17) TechnologyMenu (старое меню технологий) [не карточное, но требуется кастомный UI]
+  - Главный экран:
+    - Карточки-ветки (названия из сервиса) [динамич]
+    - Карточки доступных технологий [динамич]
+    - "Информация" (панель)
+    - "Закрыть"
+  - Экран ветки:
+    - Заголовки тиров (1–5)
+    - Карточки технологий тира [динамич]
+    - "Назад"
+    - "Закрыть"
+
+18) TechnologyTreeMenu (старое) [динамич]
+  - Карточки технологий (TechNode) до 24 штук: статус LOCKED/AVAILABLE/UNLOCKED
+  - Декор слоты 24–26
+
+19) AdvancedTechnologyTreeMenu (старое) [динамич]
+  - Карточки технологий (TechCard) до 24 штук: available/unlocked/locked
+  - Декор слоты 24–26
+
+20) ConfirmMenu (Подтверждение)
+  - "Подтверждение действия" (описание)
+  - "Да"
+  - "Нет"
+  - "Закрыть"
+
+21) WarMenu (Войны) [не карточное]
+  - "Активные войны" [динамич]
+  - "Статистика"
+  - "Объявить войну"
+  - "Статус войн"
+  - "Мобилизация"
+  - "Рейды"
+  - "Осады"
+  - "Завоевания"
+  - "Назад"
+  - "Закрыть"
+
+22) CorporationsMenu (Корпорации) [не карточное]
+  - "Ваши Корпорации" (хедер)
+  - Карточки корпораций [динамич]
+  - "Глобальный Рынок"
+  - "Закрыть"
+
+23) TutorialService (Руководство AXIOM) [не карточное]
+  - Главы 1–10 (иконки: BOOK/EMERALD/MAP/IRON_SWORD/ENCHANTED_BOOK/WRITTEN_BOOK/ENCHANTING_TABLE/BRICKS/GOLDEN_APPLE/COMPASS)
+  - "Закрыть"

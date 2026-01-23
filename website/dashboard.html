@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления - AXIOM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="/" style="text-decoration: none; color: inherit;">
+                        <h1>AXIOM</h1>
+                        <span class="subtitle">LAUNCHER v2.0</span>
+                    </a>
+                </div>
+                <nav class="nav">
+                    <a href="/" class="nav-link">На главную</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 100px;">
+        <h2 class="section-title">Панель управления</h2>
+        <div id="dashboard-loading" class="loading">Загрузка данных...</div>
+        <div id="dashboard-content" class="dashboard-grid" style="display: none;">
+            <!-- User Info -->
+            <div class="dashboard-card">
+                <h3>Профиль</h3>
+                <p><strong>Логин:</strong> <span id="db-login">...</span></p>
+                <p><strong>Игровой ник:</strong> <span id="db-player-name">...</span></p>
+            </div>
+
+            <!-- Nation Info -->
+            <div class="dashboard-card">
+                <h3>Нация</h3>
+                <p><strong>Название:</strong> <span id="db-nation-name">...</span></p>
+                <p><strong>Ранг:</strong> <span id="db-nation-rank">...</span></p>
+            </div>
+
+            <!-- Economy Info -->
+            <div class="dashboard-card">
+                <h3>Экономика</h3>
+                <p><strong>Баланс:</strong> <span id="db-balance">...</span> 🪙</p>
+            </div>
+            
+            <!-- Status -->
+            <div class="dashboard-card">
+                <h3>Статус</h3>
+                <p><strong>Последнее обновление:</strong> <span id="db-last-updated">...</span></p>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification-container"></div>
+    <script src="dashboard.js"></script>
+</body>
+</html>

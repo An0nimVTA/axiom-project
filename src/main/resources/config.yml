@@ -1,0 +1,63 @@
+# AXIOM Geopolitical Engine Configuration
+
+branding:
+  pluginName: "AXIOM Geopolitical Engine"
+  motto: "В AXIOM вы не играете в мире — вы его строите"
+
+storage:
+  baseFolder: "plugins/AXIOM" # Overridden by Bukkit's data folder at runtime
+  prettyPrintJson: true
+
+economy:
+  defaultCurrencyCode: "AXC"
+  startingTreasury: 10000.0
+  maxPrintAmountPerCommand: 1000000.0
+  incomeTaxPercent: 10
+  salesTaxPercent: 5
+
+territory:
+  protectionEnabled: true
+  allowNationMembersToBuild: true
+
+events:
+  newsBroadcastIntervalSeconds: 900
+
+autosave:
+  intervalSeconds: 300
+
+pvp:
+  requireToggle: true
+
+debug: false
+
+roles:
+  LEADER:
+    permissions:
+      - "claim_chunk"
+      - "unclaim_chunk"
+      - "print_money"
+      - "declare_war"
+      - "manage_citizens"
+      - "set_taxes"
+      - "manage_alliances"
+      - "manage_budget"
+  MINISTER:
+    permissions:
+      - "claim_chunk"
+      - "manage_citizens"
+      - "manage_alliances"
+      - "manage_budget"
+  GENERAL:
+    permissions:
+      - "declare_war"
+      - "mobilize"
+  GOVERNOR:
+    permissions:
+      - "claim_chunk"
+      - "unclaim_chunk"
+      - "manage_citizens"
+  CITIZEN:
+    permissions:
+      - "vote"
+      - "chat_nation"
+

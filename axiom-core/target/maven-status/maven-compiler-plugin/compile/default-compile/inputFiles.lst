@@ -1,0 +1,10 @@
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/example/ModularArchitectureExample.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/ModuleManager.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/model/City.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/Module.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/plugin/AXIOMModular.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/Repository.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/model/Nation.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/service/NationManager.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/ServiceContainer.java
+/home/an0nimvta/axiom plugin/axiom-core/src/main/java/com/axiom/core/EventPublisher.java
