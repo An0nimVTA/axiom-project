@@ -65,3 +65,9 @@ desktop.ini
 *.bak
 *.swp
 *~.nib
+
+# Large files (>100MB)
+modpacks/*.zip
+modpacks_temp/
+launcher-files/*.zip
+launcher-files/forge-*.zip
