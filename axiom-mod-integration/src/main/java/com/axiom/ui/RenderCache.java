@@ -1,13 +1,14 @@
 package com.axiom.ui;
 
-import net.minecraft.client.gui.GuiGraphics;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
 public class RenderCache {
     private static final RenderCache INSTANCE = new RenderCache();
-    private final Map<String, CachedElement> cache = new HashMap<>();
-    private final long CACHE_DURATION = 1000; // 1 second
+    private final Map<String, CachedElement> cache = new ConcurrentHashMap<>();
+    private final long CACHE_DURATION = 1000;
+    private long lastCleanup = 0;
+    private static final long CLEANUP_INTERVAL = 5000;
 
     public static class CachedElement {
         public final Object data;
@@ -30,6 +31,7 @@ public class RenderCache {
     }
 
     public void put(String key, Object data) {
+        autoCleanup();
         cache.put(key, new CachedElement(data));
     }
 
@@ -44,6 +46,14 @@ public class RenderCache {
 
     public void clear() {
         cache.clear();
+    }
+
+    private void autoCleanup() {
+        long now = System.currentTimeMillis();
+        if (now - lastCleanup > CLEANUP_INTERVAL) {
+            clearExpired();
+            lastCleanup = now;
+        }
     }
 
     public void clearExpired() {

@@ -670,6 +670,10 @@ public final class AXIOM extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new DashboardListener(this), this);
         Bukkit.getPluginManager().registerEvents(new VisualEffectsListener(this, visualEffectsService), this);
 
+        // Register plugin messaging channel
+        getServer().getMessenger().registerOutgoingPluginChannel(this, "axiom:ui");
+        getServer().getMessenger().registerIncomingPluginChannel(this, "axiom:ui", new com.axiom.network.ModCommunicationHandler(this));
+
         // Autosave
         long autosaveTicks = getConfig().getLong("autosave.intervalSeconds", 300) * 20L;
         if (autosaveTicks > 0) {
@@ -678,7 +682,7 @@ public final class AXIOM extends JavaPlugin {
             }, autosaveTicks, autosaveTicks);
         }
 
-        getLogger().info("AXIOM enabled.");
+        getLogger().info("AXIOM enabled with UI mod support.");
     }
 
     @Override

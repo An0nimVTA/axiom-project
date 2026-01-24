@@ -61,13 +61,31 @@ public class StatsOverlayScreen extends Screen {
         }
         lastUpdate = currentTime;
         
-        // TODO: Send packet to server to request stats
-        // For now, use mock data
-        updateMockData();
+        // Request real data from server
+        AxiomUiMod.requestUpdate("stats");
+        updateFromCache();
+    }
+
+    private void updateFromCache() {
+        var stats = AxiomUiMod.cachedStats;
+        if (stats.isEmpty()) {
+            updateMockData();
+            return;
+        }
+        
+        balance = ((Number) stats.getOrDefault("balance", 0.0)).doubleValue();
+        nationName = (String) stats.getOrDefault("nationName", "Нет нации");
+        citizens = ((Number) stats.getOrDefault("population", 0)).intValue();
+        
+        // Calculate tech progress from cached techs
+        long unlocked = AxiomUiMod.cachedTechs.stream()
+            .filter(t -> Boolean.TRUE.equals(t.get("unlocked")))
+            .count();
+        techProgress = (int) unlocked;
+        totalTechs = AxiomUiMod.cachedTechs.size();
     }
 
     private void updateMockData() {
-        // Mock data for demonstration
         balance = 15000 + (Math.random() * 1000);
         nationName = "Россия";
         techProgress = 12;

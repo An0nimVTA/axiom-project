@@ -1,5 +1,7 @@
 package com.axiom.ui;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.Connection;
@@ -16,7 +18,7 @@ import net.minecraftforge.network.event.EventNetworkChannel;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
+import java.util.*;
 
 import io.netty.buffer.Unpooled;
 
@@ -31,6 +33,11 @@ public class AxiomUiMod {
         NetworkRegistry.acceptMissingOr(UI_PROTOCOL),
         NetworkRegistry.acceptMissingOr(UI_PROTOCOL)
     );
+    
+    private static final Gson gson = new Gson();
+    public static Map<String, Object> cachedStats = new HashMap<>();
+    public static List<Map<String, Object>> cachedTechs = new ArrayList<>();
+    public static List<Map<String, Object>> cachedNations = new ArrayList<>();
 
     public AxiomUiMod() {
         MinecraftForge.EVENT_BUS.addListener(this::onRegisterClientCommands);
@@ -39,8 +46,7 @@ public class AxiomUiMod {
         MinecraftForge.EVENT_BUS.addListener(this::onRenderOverlay);
         UI_NETWORK.addListener(this::onClientPayload);
         
-        // Загрузить балансировку
-        System.out.println("[AXIOM UI] Загрузка автоматической балансировки...");
+        System.out.println("[AXIOM UI] Mod loaded with server integration");
     }
 
     private void onRenderOverlay(net.minecraftforge.client.event.RenderGuiOverlayEvent.Post event) {
@@ -54,8 +60,7 @@ public class AxiomUiMod {
     }
 
     private void onKeyInput(net.minecraftforge.client.event.InputEvent.Key event) {
-        // F1 - open main menu
-        if (event.getKey() == 290 && event.getAction() == 1) { // F1 pressed
+        if (event.getKey() == 290 && event.getAction() == 1) { // F1
             Minecraft.getInstance().setScreen(new CommandMenuScreen());
         }
     }
@@ -153,12 +158,15 @@ public class AxiomUiMod {
 
     private void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
         Connection connection = event.getConnection();
-        if (connection == null) {
-            return;
-        }
+        if (connection == null) return;
+        
         MCRegisterPacketHandler.INSTANCE.addChannels(Set.of(UI_CHANNEL), connection);
         MCRegisterPacketHandler.INSTANCE.sendRegistry(connection, NetworkDirection.PLAY_TO_SERVER);
-        sendToServer(connection, "hello");
+        
+        // Request initial data
+        sendToServer(connection, "get_stats");
+        sendToServer(connection, "get_techs");
+        sendToServer(connection, "get_nations");
     }
 
     private void onClientPayload(NetworkEvent.ClientCustomPayloadEvent event) {
@@ -167,10 +175,21 @@ public class AxiomUiMod {
             event.getSource().get().setPacketHandled(true);
             return;
         }
-        String action = buf.readUtf(64);
+        
+        String type = buf.readUtf(64);
+        String json = buf.readUtf(32767);
+        
         event.getSource().get().enqueueWork(() -> {
-            if ("open_religions".equalsIgnoreCase(action)) {
-                Minecraft.getInstance().setScreen(new ReligionCardsScreen());
+            switch (type) {
+                case "stats":
+                    cachedStats = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
+                    break;
+                case "techs":
+                    cachedTechs = gson.fromJson(json, new TypeToken<List<Map<String, Object>>>(){}.getType());
+                    break;
+                case "nations":
+                    cachedNations = gson.fromJson(json, new TypeToken<List<Map<String, Object>>>(){}.getType());
+                    break;
             }
         });
         event.getSource().get().setPacketHandled(true);
@@ -180,5 +199,14 @@ public class AxiomUiMod {
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeUtf(action);
         connection.send(NetworkDirection.PLAY_TO_SERVER.buildPacket(Pair.of(buf, 0), UI_CHANNEL).getThis());
+    }
+    
+    public static void requestUpdate(String type) {
+        var player = Minecraft.getInstance().player;
+        if (player == null) return;
+        
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeUtf("get_" + type);
+        player.connection.send(NetworkDirection.PLAY_TO_SERVER.buildPacket(Pair.of(buf, 0), UI_CHANNEL).getThis());
     }
 }

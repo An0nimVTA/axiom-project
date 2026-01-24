@@ -38,6 +38,7 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${project.property('minecraft_version')}-${project.property('forge_version')}"
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 tasks.withType(JavaCompile).configureEach {
