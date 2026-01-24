@@ -1,7 +1,0 @@
-com/axiom/military/MilitaryModule.class
-com/axiom/military/repository/MilitaryRepository.class
-com/axiom/military/service/UnitsUpgradedEvent.class
-com/axiom/military/service/UnitsRecruitedEvent.class
-com/axiom/military/model/MilitaryData.class
-com/axiom/military/service/UnitsDismissedEvent.class
-com/axiom/military/service/MilitaryService.class

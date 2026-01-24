@@ -71,3 +71,11 @@ modpacks/*.zip
 modpacks_temp/
 launcher-files/*.zip
 launcher-files/forge-*.zip
+
+# Maven
+target/
+**/target/
+
+# Backup
+backups/
+
