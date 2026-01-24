@@ -32,10 +32,10 @@ FILES=(
 for file in "${FILES[@]}"; do
     if [ -f "$file" ]; then
         echo -e "  ${GREEN}✓${NC} $file"
-        ((PASSED++))
+        ((++PASSED))
     else
         echo -e "  ${RED}✗${NC} $file - НЕ НАЙДЕН"
-        ((FAILED++))
+        ((++FAILED))
     fi
 done
 
@@ -43,13 +43,13 @@ done
 echo -e "\n${YELLOW}[2/8]${NC} Проверка синтаксиса Java..."
 if GRADLE_USER_HOME=$PWD/.gradle ./gradlew --no-daemon compileJava > /tmp/compile.log 2>&1; then
     echo -e "  ${GREEN}✓${NC} Синтаксис корректен"
-    ((PASSED++))
+    ((++PASSED))
     
     # Проверка предупреждений
     WARN_COUNT=$(grep -c "warning:" /tmp/compile.log || true)
     if [ "$WARN_COUNT" -gt 0 ]; then
         echo -e "  ${YELLOW}⚠${NC} Найдено предупреждений: $WARN_COUNT"
-        ((WARNINGS++))
+                ((++WARNINGS))
     fi
 else
     echo -e "  ${RED}✗${NC} Ошибки компиляции"
@@ -61,7 +61,7 @@ fi
 echo -e "\n${YELLOW}[3/8]${NC} Сборка JAR..."
 if GRADLE_USER_HOME=$PWD/.gradle ./gradlew --no-daemon build -x test > /tmp/build.log 2>&1; then
     echo -e "  ${GREEN}✓${NC} Сборка успешна"
-    ((PASSED++))
+    ((++PASSED))
 else
     echo -e "  ${RED}✗${NC} Ошибка сборки"
     tail -20 /tmp/build.log
@@ -74,7 +74,7 @@ JAR_FILE="build/libs/axiomui-0.1.0.jar"
 if [ -f "$JAR_FILE" ]; then
     SIZE=$(du -h "$JAR_FILE" | cut -f1)
     echo -e "  ${GREEN}✓${NC} JAR создан: $SIZE"
-    ((PASSED++))
+    ((++PASSED))
 else
     echo -e "  ${RED}✗${NC} JAR не найден"
     ((FAILED++))
@@ -91,10 +91,10 @@ REQUIRED_CLASSES=(
 for class in "${REQUIRED_CLASSES[@]}"; do
     if jar tf "$JAR_FILE" | grep -q "$class"; then
         echo -e "  ${GREEN}✓${NC} $class"
-        ((PASSED++))
+        ((++PASSED))
     else
         echo -e "  ${RED}✗${NC} $class - НЕ НАЙДЕН В JAR"
-        ((FAILED++))
+        ((++FAILED))
     fi
 done
 
@@ -103,10 +103,10 @@ echo -e "\n${YELLOW}[6/8]${NC} Проверка размера JAR..."
 SIZE_BYTES=$(stat -f%z "$JAR_FILE" 2>/dev/null || stat -c%s "$JAR_FILE" 2>/dev/null)
 if [ "$SIZE_BYTES" -gt 50000 ] && [ "$SIZE_BYTES" -lt 100000 ]; then
     echo -e "  ${GREEN}✓${NC} Размер адекватный: $SIZE_BYTES байт"
-    ((PASSED++))
+    ((++PASSED))
 else
     echo -e "  ${YELLOW}⚠${NC} Размер необычный: $SIZE_BYTES байт"
-    ((WARNINGS++))
+            ((++WARNINGS))
 fi
 
 # Тест 7: Проверка количества классов
@@ -114,7 +114,7 @@ echo -e "\n${YELLOW}[7/8]${NC} Проверка количества класс�
 CLASS_COUNT=$(jar tf "$JAR_FILE" | grep -c "\.class$" || true)
 if [ "$CLASS_COUNT" -gt 20 ]; then
     echo -e "  ${GREEN}✓${NC} Классов в JAR: $CLASS_COUNT"
-    ((PASSED++))
+    ((++PASSED))
 else
     echo -e "  ${RED}✗${NC} Мало классов: $CLASS_COUNT"
     ((FAILED++))
@@ -130,10 +130,10 @@ PACKAGES=(
 for pkg in "${PACKAGES[@]}"; do
     if jar tf "$JAR_FILE" | grep -q "$pkg"; then
         echo -e "  ${GREEN}✓${NC} $pkg"
-        ((PASSED++))
+        ((++PASSED))
     else
         echo -e "  ${RED}✗${NC} $pkg - НЕ НАЙДЕН"
-        ((FAILED++))
+        ((++FAILED))
     fi
 done
 
