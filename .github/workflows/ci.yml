@@ -1,0 +1,77 @@
+name: AXIOM CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build Plugin
+        run: |
+          cd axiom-plugin
+          mvn clean package -DskipTests
+      - name: Upload Plugin
+        uses: actions/upload-artifact@v3
+        with:
+          name: axiom-plugin
+          path: axiom-plugin/target/axiom-plugin-*.jar
+
+  build-mod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build UI Mod
+        run: |
+          cd axiom-mod-integration
+          GRADLE_USER_HOME=$PWD/.gradle ./gradlew build -x test
+      - name: Upload Mod
+        uses: actions/upload-artifact@v3
+        with:
+          name: axiom-ui-mod
+          path: axiom-mod-integration/build/libs/axiomui-*.jar
+
+  build-launcher:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Build Launcher
+        run: |
+          cd axiom-launcher-kotlin
+          ./gradlew build -x test
+      - name: Upload Launcher
+        uses: actions/upload-artifact@v3
+        with:
+          name: axiom-launcher
+          path: axiom-launcher-kotlin/build/libs/axiom-launcher-*.jar
+
+  create-release:
+    needs: [build-plugin, build-mod, build-launcher]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/download-artifact@v3
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}
+          files: |
+            axiom-plugin/*.jar
+            axiom-ui-mod/*.jar
+            axiom-launcher/*.jar
