@@ -37,12 +37,22 @@ public class CommandHistory {
     }
 
     public void addToHistory(String command) {
-        // Remove if exists
-        history.removeIf(e -> e.command.equals(command));
-        
-        // Add to front
-        HistoryEntry entry = new HistoryEntry(command);
-        history.add(0, entry);
+        HistoryEntry existing = null;
+        for (HistoryEntry entry : history) {
+            if (entry.command.equals(command)) {
+                existing = entry;
+                break;
+            }
+        }
+        if (existing != null) {
+            history.remove(existing);
+            existing.useCount += 1;
+            existing.timestamp = System.currentTimeMillis();
+            history.add(0, existing);
+        } else {
+            HistoryEntry entry = new HistoryEntry(command);
+            history.add(0, entry);
+        }
         
         // Limit size
         while (history.size() > MAX_HISTORY) {
@@ -50,6 +60,16 @@ public class CommandHistory {
         }
         
         save();
+    }
+
+    public int getUseCount(String command) {
+        if (command == null) return 0;
+        for (HistoryEntry entry : history) {
+            if (command.equals(entry.command)) {
+                return entry.useCount;
+            }
+        }
+        return 0;
     }
 
     public void addFavorite(String commandId) {

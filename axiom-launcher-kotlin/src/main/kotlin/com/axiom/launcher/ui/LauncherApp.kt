@@ -31,6 +31,7 @@ class LauncherApp : Application() {
     private var newsList: List<NewsItem> = emptyList()
     private var selectedServer: Server? = null
     private var serverProcess: Process? = null
+    private var autoLaunchTriggered = false
     
     private lateinit var stage: Stage
     private lateinit var contentArea: StackPane
@@ -56,11 +57,21 @@ class LauncherApp : Application() {
         ConfigManager.load()
         
         if (ConfigManager.config.token != null) {
-            api.setToken(ConfigManager.config.token)
-            currentUser = User(0, ConfigManager.config.lastUser ?: "Player", ConfigManager.config.token)
-            showMainView()
+            if (ConfigManager.config.token == "OFFLINE") {
+                currentUser = User(0, ConfigManager.config.lastUser ?: "Player", "OFFLINE")
+                showMainView()
+            } else {
+                api.setToken(ConfigManager.config.token)
+                currentUser = User(0, ConfigManager.config.lastUser ?: "Player", ConfigManager.config.token)
+                showMainView()
+            }
         } else {
-            showLoginView()
+            if (ConfigManager.config.autoLaunch && !ConfigManager.config.lastUser.isNullOrBlank()) {
+                currentUser = User(0, ConfigManager.config.lastUser ?: "Player", "OFFLINE")
+                showMainView()
+            } else {
+                showLoginView()
+            }
         }
         
         stage.title = "AXIOM"
@@ -92,9 +103,17 @@ class LauncherApp : Application() {
             setOnAction { doRegister(loginField.text, passField.text, error, this) }
         }
         
+        val offlineBtn = createButton("Войти Оффлайн", false).apply {
+            style = "-fx-background-color: transparent; -fx-text-fill: #555; -fx-font-size: 12px; -fx-border-width: 0;"
+            cursor = Cursor.HAND
+            setOnMouseEntered { textFill = Color.web(TEXT_SEC) }
+            setOnMouseExited { textFill = Color.web("#555") }
+            setOnAction { doOfflineLogin(loginField.text, error) }
+        }
+        
         passField.setOnAction { doLogin(loginField.text, passField.text, error, loginBtn) }
         
-        card.children.addAll(logo, sub, Region().apply { prefHeight = 16.0 }, loginField, passField, error, Region().apply { prefHeight = 8.0 }, loginBtn, regBtn)
+        card.children.addAll(logo, sub, Region().apply { prefHeight = 16.0 }, loginField, passField, error, Region().apply { prefHeight = 8.0 }, loginBtn, regBtn, offlineBtn)
         root.children.add(card)
         stage.scene = Scene(root, 960.0, 640.0)
     }
@@ -182,6 +201,7 @@ class LauncherApp : Application() {
         content.children.addAll(header, serverListBox, Region().apply { VBox.setVgrow(this, Priority.ALWAYS) }, playCard)
         
         contentArea.children.setAll(content)
+        maybeAutoLaunch(statusLabel, progressBar, playBtn)
     }
     
     private fun showNewsTab() {
@@ -226,11 +246,12 @@ class LauncherApp : Application() {
             style = "-fx-background-color: $CARD; -fx-background-radius: 12; -fx-border-color: $BORDER; -fx-border-radius: 12;"
         }
         
-        // Java path
         val javaLabel = Label("Путь к Java").apply { font = Font.font(14.0); textFill = Color.WHITE }
         val javaField = createInput("java").apply { text = ConfigManager.config.javaPath; prefWidth = 400.0 }
         
-        // RAM
+        val ipLabel = Label("IP Адрес Сервера (для оффлайн)").apply { font = Font.font(14.0); textFill = Color.WHITE }
+        val ipField = createInput("localhost").apply { text = ConfigManager.config.serverAddress; prefWidth = 400.0 }
+        
         val ramLabel = Label("Оперативная память: ${ConfigManager.config.maxRam} MB").apply { font = Font.font(14.0); textFill = Color.WHITE }
         val ramSlider = Slider(1024.0, 16384.0, ConfigManager.config.maxRam.toDouble()).apply {
             prefWidth = 400.0
@@ -240,30 +261,52 @@ class LauncherApp : Application() {
         }
         ramSlider.valueProperty().addListener { _, _, v -> ramLabel.text = "Оперативная память: ${v.toInt()} MB" }
 
-        // Server start script (tests)
         val serverLabel = Label("Скрипт запуска сервера (для тестов)").apply { font = Font.font(14.0); textFill = Color.WHITE }
         val serverField = createInput("/path/to/server/start.sh").apply { text = ConfigManager.config.serverStartPath; prefWidth = 400.0 }
+
+        val autoLaunchCheck = CheckBox("Автозапуск игры").apply {
+            isSelected = ConfigManager.config.autoLaunch
+            textFill = Color.WHITE
+        }
+        val autoStartServerCheck = CheckBox("Автозапуск локального сервера").apply {
+            isSelected = ConfigManager.config.autoStartServer
+            textFill = Color.WHITE
+        }
+        val autoUiTestsCheck = CheckBox("Авто-UI тесты").apply {
+            isSelected = ConfigManager.config.autoUiTests
+            textFill = Color.WHITE
+        }
         
         val saveBtn = createButton("Сохранить", true).apply {
             prefWidth = 150.0
             setOnAction {
-                ConfigManager.update { copy(javaPath = javaField.text, maxRam = ramSlider.value.toInt(), serverStartPath = serverField.text) }
+                ConfigManager.update { copy(
+                    javaPath = javaField.text, 
+                    maxRam = ramSlider.value.toInt(), 
+                    serverStartPath = serverField.text,
+                    serverAddress = ipField.text,
+                    autoLaunch = autoLaunchCheck.isSelected,
+                    autoStartServer = autoStartServerCheck.isSelected,
+                    autoUiTests = autoUiTestsCheck.isSelected
+                ) }
                 text = "Сохранено ✓"
                 scope.launch { delay(1500); Platform.runLater { text = "Сохранить" } }
+                loadData()
             }
         }
         
         card.children.addAll(
-            javaLabel, javaField,
+            javaLabel, javaField, Region().apply { prefHeight = 8.0 },
+            ipLabel, ipField, Region().apply { prefHeight = 8.0 },
+            ramLabel, ramSlider, Region().apply { prefHeight = 12.0 },
+            serverLabel, serverField, Region().apply { prefHeight = 16.0 },
+            autoLaunchCheck,
+            autoStartServerCheck,
+            autoUiTestsCheck,
             Region().apply { prefHeight = 8.0 },
-            ramLabel, ramSlider,
-            Region().apply { prefHeight = 12.0 },
-            serverLabel, serverField,
-            Region().apply { prefHeight = 16.0 },
             saveBtn
         )
         
-        // Account section
         val accCard = VBox(16.0).apply {
             padding = Insets(24.0)
             style = "-fx-background-color: $CARD; -fx-background-radius: 12; -fx-border-color: $BORDER; -fx-border-radius: 12;"
@@ -281,15 +324,31 @@ class LauncherApp : Application() {
         content.children.addAll(header, card, accCard)
         contentArea.children.setAll(content)
     }
+
+    private fun maybeAutoLaunch(status: Label, progress: ProgressBar, btn: Button) {
+        if (autoLaunchTriggered) return
+        if (!ConfigManager.config.autoLaunch) return
+        if (currentUser == null) return
+        if (selectedServer == null) return
+        autoLaunchTriggered = true
+        val delayMs = ConfigManager.config.autoStartServerDelayMs.coerceAtLeast(0)
+        if (ConfigManager.config.autoStartServer) {
+            val started = startLocalServerAuto(status)
+            scope.launch {
+                if (started) delay(delayMs)
+                Platform.runLater { launchGame(status, progress, btn) }
+            }
+        } else {
+            launchGame(status, progress, btn)
+        }
+    }
     
     private fun createNavItem(text: String, tab: String): HBox = HBox().apply {
         padding = Insets(10.0, 12.0, 10.0, 12.0)
         alignment = Pos.CENTER_LEFT
         cursor = Cursor.HAND
         style = "-fx-background-radius: 8;"
-        
         children.add(Label(text).apply { font = Font.font(14.0); textFill = Color.web(TEXT_SEC) })
-        
         setOnMouseClicked {
             when (tab) {
                 "servers" -> showServersTab()
@@ -383,7 +442,24 @@ class LauncherApp : Application() {
     
     private fun loadData() {
         scope.launch {
-            api.getServers().onSuccess { servers = it; Platform.runLater { showServersTab() } }
+            api.getServers()
+                .onSuccess { 
+                    servers = it
+                    if (selectedServer == null && servers.isNotEmpty()) {
+                        selectedServer = servers.first()
+                    }
+                    Platform.runLater { if (currentTab == "servers") showServersTab() } 
+                }
+                .onFailure {
+                    // Fallback: Default to the local network server
+                    // Это "Нормальный вариант": сервер прописан по умолчанию
+                    val cfg = ConfigManager.config
+                    servers = listOf(
+                        Server("1", "AXIOM Server (Local)", cfg.serverAddress, cfg.serverPort, "default", true)
+                    )
+                    selectedServer = servers.first()
+                    Platform.runLater { if (currentTab == "servers") showServersTab() }
+                }
             api.getNews().onSuccess { newsList = it }
         }
     }
@@ -443,10 +519,11 @@ class LauncherApp : Application() {
         status.text = "Запуск сервера..."
         scope.launch {
             val process = withContext(Dispatchers.IO) {
-                ProcessBuilder("bash", script.absolutePath)
+                val builder = ProcessBuilder("bash", script.absolutePath)
                     .directory(script.parentFile)
                     .redirectErrorStream(true)
-                    .start()
+                com.axiom.launcher.ServerStartEnv.apply(builder)
+                builder.start()
             }
             serverProcess = process
             Platform.runLater { status.text = "Сервер запускается..." }
@@ -457,6 +534,39 @@ class LauncherApp : Application() {
                 btn.isDisable = false
             }
         }
+    }
+
+    private fun startLocalServerAuto(status: Label): Boolean {
+        val existing = serverProcess
+        if (existing != null && existing.isAlive) {
+            status.text = "Сервер уже запущен."
+            return false
+        }
+
+        val script = resolveServerStartScript()
+        if (script == null) {
+            status.text = "Скрипт запуска сервера не найден."
+            return false
+        }
+
+        status.text = "Запуск сервера..."
+        scope.launch {
+            val process = withContext(Dispatchers.IO) {
+                val builder = ProcessBuilder("bash", script.absolutePath)
+                    .directory(script.parentFile)
+                    .redirectErrorStream(true)
+                com.axiom.launcher.ServerStartEnv.apply(builder)
+                builder.start()
+            }
+            serverProcess = process
+            Platform.runLater { status.text = "Сервер запускается..." }
+
+            scope.launch {
+                val code = withContext(Dispatchers.IO) { process.waitFor() }
+                Platform.runLater { status.text = "Сервер остановлен (код $code)" }
+            }
+        }
+        return true
     }
 
     private fun resolveServerStartScript(): File? {
@@ -493,6 +603,14 @@ class LauncherApp : Application() {
                 else { err.text = r.message; btn.text = "Создать аккаунт"; btn.isDisable = false }
             }}.onFailure { Platform.runLater { err.text = "Ошибка"; btn.text = "Создать аккаунт"; btn.isDisable = false } }
         }
+    }
+
+    private fun doOfflineLogin(login: String, err: Label) {
+        if (login.isBlank()) { err.text = "Введите логин"; return }
+        val offlineUser = User(0, login, "OFFLINE")
+        currentUser = offlineUser
+        ConfigManager.update { copy(token = "OFFLINE", lastUser = login) }
+        showMainView()
     }
     
     private fun logout() { ConfigManager.update { copy(token = null, lastUser = null) }; api.setToken(null); currentUser = null; selectedServer = null; showLoginView() }

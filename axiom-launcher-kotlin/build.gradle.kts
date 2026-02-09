@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "1.9.22"
     application
     id("org.openjfx.javafxplugin") version "0.1.0"
+    id("edu.sc.seis.launch4j") version "3.0.5"
 }
 
 group = "com.axiom"
@@ -10,6 +11,17 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
+}
+
+launch4j {
+    mainClassName.set("com.axiom.launcher.MainKt")
+    outfile.set("AxiomLauncher.exe")
+    headerType.set("gui") // <--- Changed from "console" to "gui"
+    bundledJrePath.set("runtime") 
+    jreMinVersion.set("17")
+    errTitle.set("Axiom Launcher Error")
+    downloadUrl.set("https://adoptium.net/temurin/releases/")
+    supportUrl.set("https://github.com/An0nimVTA/axiom-project")
 }
 
 javafx {
@@ -33,6 +45,18 @@ dependencies {
     // Logging
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     implementation("ch.qos.logback:logback-classic:1.4.14")
+
+    // Cross-platform JavaFX
+    val javafxVersion = "21"
+    val javafxModules = listOf("base", "controls", "fxml", "graphics", "media", "swing", "web")
+    
+    for (module in javafxModules) {
+        implementation("org.openjfx:javafx-$module:$javafxVersion:linux")
+        implementation("org.openjfx:javafx-$module:$javafxVersion:win")
+        implementation("org.openjfx:javafx-$module:$javafxVersion:mac")
+    }
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
 }
 
 application {
@@ -49,4 +73,8 @@ tasks.jar {
 
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.test {
+    useJUnitPlatform()
 }

@@ -1,13 +1,13 @@
 package com.axiom.test;
 
-import com.axiom.service.MilitaryServiceInterface;
+import com.axiom.domain.service.military.MilitaryServiceInterface;
 import com.axiom.service.adapter.MilitaryServiceAdapter;
-import com.axiom.repository.NationRepository;
-import com.axiom.repository.MilitaryRepository;
-import com.axiom.repository.impl.JsonNationRepository;
-import com.axiom.repository.impl.JsonMilitaryRepository;
-import com.axiom.model.Nation;
-import com.axiom.model.MilitaryData;
+import com.axiom.domain.repo.NationRepository;
+import com.axiom.domain.repo.MilitaryRepository;
+import com.axiom.infra.persistence.JsonNationRepository;
+import com.axiom.infra.persistence.JsonMilitaryRepository;
+import com.axiom.domain.model.Nation;
+import com.axiom.domain.model.MilitaryData;
 import com.axiom.AXIOM;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;

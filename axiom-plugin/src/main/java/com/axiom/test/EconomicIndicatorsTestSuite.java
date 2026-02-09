@@ -1,8 +1,8 @@
 package com.axiom.test;
 
 import com.axiom.AXIOM;
-import com.axiom.gui.EconomicIndicatorsMenu;
-import com.axiom.service.EconomicIndicatorsService;
+import com.axiom.app.gui.EconomicIndicatorsMenu;
+import com.axiom.domain.service.industry.EconomicIndicatorsService;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 

@@ -1,0 +1,24 @@
+{
+  "javaPath": "java",
+  "minRam": 2048,
+  "maxRam": 4096,
+  "gameDir": "minecraft",
+  "serverAddress": "localhost",
+  "serverPort": 25565,
+  "lastUser": "Autotest",
+  "serverStartPath": "/home/an0nimvta/axiom plugin/server/start.sh",
+  "autoLaunch": true,
+  "autoStartServer": true,
+  "autoStartServerDelayMs": 120000,
+  "autoUiTests": true,
+  "autoUiTestIncludeScreens": true,
+  "autoUiTestAutoStartDelayTicks": 200,
+  "autoUiTestStepDelayTicks": 10,
+  "autoUiTestCommandTimeoutTicks": 600,
+  "autoUiTestCommands": [
+    "/test",
+    "/testbot run",
+    "/stop"
+  ],
+  "autoUiTestCommandBlacklist": []
+}

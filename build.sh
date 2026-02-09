@@ -22,8 +22,9 @@ echo ""
 
 # 1. Plugin
 echo "1️⃣  Сборка AXIOM Plugin..."
+cd "$PROJECT_DIR/axiom-plugin"
+mvn clean package -DskipTests
 cd "$PROJECT_DIR"
-mvn clean package -DskipTests -q
 cp axiom-plugin/target/axiom-plugin-*.jar "$BUILD_DIR/$DATE/axiom-plugin.jar"
 echo "   ✅ Plugin собран"
 
@@ -37,9 +38,10 @@ echo "   ✅ UI Mod собран"
 # 3. Launcher
 echo "3️⃣  Сборка AXIOM Launcher..."
 cd "$PROJECT_DIR/axiom-launcher-kotlin"
-./gradlew clean build -x test -q
+./gradlew clean build createExe -x test -q
 cp build/libs/axiom-launcher-*.jar "$BUILD_DIR/$DATE/axiom-launcher.jar"
-echo "   ✅ Launcher собран"
+cp build/launch4j/AxiomLauncher.exe "$BUILD_DIR/$DATE/AxiomLauncher.exe"
+echo "   ✅ Launcher (JAR + EXE) собран"
 
 echo ""
 echo "📊 Результаты сборки:"

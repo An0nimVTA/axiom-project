@@ -1,145 +1,192 @@
 package com.axiom.balance;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 @Mod.EventBusSubscriber
 public class RecipeModifier {
     
-    // Новые крафты (автоматически применяются)
     private static final Map<String, RecipeChange> RECIPE_CHANGES = new HashMap<>();
     
     static {
-        // === ОРУЖЕЙНЫЕ МОДЫ - ЗАВИСЯТ ДРУГ ОТ ДРУГА ===
+        // === ПРИМЕРЫ ИЗМЕНЕНИЙ ===
         
-        // TACZ оружие требует детали из других модов
+        // TACZ AK-47 (tacz:ak47) - пример усложнения
+        // Стандартный крафт обычно проще. Мы заменяем его на список дорогих компонентов.
         RECIPE_CHANGES.put("tacz:ak47", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:8", "pointblank:gun_parts:2", 
-                         "ballistix:barrel:1", "caps:tactical_grip:1"),
+            Arrays.asList(
+                "minecraft:iron_block", "pointblank:gun_parts", "minecraft:iron_block",
+                "ballistix:barrel", "caps:tactical_grip", "ballistix:barrel",
+                "minecraft:iron_ingot", "pointblank:gun_parts", "minecraft:iron_ingot"
+            ),
             "Требует детали из Point Blank, Ballistix, CAPS"
         ));
         
-        RECIPE_CHANGES.put("tacz:m4a1", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:6", "pointblank:gun_parts:2",
-                         "ballistix:scope:1", "caps:tactical_stock:1"),
-            "Требует детали из Point Blank, Ballistix, CAPS"
-        ));
-        
-        // Point Blank оружие требует детали из других модов
-        RECIPE_CHANGES.put("pointblank:ak47", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:8", "tacz:gun_parts:2",
-                         "ballistix:barrel:1", "superbwarfare:weapon_parts:1"),
-            "Требует детали из TACZ, Ballistix, Superb Warfare"
-        ));
-        
-        // Ballistix оружие требует детали из других модов
-        RECIPE_CHANGES.put("ballistix:rifle", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:6", "tacz:gun_parts:2",
-                         "pointblank:scope:1", "caps:tactical_rail:1"),
-            "Требует детали из TACZ, Point Blank, CAPS"
-        ));
-        
-        // === ПАТРОНЫ - ТРЕБУЮТ ДЕТАЛИ ИЗ РАЗНЫХ МОДОВ ===
-        
-        RECIPE_CHANGES.put("tacz:ammo_556", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:1", "minecraft:gunpowder:1", 
-                         "minecraft:copper_ingot:2", "pointblank:casing:1"),
-            "Требует гильзы из Point Blank"
-        ));
-        
-        RECIPE_CHANGES.put("pointblank:ammo_762", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:2", "minecraft:gunpowder:2",
-                         "minecraft:copper_ingot:2", "ballistix:primer:1"),
-            "Требует капсюль из Ballistix"
-        ));
-        
-        // === ТЕХНИЧЕСКИЕ МОДЫ - ЗАВИСЯТ ДРУГ ОТ ДРУГА ===
-        
-        // Immersive Engineering требует детали из AE2 и Industrial
-        RECIPE_CHANGES.put("immersiveengineering:crusher", new RecipeChange(
-            Arrays.asList("minecraft:iron_block:4", "minecraft:piston:2",
-                         "appliedenergistics2:engineering_processor:1",
-                         "industrialupgrade:electric_motor:2"),
+        // Пример для Immersive Engineering
+        RECIPE_CHANGES.put("immersiveengineering:crafting/crusher", new RecipeChange(
+            Arrays.asList(
+                "minecraft:iron_block", "industrialupgrade:electric_motor", "minecraft:iron_block",
+                "minecraft:piston", "appliedenergistics2:engineering_processor", "minecraft:piston",
+                "minecraft:copper_block", "industrialupgrade:electric_motor", "minecraft:copper_block"
+            ),
             "Требует процессор из AE2 и мотор из Industrial"
-        ));
-        
-        RECIPE_CHANGES.put("immersiveengineering:arc_furnace", new RecipeChange(
-            Arrays.asList("minecraft:iron_block:8", "immersiveengineering:heavy_engineering:2",
-                         "appliedenergistics2:energy_cell:1",
-                         "industrialupgrade:heat_conductor:2"),
-            "Требует энергоячейку из AE2 и проводник из Industrial"
-        ));
-        
-        // Applied Energistics 2 требует детали из IE и Industrial
-        RECIPE_CHANGES.put("appliedenergistics2:controller", new RecipeChange(
-            Arrays.asList("appliedenergistics2:smooth_sky_stone_block:4",
-                         "immersiveengineering:component_steel:2",
-                         "industrialupgrade:advanced_circuit:2",
-                         "minecraft:diamond:4"),
-            "Требует сталь из IE и схемы из Industrial"
-        ));
-        
-        RECIPE_CHANGES.put("appliedenergistics2:drive", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:8", "appliedenergistics2:engineering_processor:2",
-                         "immersiveengineering:wirecoil:2",
-                         "industrialupgrade:electric_motor:1"),
-            "Требует катушки из IE и мотор из Industrial"
-        ));
-        
-        // Industrial Upgrade требует детали из IE и AE2
-        RECIPE_CHANGES.put("industrialupgrade:electric_furnace", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:8", "minecraft:furnace:1",
-                         "immersiveengineering:coil:2",
-                         "appliedenergistics2:quartz_glass:4"),
-            "Требует катушки из IE и стекло из AE2"
-        ));
-        
-        RECIPE_CHANGES.put("industrialupgrade:advanced_machine", new RecipeChange(
-            Arrays.asList("minecraft:iron_block:4", "industrialupgrade:basic_machine:1",
-                         "immersiveengineering:component_steel:4",
-                         "appliedenergistics2:calculation_processor:2"),
-            "Требует сталь из IE и процессор из AE2"
-        ));
-        
-        // === ОРУЖИЕ + ТЕХНИКА - ВЗАИМОСВЯЗЬ ===
-        
-        // Продвинутое оружие требует технические детали
-        RECIPE_CHANGES.put("tacz:awp", new RecipeChange(
-            Arrays.asList("minecraft:iron_ingot:12", "tacz:gun_parts:4",
-                         "immersiveengineering:component_steel:2",
-                         "appliedenergistics2:engineering_processor:1",
-                         "ballistix:precision_barrel:1"),
-            "Снайперка требует сталь из IE и процессор из AE2"
-        ));
-        
-        RECIPE_CHANGES.put("superbwarfare:machine_gun", new RecipeChange(
-            Arrays.asList("minecraft:iron_block:2", "superbwarfare:weapon_parts:4",
-                         "immersiveengineering:heavy_engineering:1",
-                         "industrialupgrade:electric_motor:1"),
-            "Пулемёт требует детали из IE и Industrial"
         ));
     }
     
     @SubscribeEvent
-    public static void onReload(AddReloadListenerEvent event) {
-        // Применить изменения крафтов при загрузке
-        applyRecipeChanges();
+    public static void onServerStarting(ServerAboutToStartEvent event) {
+        System.out.println("[AXIOM Balance] Перехват и модификация рецептов...");
+        modifyRecipes(event.getServer().getRecipeManager());
+    }
+
+    private static void modifyRecipes(RecipeManager recipeManager) {
+        try {
+            Map<ResourceLocation, Recipe<?>> recipesMap = resolveRecipesMap(recipeManager);
+            if (recipesMap.isEmpty()) {
+                System.err.println("[AXIOM Balance] Не удалось получить карту рецептов из RecipeManager");
+                return;
+            }
+
+            int modifiedCount = 0;
+
+            for (Map.Entry<String, RecipeChange> change : RECIPE_CHANGES.entrySet()) {
+                ResourceLocation recipeId = new ResourceLocation(change.getKey());
+                Recipe<?> oldRecipe = recipesMap.get(recipeId);
+                
+                if (oldRecipe instanceof ShapedRecipe shapedRecipe) {
+                    System.out.println("[AXIOM Balance] Патчим рецепт: " + recipeId);
+                    
+                    // 2. Создаем новый список ингредиентов (NonNullList)
+                    NonNullList<Ingredient> newIngredients = NonNullList.create();
+                    for (String itemId : change.getValue().ingredients) {
+                        newIngredients.add(createIngredient(itemId));
+                    }
+                    
+                    // Если размер нового списка не совпадает с размером рецепта (width * height),
+                    // то рецепт может сломаться или отображаться криво. 
+                    // Для надежности мы просто заменяем список ингредиентов.
+                    // В идеале нужно менять и width/height, но это сложнее. 
+                    // Предполагаем, что мы заменяем рецепт 3x3 на 3x3.
+                    
+                    // 3. Внедряем новые ингредиенты через Reflection
+                    try {
+                        // Поле 'recipeItems' или 'ingredients' в ShapedRecipe
+                        // Нужно найти правильное имя поля. В dev среде это 'recipeItems'.
+                        // В продакшене (Forge) это может быть f_44146_ (SRG)
+                        Field ingredientsField = null;
+                        
+                        // Пытаемся найти поле по типу
+                        for (Field f : ShapedRecipe.class.getDeclaredFields()) {
+                            if (f.getType() == NonNullList.class) {
+                                ingredientsField = f;
+                                break;
+                            }
+                        }
+                        
+                        if (ingredientsField != null) {
+                            ingredientsField.setAccessible(true);
+                            ingredientsField.set(shapedRecipe, newIngredients);
+                            System.out.println("   -> Успешно заменены ингредиенты");
+                            modifiedCount++;
+                        } else {
+                            System.err.println("   -> Ошибка: Не найдено поле ингредиентов в ShapedRecipe");
+                        }
+                        
+                    } catch (Exception e) {
+                        System.err.println("   -> Ошибка при замене полей: " + e.getMessage());
+                    }
+                    
+                } else {
+                    if (oldRecipe == null) {
+                        System.out.println("[AXIOM Balance] Рецепт не найден (возможно, мод не загружен): " + recipeId);
+                    } else {
+                        System.out.println("[AXIOM Balance] Рецепт не является ShapedRecipe (пропуск): " + recipeId + " (" + oldRecipe.getClass().getName() + ")");
+                    }
+                }
+            }
+            
+            System.out.println("[AXIOM Balance] Итог: Изменено " + modifiedCount + " рецептов.");
+            
+        } catch (Exception e) {
+            System.err.println("[AXIOM Balance] Критическая ошибка RecipeModifier: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static Map<ResourceLocation, Recipe<?>> resolveRecipesMap(RecipeManager recipeManager) {
+        try {
+            try {
+                var getRecipesMethod = RecipeManager.class.getMethod("getRecipes");
+                Object raw = getRecipesMethod.invoke(recipeManager);
+                Map<ResourceLocation, Recipe<?>> flattened = flattenRecipeMap(raw);
+                if (!flattened.isEmpty()) {
+                    return flattened;
+                }
+            } catch (Exception ignored) {
+            }
+
+            for (Field field : RecipeManager.class.getDeclaredFields()) {
+                if (!Map.class.isAssignableFrom(field.getType())) {
+                    continue;
+                }
+                field.setAccessible(true);
+                Object raw = field.get(recipeManager);
+                Map<ResourceLocation, Recipe<?>> flattened = flattenRecipeMap(raw);
+                if (!flattened.isEmpty()) {
+                    return flattened;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return Collections.emptyMap();
+    }
+
+    private static Map<ResourceLocation, Recipe<?>> flattenRecipeMap(Object raw) {
+        if (!(raw instanceof Map<?, ?> map)) {
+            return Collections.emptyMap();
+        }
+        Map<ResourceLocation, Recipe<?>> flattened = new HashMap<>();
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            Object key = entry.getKey();
+            Object value = entry.getValue();
+            if (key instanceof ResourceLocation && value instanceof Recipe) {
+                flattened.put((ResourceLocation) key, (Recipe<?>) value);
+                continue;
+            }
+            if (value instanceof Map<?, ?> nested) {
+                for (Map.Entry<?, ?> nestedEntry : nested.entrySet()) {
+                    Object nestedKey = nestedEntry.getKey();
+                    Object nestedValue = nestedEntry.getValue();
+                    if (nestedKey instanceof ResourceLocation && nestedValue instanceof Recipe) {
+                        flattened.put((ResourceLocation) nestedKey, (Recipe<?>) nestedValue);
+                    }
+                }
+            }
+        }
+        return flattened;
     }
     
-    private static void applyRecipeChanges() {
-        // Здесь мод автоматически изменяет крафты
-        // Это работает через Forge Recipe API
-        System.out.println("[AXIOM Balance] Применение изменённых крафтов...");
-        
-        for (Map.Entry<String, RecipeChange> entry : RECIPE_CHANGES.entrySet()) {
-            System.out.println("[AXIOM Balance] Изменён крафт: " + entry.getKey() + 
-                             " - " + entry.getValue().reason);
+    private static Ingredient createIngredient(String itemId) {
+        ResourceLocation id = new ResourceLocation(itemId);
+        Item item = ForgeRegistries.ITEMS.getValue(id);
+        if (item != null) {
+            return Ingredient.of(new ItemStack(item));
+        } else {
+            System.err.println("[AXIOM Balance] ОШИБКА: Предмет не найден: " + itemId);
+            return Ingredient.EMPTY; // Чтобы не крашить, возвращаем пустой
         }
     }
     

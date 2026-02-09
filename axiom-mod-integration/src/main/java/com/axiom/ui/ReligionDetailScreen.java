@@ -29,14 +29,14 @@ public class ReligionDetailScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.fill(0, 0, width, height, 0xFF000000);
+        UiTheme.drawBackdrop(guiGraphics, width, height);
 
-        guiGraphics.drawCenteredString(font, title, width / 2, 12, 0xFFFFFFFF);
+        guiGraphics.drawCenteredString(font, title, width / 2, 12, UiTheme.TEXT_PRIMARY);
 
         int y = 40;
         int x = 20;
         for (String line : card.getDetails()) {
-            guiGraphics.drawString(font, line, x, y, 0xFFFFFFFF, false);
+            guiGraphics.drawString(font, line, x, y, UiTheme.TEXT_PRIMARY, false);
             y += font.lineHeight + 4;
         }
 

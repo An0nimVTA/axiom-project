@@ -1,11 +1,11 @@
 package com.axiom.service.adapter;
 
 import com.axiom.AXIOM;
-import com.axiom.model.Nation;
-import com.axiom.service.EconomyService;
-import com.axiom.service.EconomyServiceInterface;
-import com.axiom.service.NationManager;
-import com.axiom.service.WalletService;
+import com.axiom.domain.model.Nation;
+import com.axiom.domain.service.industry.EconomyService;
+import com.axiom.domain.service.industry.EconomyServiceInterface;
+import com.axiom.domain.service.state.NationManager;
+import com.axiom.domain.service.industry.WalletService;
 import java.util.UUID;
 
 /**

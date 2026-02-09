@@ -1,7 +1,7 @@
 package com.axiom.service.adapter;
 
-import com.axiom.service.MilitaryService;
-import com.axiom.service.MilitaryServiceInterface;
+import com.axiom.domain.service.military.MilitaryService;
+import com.axiom.domain.service.military.MilitaryServiceInterface;
 import com.axiom.AXIOM;
 import java.util.Map;
 

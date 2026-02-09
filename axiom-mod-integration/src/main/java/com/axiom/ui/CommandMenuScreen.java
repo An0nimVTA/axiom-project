@@ -5,235 +5,223 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CommandMenuScreen extends Screen {
-    private final List<CommandCardWidget> cards = new ArrayList<>();
-    private CommandCategory selectedCategory = null;
-    private int scrollOffset = 0;
-    private final int CARD_SPACING = 10;
-    private final int CARDS_PER_PAGE = 5;
-    
-    private Button[] categoryButtons;
+    private int padding = 16;
+    private int searchY = 34;
+    private int filterHeight = 24;
+    private int filterGap = 8;
+    private int categoryWidth = 140;
+    private int categoryHeight = 52;
+    private int categoryGap = 10;
+    private int cardSpacing = 12;
+    private int footerHeight = 22;
+    private float layoutScale = 1.0f;
+
+    private final List<CardEntry> cardEntries = new ArrayList<>();
+    private final List<FilterEntry> filterEntries = new ArrayList<>();
+    private final List<FilterEntry> sortEntries = new ArrayList<>();
+    private final List<CategoryEntry> categoryEntries = new ArrayList<>();
+
+    private final CommandCategory initialCategory;
+    private CommandCategory selectedCategory;
+    private boolean showFavorites;
+    private boolean showHistory;
+    private SortMode sortMode = SortMode.ALPHA;
+
+    private int scrollOffset;
+    private int maxScroll;
+    private int commandsTop;
+    private int commandsBottom;
+    private int headerBottom;
+
     private Button backButton;
-    private Button favoritesButton;
-    private Button historyButton;
-    
     private CommandSearchWidget searchWidget;
     private final CommandHistory commandHistory = new CommandHistory();
-    
-    private boolean showFavorites = false;
-    private boolean showHistory = false;
-    
-    // Optimization: cache visible area
-    private int visibleAreaTop = 140;
-    private int visibleAreaBottom;
-    private long lastRenderTime = 0;
-    private static final long RENDER_THROTTLE = 16; // ~60 FPS
+
+    private enum SortMode {
+        ALPHA,
+        RARITY,
+        POPULAR,
+        RECENT
+    }
 
     public CommandMenuScreen() {
-        super(Component.literal("AXIOM - Команды плагина"));
+        this(null);
+    }
+
+    public CommandMenuScreen(CommandCategory initialCategory) {
+        super(UiText.text("AXIOM - Команды плагина", "AXIOM - Plugin Commands"));
+        this.initialCategory = initialCategory;
     }
 
     @Override
     protected void init() {
         super.init();
-        
-        // Search widget
-        searchWidget = new CommandSearchWidget(10, 45, 400, CommandCatalog.getAllCommands());
-        
-        // Category buttons (top row)
-        int btnWidth = 100;
-        int btnHeight = 25;
-        int startX = 10;
-        int y = 80;
-        
-        CommandCategory[] categories = CommandCategory.values();
-        categoryButtons = new Button[categories.length];
-        
-        for (int i = 0; i < categories.length; i++) {
-            CommandCategory cat = categories[i];
-            int x = startX + (i % 5) * (btnWidth + 5);
-            if (i > 0 && i % 5 == 0) {
-                y += btnHeight + 5;
-            }
-            
-            categoryButtons[i] = Button.builder(
-                Component.literal(cat.getDisplayName()),
-                (btn) -> selectCategory(cat)
-            )
-            .bounds(x, y, btnWidth, btnHeight)
-            .build();
-            
-            addRenderableWidget(categoryButtons[i]);
-        }
-        
-        // Back button
-        backButton = Button.builder(Component.literal("◀ Назад"), (btn) -> onClose())
-            .bounds(width - 110, 10, 100, 20)
+
+        layoutScale = UiLayout.scaleFor(width, height);
+        padding = UiLayout.scaled(18, layoutScale);
+        searchY = UiLayout.scaled(44, layoutScale);
+        filterHeight = UiLayout.scaled(24, layoutScale);
+        filterGap = UiLayout.scaled(8, layoutScale);
+        categoryWidth = UiLayout.scaled(150, layoutScale);
+        categoryHeight = UiLayout.scaled(54, layoutScale);
+        categoryGap = UiLayout.scaled(10, layoutScale);
+        cardSpacing = UiCardSizing.commandMenuGap(layoutScale);
+        footerHeight = UiLayout.scaled(24, layoutScale);
+
+        int searchWidth = Math.max(UiLayout.scaled(220, layoutScale),
+            Math.min(UiLayout.scaled(440, layoutScale), width - padding * 2 - UiLayout.scaled(140, layoutScale)));
+        searchWidget = new CommandSearchWidget(padding, searchY, searchWidth, CommandCatalog.getAllCommands());
+
+        backButton = Button.builder(UiText.text("Назад", "Back"), (btn) -> onClose())
+            .bounds(width - UiLayout.scaled(110, layoutScale), UiLayout.scaled(10, layoutScale),
+                UiLayout.scaled(100, layoutScale), UiLayout.scaled(20, layoutScale))
             .build();
         addRenderableWidget(backButton);
-        
-        // Favorites button
-        favoritesButton = Button.builder(Component.literal("★ Избранное"), (btn) -> toggleFavorites())
-            .bounds(width - 220, 10, 100, 20)
-            .build();
-        addRenderableWidget(favoritesButton);
-        
-        // History button
-        historyButton = Button.builder(Component.literal("🕐 История"), (btn) -> toggleHistory())
-            .bounds(width - 330, 10, 100, 20)
-            .build();
-        addRenderableWidget(historyButton);
-        
-        // Tech tree button
-        Button techTreeButton = Button.builder(Component.literal("🌳 Технологии"), (btn) -> {
-            Minecraft.getInstance().setScreen(new TechnologyTreeScreen(this));
-        })
-        .bounds(width - 440, 10, 100, 20)
-        .build();
-        addRenderableWidget(techTreeButton);
-        
-        // Stats button
-        Button statsButton = Button.builder(Component.literal("📊 Статистика"), (btn) -> {
-            Minecraft.getInstance().setScreen(new StatsOverlayScreen(this));
-        })
-        .bounds(width - 550, 10, 100, 20)
-        .build();
-        addRenderableWidget(statsButton);
-        
-        // Map button
-        Button mapButton = Button.builder(Component.literal("🗺️ Карта"), (btn) -> {
-            Minecraft.getInstance().setScreen(new NationMapScreen(this));
-        })
-        .bounds(width - 660, 10, 100, 20)
-        .build();
-        addRenderableWidget(mapButton);
-        
-        // Education button
-        Button educationButton = Button.builder(Component.literal("🎓 Образование"), (btn) -> {
-            Minecraft.getInstance().setScreen(new EducationScreen(this));
-        })
-        .bounds(width - 780, 10, 110, 20)
-        .build();
-        addRenderableWidget(educationButton);
-        
-        // Culture button
-        Button cultureButton = Button.builder(Component.literal("🎭 Культура"), (btn) -> {
-            Minecraft.getInstance().setScreen(new CultureScreen(this));
-        })
-        .bounds(width - 900, 10, 110, 20)
-        .build();
-        addRenderableWidget(cultureButton);
-        
-        // Ecology button
-        Button ecologyButton = Button.builder(Component.literal("🌿 Экология"), (btn) -> {
-            Minecraft.getInstance().setScreen(new EcologyScreen(this));
-        })
-        .bounds(width - 1020, 10, 110, 20)
-        .build();
-        addRenderableWidget(ecologyButton);
-        
-        // Espionage button
-        Button espionageButton = Button.builder(Component.literal("🕵️ Шпионаж"), (btn) -> {
-            Minecraft.getInstance().setScreen(new EspionageScreen(this));
-        })
-        .bounds(width - 1140, 10, 110, 20)
-        .build();
-        addRenderableWidget(espionageButton);
-        
-        // Analytics button
-        Button analyticsButton = Button.builder(Component.literal("📊 Аналитика"), (btn) -> {
-            Minecraft.getInstance().setScreen(new AnalyticsScreen(this));
-        })
-        .bounds(width - 1260, 10, 110, 20)
-        .build();
-        addRenderableWidget(analyticsButton);
-        
-        // Balance button
-        Button balanceButton = Button.builder(Component.literal("⚖️ Баланс"), (btn) -> {
-            Minecraft.getInstance().setScreen(new ItemBalanceScreen(this));
-        })
-        .bounds(width - 1380, 10, 110, 20)
-        .build();
-        addRenderableWidget(balanceButton);
-        
-        // Recipes button
-        Button recipesButton = Button.builder(Component.literal("📝 Крафты"), (btn) -> {
-            Minecraft.getInstance().setScreen(new RecipeEditorScreen(this));
-        })
-        .bounds(width - 1500, 10, 110, 20)
-        .build();
-        addRenderableWidget(recipesButton);
-        
-        // Load all commands by default
-        loadCommands(null);
+
+        selectedCategory = initialCategory;
+        showFavorites = false;
+        showHistory = false;
+
+        rebuildLayout();
+    }
+
+    private void rebuildLayout() {
+        int filtersTop = searchY + UiLayout.scaled(26, layoutScale);
+        int filtersBottom = layoutFilters(filtersTop);
+        int categoriesTop = filtersBottom + 8;
+        int categoriesBottom = layoutCategories(categoriesTop);
+
+        headerBottom = categoriesBottom + 4;
+        commandsTop = headerBottom + 10;
+        commandsBottom = height - footerHeight;
+
+        reloadCommands();
+    }
+
+    private int layoutFilters(int startY) {
+        filterEntries.clear();
+        sortEntries.clear();
+
+        int x = padding;
+        int y = startY;
+        int maxX = width - padding;
+
+        x = addFilterEntry(UiText.pick("Все", "All"), this::selectAll, x, y, maxX);
+        if (x < padding) {
+            y += filterHeight + filterGap;
+            x = padding;
+        }
+        x = addFilterEntry(UiText.pick("Избранное", "Favorites"), this::toggleFavorites, x, y, maxX);
+        if (x < padding) {
+            y += filterHeight + filterGap;
+            x = padding;
+        }
+        addFilterEntry(UiText.pick("История", "History"), this::toggleHistory, x, y, maxX);
+
+        int sortY = y + filterHeight + filterGap;
+        layoutSorts(sortY);
+
+        return sortY + filterHeight;
+    }
+
+    private void layoutSorts(int y) {
+        int x = padding;
+        int maxX = width - padding;
+        x = addSortEntry(UiText.pick("A-Я", "A-Z"), SortMode.ALPHA, x, y, maxX);
+        if (x < padding) {
+            y += filterHeight + filterGap;
+            x = padding;
+        }
+        x = addSortEntry(UiText.pick("Редкость", "Rarity"), SortMode.RARITY, x, y, maxX);
+        if (x < padding) {
+            y += filterHeight + filterGap;
+            x = padding;
+        }
+        x = addSortEntry(UiText.pick("Популярные", "Popular"), SortMode.POPULAR, x, y, maxX);
+        if (x < padding) {
+            y += filterHeight + filterGap;
+            x = padding;
+        }
+        addSortEntry(UiText.pick("Недавние", "Recent"), SortMode.RECENT, x, y, maxX);
+    }
+
+    private int addSortEntry(String label, SortMode mode, int x, int y, int maxX) {
+        int widthNeeded = Math.max(UiLayout.scaled(48, layoutScale), font.width(label) + UiLayout.scaled(16, layoutScale));
+        if (x + widthNeeded > maxX) {
+            return -1;
+        }
+        sortEntries.add(new FilterEntry(label, () -> setSortMode(mode), x, y, widthNeeded, filterHeight));
+        return x + widthNeeded + filterGap;
+    }
+
+    private int addFilterEntry(String label, Runnable action, int x, int y, int maxX) {
+        int widthNeeded = Math.max(UiLayout.scaled(40, layoutScale), font.width(label) + UiLayout.scaled(16, layoutScale));
+        if (x + widthNeeded > maxX) {
+            return -1;
+        }
+        filterEntries.add(new FilterEntry(label, action, x, y, widthNeeded, filterHeight));
+        return x + widthNeeded + filterGap;
+    }
+
+    private int layoutCategories(int startY) {
+        categoryEntries.clear();
+
+        CommandCategory[] categories = CommandCategory.values();
+        int availableWidth = Math.max(0, width - padding * 2);
+        int columns = Math.max(1, Math.min(4, (availableWidth + categoryGap) / (categoryWidth + categoryGap)));
+        int rows = (int) Math.ceil(categories.length / (double) columns);
+
+        int totalWidth = columns * categoryWidth + (columns - 1) * categoryGap;
+        int startX = Math.max(padding, (width - totalWidth) / 2);
+
+        for (int i = 0; i < categories.length; i++) {
+            int col = i % columns;
+            int row = i / columns;
+            int x = startX + col * (categoryWidth + categoryGap);
+            int y = startY + row * (categoryHeight + categoryGap);
+            categoryEntries.add(new CategoryEntry(categories[i], x, y, categoryWidth, categoryHeight));
+        }
+
+        int totalHeight = rows * categoryHeight + Math.max(0, rows - 1) * categoryGap;
+        return startY + totalHeight;
+    }
+
+    private void selectAll() {
+        selectedCategory = null;
+        showFavorites = false;
+        showHistory = false;
+        scrollOffset = 0;
+        reloadCommands();
     }
 
     private void toggleFavorites() {
         showFavorites = !showFavorites;
         showHistory = false;
-        scrollOffset = 0;
-        
         if (showFavorites) {
-            loadFavoriteCommands();
-        } else {
-            loadCommands(selectedCategory);
+            selectedCategory = null;
         }
+        scrollOffset = 0;
+        reloadCommands();
     }
 
     private void toggleHistory() {
         showHistory = !showHistory;
         showFavorites = false;
-        scrollOffset = 0;
-        
         if (showHistory) {
-            loadHistoryCommands();
-        } else {
-            loadCommands(selectedCategory);
+            selectedCategory = null;
         }
-    }
-
-    private void loadFavoriteCommands() {
-        cards.clear();
-        List<String> favoriteIds = commandHistory.getFavorites();
-        List<CommandInfo> allCommands = CommandCatalog.getAllCommands();
-        
-        int cardY = 140;
-        for (String favId : favoriteIds) {
-            CommandInfo cmd = allCommands.stream()
-                .filter(c -> c.getCommand().equals(favId))
-                .findFirst()
-                .orElse(null);
-            
-            if (cmd != null) {
-                CommandCardWidget card = createCard(cmd, cardY);
-                cards.add(card);
-                cardY += CommandCardWidget.HEIGHT + CARD_SPACING;
-            }
-        }
-    }
-
-    private void loadHistoryCommands() {
-        cards.clear();
-        List<CommandHistory.HistoryEntry> historyEntries = commandHistory.getHistory();
-        List<CommandInfo> allCommands = CommandCatalog.getAllCommands();
-        
-        int cardY = 140;
-        for (CommandHistory.HistoryEntry entry : historyEntries) {
-            CommandInfo cmd = allCommands.stream()
-                .filter(c -> c.getCommand().equals(entry.command))
-                .findFirst()
-                .orElse(null);
-            
-            if (cmd != null) {
-                CommandCardWidget card = createCard(cmd, cardY);
-                cards.add(card);
-                cardY += CommandCardWidget.HEIGHT + CARD_SPACING;
-            }
-        }
+        scrollOffset = 0;
+        reloadCommands();
     }
 
     private void selectCategory(CommandCategory category) {
@@ -241,36 +229,150 @@ public class CommandMenuScreen extends Screen {
         showFavorites = false;
         showHistory = false;
         scrollOffset = 0;
-        loadCommands(category);
+        reloadCommands();
+    }
+
+    private void setSortMode(SortMode mode) {
+        sortMode = mode == null ? SortMode.ALPHA : mode;
+        scrollOffset = 0;
+        reloadCommands();
+    }
+
+    private void reloadCommands() {
+        if (showFavorites) {
+            loadFavoriteCommands();
+        } else if (showHistory) {
+            loadHistoryCommands();
+        } else {
+            loadCommands(selectedCategory);
+        }
+    }
+
+    private void loadFavoriteCommands() {
+        List<String> favoriteIds = commandHistory.getFavorites();
+        List<CommandInfo> allCommands = CommandCatalog.getAllCommands();
+        List<CommandInfo> commands = new ArrayList<>();
+
+        for (String favId : favoriteIds) {
+            for (CommandInfo cmd : allCommands) {
+                if (cmd.getCommand().equals(favId)) {
+                    commands.add(cmd);
+                    break;
+                }
+            }
+        }
+
+        buildCardEntries(applySort(applySearchFilter(commands)));
+    }
+
+    private void loadHistoryCommands() {
+        List<CommandHistory.HistoryEntry> historyEntries = commandHistory.getHistory();
+        List<CommandInfo> allCommands = CommandCatalog.getAllCommands();
+        List<CommandInfo> commands = new ArrayList<>();
+
+        for (CommandHistory.HistoryEntry entry : historyEntries) {
+            for (CommandInfo cmd : allCommands) {
+                if (cmd.getCommand().equals(entry.command)) {
+                    commands.add(cmd);
+                    break;
+                }
+            }
+        }
+
+        buildCardEntries(applySort(applySearchFilter(commands)));
     }
 
     private void loadCommands(CommandCategory category) {
-        cards.clear();
-        
         List<CommandInfo> commands = searchWidget.getFilteredCommands();
         if (category != null) {
             commands = commands.stream()
                 .filter(cmd -> cmd.getCategory() == category)
                 .toList();
         }
-        
-        int cardY = 140;
-        for (CommandInfo cmd : commands) {
-            CommandCardWidget card = createCard(cmd, cardY);
-            cards.add(card);
-            cardY += CommandCardWidget.HEIGHT + CARD_SPACING;
-        }
+        buildCardEntries(applySort(commands));
     }
 
-    private CommandCardWidget createCard(CommandInfo cmd, int cardY) {
-        CommandCardWidget card = new CommandCardWidget(
-            20, cardY, cmd,
-            () -> executeCommand(cmd),
-            () -> showDetails(cmd),
-            () -> toggleFavorite(cmd)
-        );
-        card.setFavorite(commandHistory.isFavorite(cmd.getCommand()));
-        return card;
+    private List<CommandInfo> applySort(List<CommandInfo> commands) {
+        List<CommandInfo> sorted = new ArrayList<>(commands);
+        switch (sortMode) {
+            case RARITY -> sorted.sort((a, b) -> Integer.compare(b.getRarity().ordinal(), a.getRarity().ordinal()));
+            case POPULAR -> sorted.sort((a, b) -> {
+                int ua = commandHistory.getUseCount(a.getCommand());
+                int ub = commandHistory.getUseCount(b.getCommand());
+                if (ua != ub) return Integer.compare(ub, ua);
+                return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+            });
+            case RECENT -> sorted.sort((a, b) -> {
+                int ia = indexInHistory(a.getCommand());
+                int ib = indexInHistory(b.getCommand());
+                if (ia != ib) return Integer.compare(ia, ib);
+                return a.getDisplayName().compareToIgnoreCase(b.getDisplayName());
+            });
+            case ALPHA -> sorted.sort((a, b) -> a.getDisplayName().compareToIgnoreCase(b.getDisplayName()));
+            default -> {
+            }
+        }
+        return sorted;
+    }
+
+    private int indexInHistory(String commandId) {
+        List<CommandHistory.HistoryEntry> history = commandHistory.getHistory();
+        for (int i = 0; i < history.size(); i++) {
+            if (history.get(i).command.equals(commandId)) {
+                return i;
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
+
+    private List<CommandInfo> applySearchFilter(List<CommandInfo> commands) {
+        String query = searchWidget.getSearchField().getValue();
+        if (query == null || query.isBlank()) {
+            return commands;
+        }
+        Set<CommandInfo> allowed = new HashSet<>(searchWidget.getFilteredCommands());
+        return commands.stream().filter(allowed::contains).toList();
+    }
+
+    private void buildCardEntries(List<CommandInfo> commands) {
+        cardEntries.clear();
+
+        int availableWidth = Math.max(0, width - padding * 2);
+        int cardWidth = UiCardSizing.commandMenuCardWidth(layoutScale, availableWidth);
+        int cardHeight = UiCardSizing.commandMenuCardHeight(layoutScale);
+        int columns = Math.max(1, (availableWidth + cardSpacing) / (cardWidth + cardSpacing));
+        int totalWidth = columns * cardWidth + (columns - 1) * cardSpacing;
+        int startX = Math.max(padding, (width - totalWidth) / 2);
+
+        for (int i = 0; i < commands.size(); i++) {
+            int col = i % columns;
+            int row = i / columns;
+            int x = startX + col * (cardWidth + cardSpacing);
+            int y = commandsTop + row * (cardHeight + cardSpacing);
+
+            CommandInfo cmd = commands.get(i);
+            CommandCardWidget card = new CommandCardWidget(
+                x, y, cardWidth, cardHeight, cmd,
+                () -> executeCommand(cmd),
+                () -> executeCommand(cmd),
+                () -> toggleFavorite(cmd)
+            );
+            card.setFavorite(commandHistory.isFavorite(cmd.getCommand()));
+            cardEntries.add(new CardEntry(card, x, y));
+        }
+
+        int rows = (int) Math.ceil(commands.size() / (double) columns);
+        int totalHeight = rows * cardHeight + Math.max(0, rows - 1) * cardSpacing;
+        int viewHeight = Math.max(0, commandsBottom - commandsTop);
+        maxScroll = Math.max(0, totalHeight - viewHeight);
+        scrollOffset = Mth.clamp(scrollOffset, 0, maxScroll);
+        applyScroll();
+    }
+
+    private void applyScroll() {
+        for (CardEntry entry : cardEntries) {
+            entry.card.setPosition(entry.baseX, entry.baseY - scrollOffset);
+        }
     }
 
     private void toggleFavorite(CommandInfo cmd) {
@@ -281,114 +383,195 @@ public class CommandMenuScreen extends Screen {
             commandHistory.addFavorite(cmd.getCommand());
             NotificationManager.getInstance().success("Добавлено в избранное: " + cmd.getDisplayName());
         }
-        // Refresh if showing favorites
         if (showFavorites) {
             loadFavoriteCommands();
         }
     }
 
     private void executeCommand(CommandInfo cmd) {
-        // Add to history
         commandHistory.addToHistory(cmd.getCommand());
-        
-        // Show notification
         NotificationManager.getInstance().info("Выполнение: " + cmd.getDisplayName());
-        
-        // Open command input screen with pre-filled command
-        Minecraft.getInstance().setScreen(new CommandInputScreen(this, cmd));
+        if (Minecraft.getInstance().player != null) {
+            Minecraft.getInstance().player.connection.sendCommand(cmd.getCommand());
+        }
+        Minecraft.getInstance().setScreen(null);
     }
 
     private void showDetails(CommandInfo cmd) {
-        // Open detailed info screen
-        Minecraft.getInstance().setScreen(new CommandDetailScreen(this, cmd));
-    }
-
-    private void openSearch() {
-        searchWidget.setFocused(true);
+        executeCommand(cmd);
     }
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        // Throttle rendering for performance
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastRenderTime < RENDER_THROTTLE) {
-            super.render(gfx, mouseX, mouseY, partialTick);
-            return;
-        }
-        lastRenderTime = currentTime;
-        
-        // Dark background
-        renderBackground(gfx);
-        
-        // Title
-        String titleText = showFavorites ? "★ Избранные команды" : 
-                          showHistory ? "🕐 История команд" : 
-                          "AXIOM - Команды плагина";
-        gfx.drawCenteredString(font, titleText, width / 2, 15, 0xFFFFFFFF);
-        
-        // Search widget
-        searchWidget.render(gfx, mouseX, mouseY, partialTick);
-        
-        // Category description
-        if (selectedCategory != null && !showFavorites && !showHistory) {
-            String desc = "§7" + selectedCategory.getDescription();
-            gfx.drawCenteredString(font, Component.literal(desc), width / 2, 65, 0xFFAAAAAA);
-        } else if (showFavorites) {
-            gfx.drawCenteredString(font, Component.literal("§7Ваши избранные команды"), width / 2, 65, 0xFFAAAAAA);
+        UiTheme.drawBackdrop(gfx, width, height);
+
+        gfx.fill(0, 0, width, 38, UiTheme.PANEL);
+        gfx.fill(0, 36, width, 38, UiTheme.PANEL_BORDER);
+        gfx.drawCenteredString(font, title, width / 2, 10, UiTheme.TEXT_PRIMARY);
+
+        String subtitle = UiText.pick("Все команды плагина", "All plugin commands");
+        if (showFavorites) {
+            subtitle = UiText.pick("Избранные команды", "Favorite commands");
         } else if (showHistory) {
-            gfx.drawCenteredString(font, Component.literal("§7Последние использованные команды"), width / 2, 65, 0xFFAAAAAA);
-        } else {
-            gfx.drawCenteredString(font, Component.literal("§7Все команды плагина"), width / 2, 65, 0xFFAAAAAA);
+            subtitle = UiText.pick("История команд", "Command history");
+        } else if (selectedCategory != null) {
+            subtitle = selectedCategory.getDescription();
         }
-        
-        // Render cards with scrolling and culling
-        visibleAreaBottom = height - 50;
-        gfx.enableScissor(0, visibleAreaTop, width, visibleAreaBottom);
-        
-        // Only render visible cards (culling)
-        for (CommandCardWidget card : cards) {
-            int cardY = card.getY();
-            if (cardY + CommandCardWidget.HEIGHT >= visibleAreaTop && cardY <= visibleAreaBottom) {
-                card.render(gfx, mouseX, mouseY, partialTick);
+        gfx.drawCenteredString(font, Component.literal("§7" + subtitle), width / 2, 24, UiTheme.TEXT_MUTED);
+
+        int panelLeft = Math.max(0, padding - 10);
+        int panelRight = Math.min(width, width - padding + 10);
+        int panelTop = searchY - 10;
+        int panelBottom = Math.min(height - footerHeight, headerBottom);
+        UiTheme.drawPanel(gfx, panelLeft, panelTop, panelRight, panelBottom);
+
+        searchWidget.render(gfx, mouseX, mouseY, partialTick);
+
+        renderFilters(gfx, mouseX, mouseY);
+        renderSorts(gfx, mouseX, mouseY);
+        renderCategories(gfx, mouseX, mouseY);
+
+        int top = commandsTop;
+        int bottom = commandsBottom;
+        CommandCardWidget hoveredCard = null;
+        gfx.enableScissor(0, top, width, bottom);
+        for (CardEntry entry : cardEntries) {
+            int drawY = entry.baseY - scrollOffset;
+            if (drawY + entry.card.getHeight() < top || drawY > bottom) {
+                continue;
+            }
+            entry.card.render(gfx, mouseX, mouseY, partialTick);
+            if (hoveredCard == null && entry.card.isHovered(mouseX, mouseY)) {
+                hoveredCard = entry.card;
             }
         }
-        
         gfx.disableScissor();
-        
-        // Scroll indicator
-        if (cards.size() > CARDS_PER_PAGE) {
-            String scrollText = String.format("§7Команд: %d | Прокрутка: колесо мыши", cards.size());
-            gfx.drawCenteredString(font, Component.literal(scrollText), width / 2, height - 30, 0xFF888888);
+
+        if (cardEntries.isEmpty()) {
+            gfx.drawCenteredString(font, Component.literal(UiText.pick("Нет команд", "No commands")), width / 2, commandsTop + 12, 0xFFCCCCCC);
         }
-        
-        // Stats footer
-        String stats = String.format("§7Всего команд: %d | Избранных: %d | История: %d", 
+
+        String statsTemplate = UiText.pick("Команд: %d | Избранных: %d | История: %d",
+            "Commands: %d | Favorites: %d | History: %d");
+        String stats = String.format(statsTemplate,
             CommandCatalog.getAllCommands().size(),
             commandHistory.getFavorites().size(),
             commandHistory.getHistory().size());
-        gfx.drawString(font, stats, 10, height - 15, 0xFF666666, false);
-        
+        gfx.drawString(font, stats, padding, height - 14, UiTheme.TEXT_DIM, false);
+
+        String hint = UiText.pick("Клик по карточке — выполнить", "Click card to run");
+        gfx.drawString(font, hint, width - padding - font.width(hint), height - 14, 0xFF5F6A76, false);
+
+        if (hoveredCard != null) {
+            CommandInfo cmd = hoveredCard.getCommand();
+            List<Component> tooltip = new ArrayList<>();
+            tooltip.add(Component.literal(cmd.getDisplayName()));
+            tooltip.add(Component.literal("§7/" + cmd.getCommand()));
+            if (cmd.getShortDesc() != null && !cmd.getShortDesc().isBlank()) {
+                tooltip.add(Component.literal("§8" + cmd.getShortDesc()));
+            }
+            gfx.renderTooltip(font, tooltip, java.util.Optional.empty(), mouseX, mouseY);
+        }
+
         super.render(gfx, mouseX, mouseY, partialTick);
-        
-        // Clear expired cache periodically
-        if (currentTime % 5000 < RENDER_THROTTLE) {
-            RenderCache.getInstance().clearExpired();
+    }
+
+    private void renderFilters(GuiGraphics gfx, int mouseX, int mouseY) {
+        for (FilterEntry entry : filterEntries) {
+            boolean hovered = entry.contains(mouseX, mouseY);
+            boolean active = isFilterActive(entry.label);
+            int base = active ? UiTheme.BUTTON_BG_ACTIVE : UiTheme.BUTTON_BG;
+            int border = hovered ? 0xFFFFFFFF : (active ? UiTheme.ACCENT : UiTheme.BUTTON_BORDER);
+            gfx.fill(entry.x, entry.y, entry.x + entry.width, entry.y + entry.height, base);
+            gfx.renderOutline(entry.x, entry.y, entry.width, entry.height, border);
+            if (active) {
+                gfx.fill(entry.x + 2, entry.y + 2, entry.x + entry.width - 2, entry.y + 4, UiTheme.ACCENT);
+            }
+            int textX = entry.x + (entry.width - font.width(entry.label)) / 2;
+            gfx.drawString(font, entry.label, textX, entry.y + 7, active ? UiTheme.TEXT_PRIMARY : 0xFFBEC7D1, false);
+        }
+    }
+
+    private void renderSorts(GuiGraphics gfx, int mouseX, int mouseY) {
+        for (FilterEntry entry : sortEntries) {
+            boolean hovered = entry.contains(mouseX, mouseY);
+            boolean active = isSortActive(entry.label);
+            int base = active ? UiTheme.BUTTON_BG_ACTIVE : UiTheme.BUTTON_BG;
+            int border = hovered ? 0xFFFFFFFF : (active ? UiTheme.ACCENT : UiTheme.BUTTON_BORDER);
+            gfx.fill(entry.x, entry.y, entry.x + entry.width, entry.y + entry.height, base);
+            gfx.renderOutline(entry.x, entry.y, entry.width, entry.height, border);
+            if (active) {
+                gfx.fill(entry.x + 2, entry.y + 2, entry.x + entry.width - 2, entry.y + 4, UiTheme.ACCENT);
+            }
+            int textX = entry.x + (entry.width - font.width(entry.label)) / 2;
+            gfx.drawString(font, entry.label, textX, entry.y + 7, active ? UiTheme.TEXT_PRIMARY : 0xFFBEC7D1, false);
+        }
+    }
+
+    private boolean isSortActive(String label) {
+        String alpha = UiText.pick("A-Я", "A-Z");
+        String rarity = UiText.pick("Редкость", "Rarity");
+        String popular = UiText.pick("Популярные", "Popular");
+        String recent = UiText.pick("Недавние", "Recent");
+        if (label.equals(alpha)) {
+            return sortMode == SortMode.ALPHA;
+        }
+        if (label.equals(rarity)) {
+            return sortMode == SortMode.RARITY;
+        }
+        if (label.equals(popular)) {
+            return sortMode == SortMode.POPULAR;
+        }
+        if (label.equals(recent)) {
+            return sortMode == SortMode.RECENT;
+        }
+        return false;
+    }
+
+    private boolean isFilterActive(String label) {
+        String all = UiText.pick("Все", "All");
+        String fav = UiText.pick("Избранное", "Favorites");
+        String hist = UiText.pick("История", "History");
+        if (label.equals(all)) {
+            return !showFavorites && !showHistory && selectedCategory == null;
+        }
+        if (label.equals(fav)) {
+            return showFavorites;
+        }
+        if (label.equals(hist)) {
+            return showHistory;
+        }
+        return false;
+    }
+
+    private void renderCategories(GuiGraphics gfx, int mouseX, int mouseY) {
+        for (CategoryEntry entry : categoryEntries) {
+            boolean hovered = entry.contains(mouseX, mouseY);
+            boolean active = entry.category == selectedCategory && !showFavorites && !showHistory;
+
+            int base = hovered ? UiTheme.CARD_BG_MINIMAL_HOVER : UiTheme.CARD_BG_MINIMAL;
+            int border = active ? UiTheme.ACCENT : UiTheme.CARD_BORDER_MINIMAL;
+            gfx.fill(entry.x, entry.y, entry.x + entry.width, entry.y + entry.height, base);
+            gfx.fill(entry.x, entry.y, entry.x + 3, entry.y + entry.height, entry.category.getColor());
+            gfx.renderOutline(entry.x, entry.y, entry.width, entry.height, border);
+
+            ItemStack icon = UiIcons.resolveItem(entry.category.getIconItemId(), Items.PAPER);
+            gfx.renderItem(icon, entry.x + 8, entry.y + 10);
+
+            String label = entry.category.getDisplayName();
+            int textX = entry.x + 28;
+            int textY = entry.y + (entry.height - 10) / 2 - 4;
+            gfx.drawString(font, label, textX, textY, UiTheme.TEXT_PRIMARY, false);
         }
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        scrollOffset -= (int)(delta * 20);
-        scrollOffset = Math.max(0, Math.min(scrollOffset, 
-            Math.max(0, cards.size() * (CommandCardWidget.HEIGHT + CARD_SPACING) - (height - 190))));
-        
-        // Update card positions
-        int cardY = 140 - scrollOffset;
-        for (CommandCardWidget card : cards) {
-            card.setPosition(20, cardY);
-            cardY += CommandCardWidget.HEIGHT + CARD_SPACING;
+        if (maxScroll <= 0) {
+            return false;
         }
-        
+        scrollOffset = Mth.clamp(scrollOffset - (int) (delta * 18), 0, maxScroll);
+        applyScroll();
         return true;
     }
 
@@ -397,65 +580,71 @@ public class CommandMenuScreen extends Screen {
         if (searchWidget.mouseClicked(mouseX, mouseY, button)) {
             return true;
         }
-        
-        for (CommandCardWidget card : cards) {
-            if (card.mouseClicked(mouseX, mouseY, button)) {
+
+        for (FilterEntry entry : filterEntries) {
+            if (entry.contains(mouseX, mouseY)) {
+                entry.action.run();
                 return true;
             }
         }
+        for (FilterEntry entry : sortEntries) {
+            if (entry.contains(mouseX, mouseY)) {
+                entry.action.run();
+                return true;
+            }
+        }
+
+        for (CategoryEntry entry : categoryEntries) {
+            if (entry.contains(mouseX, mouseY)) {
+                selectCategory(entry.category);
+                return true;
+            }
+        }
+
+        for (CardEntry entry : cardEntries) {
+            if (entry.card.mouseClicked(mouseX, mouseY, button)) {
+                return true;
+            }
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        // F1 - open menu (already handled by command registration)
-        // F2 - favorites
         if (keyCode == 291) { // F2
             toggleFavorites();
             return true;
         }
-        
-        // F3 - history
         if (keyCode == 292) { // F3
             toggleHistory();
             return true;
         }
-        
-        // Ctrl+F - search
-        if (keyCode == 70 && (modifiers & 2) != 0) { // F key with Ctrl
+        if (keyCode == 70 && (modifiers & 2) != 0) { // Ctrl+F
             searchWidget.setFocused(true);
             return true;
         }
-        
-        // Esc - clear search or close
         if (keyCode == 256) { // Esc
             if (searchWidget.getSearchField().isFocused()) {
                 searchWidget.getSearchField().setValue("");
                 searchWidget.setFocused(false);
-                loadCommands(selectedCategory);
+                reloadCommands();
                 return true;
             }
         }
-        
-        // Handle search widget input
+
         if (searchWidget.keyPressed(keyCode, scanCode, modifiers)) {
-            // Reload commands with search filter
-            if (!showFavorites && !showHistory) {
-                loadCommands(selectedCategory);
-            }
+            reloadCommands();
             return true;
         }
-        
+
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
         if (searchWidget.charTyped(codePoint, modifiers)) {
-            // Reload commands with search filter
-            if (!showFavorites && !showHistory) {
-                loadCommands(selectedCategory);
-            }
+            reloadCommands();
             return true;
         }
         return super.charTyped(codePoint, modifiers);
@@ -464,5 +653,68 @@ public class CommandMenuScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    public boolean openFirstCardDetails() {
+        if (cardEntries.isEmpty()) {
+            return false;
+        }
+        CommandInfo cmd = cardEntries.get(0).card.getCommand();
+        Minecraft.getInstance().setScreen(new CommandDetailScreen(this, cmd));
+        return true;
+    }
+
+    private static final class CardEntry {
+        private final CommandCardWidget card;
+        private final int baseX;
+        private final int baseY;
+
+        private CardEntry(CommandCardWidget card, int baseX, int baseY) {
+            this.card = card;
+            this.baseX = baseX;
+            this.baseY = baseY;
+        }
+    }
+
+    private static final class FilterEntry {
+        private final String label;
+        private final Runnable action;
+        private final int x;
+        private final int y;
+        private final int width;
+        private final int height;
+
+        private FilterEntry(String label, Runnable action, int x, int y, int width, int height) {
+            this.label = label;
+            this.action = action;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+
+        private boolean contains(double mouseX, double mouseY) {
+            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+        }
+    }
+
+    private static final class CategoryEntry {
+        private final CommandCategory category;
+        private final int x;
+        private final int y;
+        private final int width;
+        private final int height;
+
+        private CategoryEntry(CommandCategory category, int x, int y, int width, int height) {
+            this.category = category;
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+        }
+
+        private boolean contains(double mouseX, double mouseY) {
+            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+        }
     }
 }

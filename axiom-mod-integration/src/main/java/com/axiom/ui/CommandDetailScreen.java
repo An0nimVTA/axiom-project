@@ -23,7 +23,7 @@ public class CommandDetailScreen extends Screen {
         super.init();
         
         // Back button
-        backButton = Button.builder(Component.literal("◀ Назад"), (btn) -> {
+        backButton = Button.builder(UiText.text("Назад", "Back"), (btn) -> {
             Minecraft.getInstance().setScreen(parent);
         })
         .bounds(width / 2 - 210, height - 40, 100, 20)
@@ -31,7 +31,7 @@ public class CommandDetailScreen extends Screen {
         addRenderableWidget(backButton);
         
         // Execute button
-        executeButton = Button.builder(Component.literal("▶ Выполнить команду"), (btn) -> {
+        executeButton = Button.builder(UiText.text("Выполнить", "Execute"), (btn) -> {
             Minecraft.getInstance().setScreen(new CommandInputScreen(parent, command));
         })
         .bounds(width / 2 + 110, height - 40, 100, 20)
@@ -41,7 +41,9 @@ public class CommandDetailScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        renderBackground(gfx);
+        UiTheme.drawBackdrop(gfx, width, height);
+        gfx.fill(0, 0, width, 38, UiTheme.withAlpha(UiTheme.PANEL, 0xE0));
+        gfx.fill(0, 36, width, 38, UiTheme.PANEL_BORDER);
         
         int centerX = width / 2;
         int y = 40;
@@ -51,23 +53,23 @@ public class CommandDetailScreen extends Screen {
         String categoryName = command.getCategory().getDisplayName();
         int badgeWidth = font.width(categoryName) + 20;
         gfx.fill(centerX - badgeWidth / 2, y, centerX + badgeWidth / 2, y + 20, categoryColor);
-        gfx.drawCenteredString(font, categoryName, centerX, y + 6, 0xFFFFFFFF);
+        gfx.drawCenteredString(font, categoryName, centerX, y + 6, UiTheme.TEXT_PRIMARY);
         y += 35;
         
         // Title
-        gfx.drawCenteredString(font, Component.literal("§l§n" + command.getDisplayName()), centerX, y, 0xFFFFFFFF);
+        gfx.drawCenteredString(font, Component.literal("§l" + command.getDisplayName()), centerX, y, UiTheme.TEXT_PRIMARY);
         y += 25;
         
         // Command syntax (in box)
         int boxWidth = 500;
         int boxHeight = 30;
-        gfx.fill(centerX - boxWidth / 2, y, centerX + boxWidth / 2, y + boxHeight, 0xFF2A2A2A);
+        UiTheme.drawPanel(gfx, centerX - boxWidth / 2, y, centerX + boxWidth / 2, y + boxHeight);
         gfx.renderOutline(centerX - boxWidth / 2, y, boxWidth, boxHeight, categoryColor);
-        gfx.drawCenteredString(font, Component.literal("§e" + command.getCommand()), centerX, y + 10, 0xFFFFFF00);
+        gfx.drawCenteredString(font, Component.literal("§e" + command.getCommand()), centerX, y + 10, UiTheme.ACCENT_WARM);
         y += boxHeight + 20;
         
         // Full description
-        gfx.drawString(font, "§lОписание:", centerX - 250, y, 0xFFFFFFFF, false);
+        gfx.drawString(font, UiText.pick("§lОписание:", "§lDescription:"), centerX - 250, y, UiTheme.TEXT_PRIMARY, false);
         y += 15;
         
         // Word wrap description
@@ -75,7 +77,7 @@ public class CommandDetailScreen extends Screen {
         StringBuilder line = new StringBuilder();
         for (String word : words) {
             if (font.width(line + word) > 480) {
-                gfx.drawString(font, line.toString(), centerX - 240, y, 0xFFCCCCCC, false);
+                gfx.drawString(font, line.toString(), centerX - 240, y, 0xFFB7C0CB, false);
                 y += 12;
                 line = new StringBuilder(word + " ");
             } else {
@@ -83,14 +85,14 @@ public class CommandDetailScreen extends Screen {
             }
         }
         if (line.length() > 0) {
-            gfx.drawString(font, line.toString(), centerX - 240, y, 0xFFCCCCCC, false);
+            gfx.drawString(font, line.toString(), centerX - 240, y, 0xFFB7C0CB, false);
             y += 20;
         }
         
         // Aliases
         if (!command.getAliases().isEmpty()) {
             y += 10;
-            gfx.drawString(font, "§lАльтернативные команды:", centerX - 250, y, 0xFFFFFFFF, false);
+            gfx.drawString(font, UiText.pick("§lАльтернативные команды:", "§lAliases:"), centerX - 250, y, UiTheme.TEXT_PRIMARY, false);
             y += 15;
             for (String alias : command.getAliases()) {
                 gfx.drawString(font, "  §7• §e" + alias, centerX - 240, y, 0xFFFFAA00, false);
@@ -101,7 +103,7 @@ public class CommandDetailScreen extends Screen {
         // Examples
         if (!command.getExamples().isEmpty()) {
             y += 10;
-            gfx.drawString(font, "§lПримеры использования:", centerX - 250, y, 0xFFFFFFFF, false);
+            gfx.drawString(font, UiText.pick("§lПримеры использования:", "§lExamples:"), centerX - 250, y, UiTheme.TEXT_PRIMARY, false);
             y += 15;
             for (String example : command.getExamples()) {
                 gfx.drawString(font, "  §7• §a" + example, centerX - 240, y, 0xFF00FF00, false);
@@ -111,16 +113,16 @@ public class CommandDetailScreen extends Screen {
         
         // Requirements
         y += 10;
-        gfx.drawString(font, "§lТребования:", centerX - 250, y, 0xFFFFFFFF, false);
+        gfx.drawString(font, UiText.pick("§lТребования:", "§lRequirements:"), centerX - 250, y, UiTheme.TEXT_PRIMARY, false);
         y += 15;
         
         if (command.requiresNation()) {
-            gfx.drawString(font, "  §7• §eДолжны состоять в нации", centerX - 240, y, 0xFFFFAA00, false);
+            gfx.drawString(font, UiText.pick("  §7• §eДолжны состоять в нации", "  §7• §eMust be in a nation"), centerX - 240, y, 0xFFFFAA00, false);
             y += 12;
         }
         
         if (command.getPermission() != null) {
-            gfx.drawString(font, "  §7• §7Права: §c" + command.getPermission(), centerX - 240, y, 0xFFFF5555, false);
+            gfx.drawString(font, UiText.pick("  §7• §7Права: §c", "  §7• §7Permission: §c") + command.getPermission(), centerX - 240, y, 0xFFFF5555, false);
             y += 12;
         }
         

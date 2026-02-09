@@ -1,9 +1,9 @@
 package com.axiom.test;
 
 import com.axiom.AXIOM;
-import com.axiom.model.Nation;
-import com.axiom.service.NationManager;
-import com.axiom.service.TechnologyTreeService;
+import com.axiom.domain.model.Nation;
+import com.axiom.domain.service.state.NationManager;
+import com.axiom.domain.service.technology.TechnologyTreeService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

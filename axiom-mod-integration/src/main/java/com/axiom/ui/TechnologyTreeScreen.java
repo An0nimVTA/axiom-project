@@ -123,67 +123,63 @@ public class TechnologyTreeScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        renderBackground(gfx);
+        UiTheme.drawBackdrop(gfx, width, height);
 
         // Title
-        gfx.drawCenteredString(font, title, width / 2, 45, 0xFFFFFFFF);
-        gfx.drawCenteredString(font, Component.literal("§7Уровень " + selectedTier + " из 5"), width / 2, 60, 0xFFAAAAAA);
+        gfx.drawCenteredString(font, title, width / 2, 45, UiTheme.TEXT_PRIMARY);
+        gfx.drawCenteredString(font, Component.literal("Уровень " + selectedTier + " из 5"), width / 2, 60, UiTheme.TEXT_MUTED);
 
         // Render tech nodes
         List<TechNode> techs = techsByTier.getOrDefault(selectedTier, new ArrayList<>());
-        int startY = 100;
-        int cardWidth = 350;
-        int cardHeight = 80;
-        int spacing = 10;
+        LayoutInfo layout = layoutFor(techs.size());
 
         for (int i = 0; i < techs.size(); i++) {
             TechNode tech = techs.get(i);
-            int x = (width - cardWidth) / 2;
-            int y = startY + i * (cardHeight + spacing);
+            int col = i % layout.columns;
+            int row = i / layout.columns;
+            int x = layout.startX + col * (layout.cardWidth + layout.gap);
+            int y = layout.startY + row * (layout.cardHeight + layout.gap);
 
-            renderTechCard(gfx, tech, x, y, cardWidth, cardHeight, mouseX, mouseY);
+            renderTechCard(gfx, tech, x, y, layout.cardWidth, layout.cardHeight, mouseX, mouseY);
         }
 
         super.render(gfx, mouseX, mouseY, partialTick);
     }
 
     private void renderTechCard(GuiGraphics gfx, TechNode tech, int x, int y, int w, int h, int mouseX, int mouseY) {
-        // Background
-        int bgColor = tech.unlocked ? (tech.color & 0x00FFFFFF) | 0x80000000 :
-                      tech.available ? (tech.color & 0x00FFFFFF) | 0x40000000 :
-                      0x40333333;
-        gfx.fill(x, y, x + w, y + h, bgColor);
+        boolean hovered = mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h;
+        boolean compact = h < 90 || w < 140;
+        int accent = tech.unlocked ? tech.color :
+            tech.available ? UiTheme.withAlpha(tech.color, 200) : UiTheme.CARD_BORDER_MINIMAL;
+        UiTheme.drawMinimalCard(gfx, x, y, x + w, y + h, accent, hovered);
 
-        // Border
-        int borderColor = tech.unlocked ? tech.color :
-                         tech.available ? (tech.color & 0x00FFFFFF) | 0x80000000 :
-                         0xFF666666;
-        gfx.renderOutline(x, y, w, h, borderColor);
+        int padding = 12;
+        int dotColor = tech.unlocked ? UiTheme.ACCENT : tech.available ? UiTheme.withAlpha(UiTheme.ACCENT, 180) : UiTheme.TEXT_DIM;
+        String dot = "●";
+        gfx.drawString(font, dot, x + w - padding - font.width(dot), y + padding, dotColor, false);
 
-        // Status icon
-        String icon = tech.unlocked ? "✓" : tech.available ? "○" : "✗";
-        int iconColor = tech.unlocked ? 0xFF00FF00 : tech.available ? 0xFFFFFF00 : 0xFFFF0000;
-        gfx.drawString(font, icon, x + 10, y + 10, iconColor, false);
+        gfx.drawString(font, tech.name, x + padding, y + padding, UiTheme.TEXT_PRIMARY, false);
 
-        // Name
-        gfx.drawString(font, Component.literal("§l" + tech.name), x + 30, y + 10, 0xFFFFFFFF, false);
-
-        // Description
-        gfx.drawString(font, tech.description, x + 30, y + 30, 0xFFCCCCCC, false);
-
-        // Prerequisites
-        if (!tech.prerequisites.isEmpty()) {
-            String prereqText = "§7Требует: " + String.join(", ", tech.prerequisites);
-            gfx.drawString(font, prereqText, x + 30, y + 50, 0xFF888888, false);
+        if (!compact) {
+            gfx.drawString(font, tech.description, x + padding, y + padding + 14, UiTheme.TEXT_MUTED, false);
         }
 
-        // Research button (if available)
-        if (tech.available && !tech.unlocked) {
-            boolean hover = mouseX >= x + w - 110 && mouseX <= x + w - 10 &&
-                           mouseY >= y + h - 30 && mouseY <= y + h - 10;
-            int btnColor = hover ? 0xFF00AA00 : 0xFF008800;
-            gfx.fill(x + w - 110, y + h - 30, x + w - 10, y + h - 10, btnColor);
-            gfx.drawCenteredString(font, "Исследовать", x + w - 60, y + h - 23, 0xFFFFFFFF);
+        if (!compact && !tech.prerequisites.isEmpty()) {
+            String prereqText = "Требует: " + String.join(", ", tech.prerequisites);
+            gfx.drawString(font, prereqText, x + padding, y + padding + 28, UiTheme.TEXT_DIM, false);
+        }
+
+        if (!compact && tech.available && !tech.unlocked) {
+            String label = "Исследовать";
+            int btnW = font.width(label) + 10;
+            int btnH = 14;
+            int btnX = x + w - btnW - padding;
+            int btnY = y + h - btnH - padding;
+            boolean hover = mouseX >= btnX && mouseX <= btnX + btnW &&
+                mouseY >= btnY && mouseY <= btnY + btnH;
+            int border = hover ? UiTheme.TEXT_PRIMARY : accent;
+            UiTheme.drawChip(gfx, btnX, btnY, btnX + btnW, btnY + btnH, border, UiTheme.BUTTON_BG);
+            gfx.drawString(font, label, btnX + 5, btnY + 3, UiTheme.TEXT_PRIMARY, false);
         }
     }
 
@@ -191,20 +187,23 @@ public class TechnologyTreeScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         // Check tech card clicks
         List<TechNode> techs = techsByTier.getOrDefault(selectedTier, new ArrayList<>());
-        int startY = 100;
-        int cardWidth = 350;
-        int cardHeight = 80;
-        int spacing = 10;
+        LayoutInfo layout = layoutFor(techs.size());
 
         for (int i = 0; i < techs.size(); i++) {
             TechNode tech = techs.get(i);
-            int x = (width - cardWidth) / 2;
-            int y = startY + i * (cardHeight + spacing);
+            int col = i % layout.columns;
+            int row = i / layout.columns;
+            int x = layout.startX + col * (layout.cardWidth + layout.gap);
+            int y = layout.startY + row * (layout.cardHeight + layout.gap);
 
             if (tech.available && !tech.unlocked) {
-                int btnX = x + cardWidth - 110;
-                int btnY = y + cardHeight - 30;
-                if (mouseX >= btnX && mouseX <= btnX + 100 && mouseY >= btnY && mouseY <= btnY + 20) {
+                int padding = 12;
+                String label = "Исследовать";
+                int btnW = font.width(label) + 10;
+                int btnH = 14;
+                int btnX = x + layout.cardWidth - btnW - padding;
+                int btnY = y + layout.cardHeight - btnH - padding;
+                if (mouseX >= btnX && mouseX <= btnX + btnW && mouseY >= btnY && mouseY <= btnY + btnH) {
                     researchTech(tech);
                     return true;
                 }
@@ -225,5 +224,37 @@ public class TechnologyTreeScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    private LayoutInfo layoutFor(int count) {
+        float scale = UiLayout.scaleFor(width, height);
+        int padding = UiLayout.scaled(24, scale);
+        int availableWidth = Math.max(0, width - padding * 2);
+        int cardWidth = UiCardSizing.techGridCardWidth(scale, availableWidth);
+        int cardHeight = UiCardSizing.techGridCardHeight(scale);
+        int gap = UiCardSizing.techGridGap(scale);
+        int columns = Math.max(1, (availableWidth + gap) / (cardWidth + gap));
+        int totalWidth = columns * cardWidth + (columns - 1) * gap;
+        int startX = Math.max(padding, (width - totalWidth) / 2);
+        int startY = UiCardSizing.techGridStartY(scale);
+        return new LayoutInfo(cardWidth, cardHeight, gap, columns, startX, startY);
+    }
+
+    private static final class LayoutInfo {
+        private final int cardWidth;
+        private final int cardHeight;
+        private final int gap;
+        private final int columns;
+        private final int startX;
+        private final int startY;
+
+        private LayoutInfo(int cardWidth, int cardHeight, int gap, int columns, int startX, int startY) {
+            this.cardWidth = cardWidth;
+            this.cardHeight = cardHeight;
+            this.gap = gap;
+            this.columns = columns;
+            this.startX = startX;
+            this.startY = startY;
+        }
     }
 }

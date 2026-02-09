@@ -1,217 +1,246 @@
 package com.axiom;
 
-import com.axiom.command.AxiomCommand;
-import com.axiom.command.CaptureCommand;
-import com.axiom.command.ClaimCommand;
-import com.axiom.command.CreateNationCommand;
-import com.axiom.command.EconomicIndicatorsCommand;
-import com.axiom.command.ModPackCommand;
-import com.axiom.command.TechnologyCommand;
-import com.axiom.command.UnclaimCommand;
-import com.axiom.command.TestBotCommand;
-import com.axiom.gui.NationMainMenu;
-import com.axiom.command.NationCommandAlias;
-import com.axiom.gui.AdvancedFeaturesMenu;
-import com.axiom.gui.AdvancedTechnologyTreeMenu;
-import com.axiom.gui.BankingMenu;
-import com.axiom.gui.CaptureSystemMenu;
-import com.axiom.gui.CitizenshipMenu;
-import com.axiom.gui.ConfirmMenu;
-import com.axiom.gui.DiplomacyMenu;
-import com.axiom.gui.EconomyMenu;
-import com.axiom.gui.ElectionMenu;
-import com.axiom.gui.HistoryMenu;
-import com.axiom.gui.ModPackBuilderMenu;
-import com.axiom.gui.ProfileMenu;
-import com.axiom.gui.ReligionMenu;
-import com.axiom.gui.TerritoryMenu;
-import com.axiom.gui.CitiesMenu;
-import com.axiom.gui.TechnologyMenu;
-import com.axiom.gui.CorporationsMenu;
-import com.axiom.listener.TerritoryProtectionListener;
-import com.axiom.listener.WarMobilizationListener;
-import com.axiom.listener.WarzoneVisualListener;
-import com.axiom.listener.ReligionBuffListener;
-import com.axiom.service.CityGrowthEngine;
-import com.axiom.service.DiplomacySystem;
-import com.axiom.service.EconomyService;
-import com.axiom.service.NationManager;
-import com.axiom.service.ReligionManager;
-import com.axiom.service.PvpService;
-import com.axiom.service.PlayerDataManager;
-import com.axiom.service.ConfirmationService;
-import com.axiom.service.DoubleClickService;
-import com.axiom.service.WalletService;
-import com.axiom.service.NewsService;
-import com.axiom.service.RolePermissionService;
-import com.axiom.service.EventGenerator;
-import com.axiom.service.ModIntegrationService;
-import com.axiom.service.UnifiedEspionageService;
-import com.axiom.service.TradeService;
-import com.axiom.service.MapBoundaryService;
-import com.axiom.service.StockMarketService;
-import com.axiom.service.ElectionService;
-import com.axiom.service.CrimeService;
-import com.axiom.service.EducationService;
-import com.axiom.service.AchievementService;
-import com.axiom.service.ClimateService;
-import com.axiom.service.HolidayService;
-import com.axiom.service.HappinessService;
-import com.axiom.service.TransportService;
-import com.axiom.service.ResourceService;
-import com.axiom.service.TreatyService;
-import com.axiom.service.NotificationService;
-import com.axiom.service.StatisticsService;
-import com.axiom.service.BankingService;
-import com.axiom.service.MobilizationService;
-import com.axiom.service.ChatService;
-import com.axiom.service.TradingPostService;
-import com.axiom.service.PlayerReputationService;
-import com.axiom.service.TechnologyTreeService;
-import com.axiom.service.VassalService;
-import com.axiom.service.QuestService;
-import com.axiom.service.NationModifierService;
-import com.axiom.service.PollutionService;
-import com.axiom.service.AllianceService;
-import com.axiom.service.CrisisResponseService;
-import com.axiom.service.DynastyService;
-import com.axiom.service.InfluenceService;
-import com.axiom.service.MigrationService;
-import com.axiom.service.EmbargoService;
-import com.axiom.service.LegacyService;
-import com.axiom.service.RitualService;
-import com.axiom.service.ConquestService;
-import com.axiom.service.CultureService;
-import com.axiom.service.PropagandaService;
-import com.axiom.service.DisasterService;
-import com.axiom.service.FestivalService;
-import com.axiom.service.SupplyChainService;
-import com.axiom.service.RevoltService;
-import com.axiom.service.DiplomaticMissionService;
-import com.axiom.service.CurrencyExchangeService;
-import com.axiom.service.NavalService;
-import com.axiom.service.SanitationService;
-import com.axiom.service.PrisonService;
-import com.axiom.service.BlackMarketService;
-import com.axiom.service.ResistanceMovementService;
-import com.axiom.service.MonumentService;
-import com.axiom.service.PandemicService;
-import com.axiom.service.InfrastructureService;
-import com.axiom.service.RefugeeService;
-import com.axiom.service.GreatWorksService;
-import com.axiom.service.RaidService;
-import com.axiom.service.TributeService;
-import com.axiom.service.PlagueService;
-import com.axiom.service.PartisanService;
-import com.axiom.service.ConscriptionService;
-import com.axiom.service.BlockadeService;
-import com.axiom.service.HarborService;
-import com.axiom.service.DiplomaticImmunityService;
-import com.axiom.service.FamineService;
-import com.axiom.service.AssassinationService;
-import com.axiom.service.ColonizationService;
-import com.axiom.service.CensusService;
-import com.axiom.service.ResourceDepletionService;
-import com.axiom.service.SiegeService;
-import com.axiom.service.FortificationService;
-import com.axiom.service.CoupService;
-import com.axiom.service.TradeAgreementService;
-import com.axiom.service.TerrorismService;
-import com.axiom.service.CeasefireService;
-import com.axiom.service.MilitaryService;
-import com.axiom.service.ReligiousWarService;
-import com.axiom.service.AdvancedWarSystem;
-import com.axiom.service.ImportExportService;
-import com.axiom.service.EnergyService;
-import com.axiom.service.RebellionService;
-import com.axiom.service.TreatyViolationService;
-import com.axiom.service.SanctionService;
-import com.axiom.service.ResourceScarcityService;
-import com.axiom.service.TradeRouteService;
-import com.axiom.service.DiplomaticRecognitionService;
-import com.axiom.service.CultureShockService;
-import com.axiom.service.BorderControlService;
-import com.axiom.service.TaxEvasionService;
-import com.axiom.service.MonetaryPolicyService;
-import com.axiom.service.ResearchFundingService;
-import com.axiom.service.CommodityMarketService;
-import com.axiom.service.ImmigrationControlService;
-import com.axiom.service.EmergencyService;
-import com.axiom.service.ArmsDealService;
-import com.axiom.service.TreatyRenegotiationService;
-import com.axiom.service.EconomicCrisisService;
-import com.axiom.service.CorruptionService;
-import com.axiom.service.DiplomaticImmunityService;
-import com.axiom.service.ResourceDiscoveryService;
-import com.axiom.service.WarCrimeService;
-import com.axiom.service.PeaceTreatyService;
-import com.axiom.service.TradeEmbargoExpansionService;
-import com.axiom.service.RaceService;
-import com.axiom.service.RacialDiscriminationService;
-import com.axiom.service.TradeNetworkService;
-import com.axiom.service.MilitaryExerciseService;
-import com.axiom.service.ResourceProcessingService;
-import com.axiom.service.PublicOpinionService;
-import com.axiom.service.InfrastructureMaintenanceService;
-import com.axiom.service.DiplomaticProtocolService;
-import com.axiom.service.PropagandaCampaignService;
-import com.axiom.service.CurrencyManipulationService;
-import com.axiom.service.ResourceStockpileService;
-import com.axiom.service.CulturalExchangeService;
-import com.axiom.service.MilitaryIntelligenceService;
-import com.axiom.service.EnvironmentalPolicyService;
-import com.axiom.service.TradeDisputeService;
-import com.axiom.service.SocialWelfareService;
-import com.axiom.service.NuclearWeaponsService;
-import com.axiom.service.ArmsControlService;
-import com.axiom.service.RefugeeResettlementService;
-import com.axiom.service.InternationalCourtService;
-import com.axiom.service.CulturalHeritageService;
-import com.axiom.service.ResourceNationalizationService;
-import com.axiom.service.CurrencyUnionService;
-import com.axiom.service.ResearchCollaborationService;
-import com.axiom.service.SpaceProgramService;
-import com.axiom.service.TradeWarService;
-import com.axiom.service.MilitaryAllianceService;
-import com.axiom.service.ResourceCartelService;
-import com.axiom.service.PopulationGrowthService;
-import com.axiom.service.InternationalAidService;
-import com.axiom.service.DiplomaticSummitService;
-import com.axiom.service.CulturalRevolutionService;
-import com.axiom.service.ModResourceService;
-import com.axiom.service.ModWarfareService;
-import com.axiom.service.ModEnergyService;
-import com.axiom.service.BalancingService;
-import com.axiom.service.BackupService;
-import com.axiom.service.WebExportService;
-import com.axiom.service.TutorialService;
-import com.axiom.service.PerformanceMetricsService;
-import com.axiom.service.MultiWorldService;
-import com.axiom.service.PlayerDashboardService;
-import com.axiom.service.VisualEffectsService;
-import com.axiom.service.ModPackBuilderService;
-import com.axiom.service.CountryCaptureService;
-import com.axiom.service.MapBoundaryVisualizationService;
-import com.axiom.service.EconomicIndicatorsService;
-import com.axiom.service.ModBalancerService;
-import com.axiom.service.ModCompatibilityChecker;
-import com.axiom.listener.ModIntegrationListener;
-import com.axiom.listener.DashboardListener;
-import com.axiom.listener.VisualEffectsListener;
-import com.axiom.service.RecipeIntegrationService;
-import com.axiom.service.ModIntegrationEnhancementService;
-import com.axiom.service.ModPackManagerService;
-import com.axiom.service.ModBalancerService;
-import com.axiom.service.PropagandaCampaignService;
-import com.axiom.service.ServiceFactory;
+import com.axiom.app.command.AxiomCommand;
+import com.axiom.app.command.CaptureCommand;
+import com.axiom.app.command.ClaimCommand;
+import com.axiom.app.command.EconomicIndicatorsCommand;
+import com.axiom.app.command.MapBoundaryVisualizationCommand;
+import com.axiom.app.command.ModBalanceCommand;
+import com.axiom.app.command.ModIntegrationEnhancementCommand;
+import com.axiom.app.command.ModPackManagerCommand;
+import com.axiom.app.command.RecipeIntegrationCommand;
+import com.axiom.app.command.ModPackCommand;
+import com.axiom.app.command.TechnologyCommand;
+import com.axiom.app.command.UnclaimCommand;
+import com.axiom.app.command.TestBotCommand;
+import com.axiom.app.command.TestCommand;
+import com.axiom.app.gui.NationMainMenu;
+import com.axiom.app.command.NationCommandAlias;
+import com.axiom.domain.DomainServices;
+import com.axiom.test.AutoTestBot;
+import com.axiom.test.AutotestSupport;
+import com.axiom.test.TestBot;
+import com.axiom.app.gui.AdvancedFeaturesMenu;
+import com.axiom.app.gui.AdvancedTechnologyTreeMenu;
+import com.axiom.app.gui.BankingMenu;
+import com.axiom.app.gui.CaptureSystemMenu;
+import com.axiom.app.gui.CitizenshipMenu;
+import com.axiom.app.gui.ConfirmMenu;
+import com.axiom.app.gui.DiplomacyMenu;
+import com.axiom.app.gui.EconomyMenu;
+import com.axiom.app.gui.ElectionMenu;
+import com.axiom.app.gui.HistoryMenu;
+import com.axiom.app.gui.ModPackBuilderMenu;
+import com.axiom.app.gui.ProfileMenu;
+import com.axiom.app.gui.ReligionMenu;
+import com.axiom.app.gui.TerritoryMenu;
+import com.axiom.app.gui.CitiesMenu;
+import com.axiom.app.gui.TechnologyMenu;
+import com.axiom.app.gui.CorporationsMenu;
+import com.axiom.app.listener.TerritoryProtectionListener;
+import com.axiom.app.listener.WarMobilizationListener;
+import com.axiom.app.listener.WarzoneVisualListener;
+import com.axiom.app.listener.ReligionBuffListener;
+import com.axiom.app.listener.UiAutotestStartListener;
+import com.axiom.domain.service.state.CityGrowthEngine;
+import com.axiom.domain.service.politics.DiplomacyRelationService;
+import com.axiom.domain.service.politics.DiplomacySystem;
+import com.axiom.domain.service.industry.EconomyService;
+import com.axiom.domain.service.state.NationManager;
+import com.axiom.domain.service.politics.ReligionManager;
+import com.axiom.domain.service.military.PvpService;
+import com.axiom.domain.service.state.PlayerDataManager;
+import com.axiom.domain.service.infrastructure.ConfirmationService;
+import com.axiom.domain.service.infrastructure.DoubleClickService;
+import com.axiom.domain.service.industry.WalletService;
+import com.axiom.domain.service.infrastructure.NewsService;
+import com.axiom.domain.service.state.RolePermissionService;
+import com.axiom.domain.service.infrastructure.EventGenerator;
+import com.axiom.domain.service.infrastructure.ModBalancerService;
+import com.axiom.domain.service.infrastructure.ModIntegrationService;
+import com.axiom.domain.service.military.UnifiedEspionageService;
+import com.axiom.domain.service.industry.TradeService;
+import com.axiom.domain.service.infrastructure.MapBoundaryService;
+import com.axiom.domain.service.industry.StockMarketService;
+import com.axiom.domain.service.politics.ElectionService;
+import com.axiom.domain.service.state.CrimeService;
+import com.axiom.domain.service.state.EducationService;
+import com.axiom.domain.service.infrastructure.AchievementService;
+import com.axiom.domain.service.state.ClimateService;
+import com.axiom.domain.service.politics.HolidayService;
+import com.axiom.domain.service.state.HappinessService;
+import com.axiom.domain.service.infrastructure.TransportService;
+import com.axiom.domain.service.industry.ResourceCatalogService;
+import com.axiom.domain.service.industry.ResourceService;
+import com.axiom.domain.service.politics.TreatyService;
+import com.axiom.domain.service.infrastructure.NotificationService;
+import com.axiom.domain.service.infrastructure.StatisticsService;
+import com.axiom.domain.service.industry.BankingService;
+import com.axiom.domain.service.military.MobilizationService;
+import com.axiom.domain.service.infrastructure.ChatService;
+import com.axiom.domain.service.industry.TradingPostService;
+import com.axiom.domain.service.state.PlayerReputationService;
+import com.axiom.domain.service.technology.TechnologyTreeService;
+import com.axiom.domain.service.politics.VassalService;
+import com.axiom.domain.service.infrastructure.QuestService;
+import com.axiom.domain.service.state.NationModifierService;
+import com.axiom.domain.service.state.PollutionService;
+import com.axiom.domain.service.politics.AllianceService;
+import com.axiom.domain.service.state.CrisisResponseService;
+import com.axiom.domain.service.politics.DynastyService;
+import com.axiom.domain.service.politics.InfluenceService;
+import com.axiom.domain.service.state.MigrationService;
+import com.axiom.domain.service.politics.EmbargoService;
+import com.axiom.domain.service.infrastructure.LegacyService;
+import com.axiom.domain.service.politics.RitualService;
+import com.axiom.domain.service.military.ConquestService;
+import com.axiom.domain.service.politics.CultureService;
+import com.axiom.domain.service.politics.PropagandaService;
+import com.axiom.domain.service.state.DisasterService;
+import com.axiom.domain.service.politics.FestivalService;
+import com.axiom.domain.service.industry.SupplyChainService;
+import com.axiom.domain.service.military.RevoltService;
+import com.axiom.domain.service.politics.DiplomaticMissionService;
+import com.axiom.domain.service.industry.CurrencyExchangeService;
+import com.axiom.domain.service.military.NavalService;
+import com.axiom.domain.service.state.SanitationService;
+import com.axiom.domain.service.state.PrisonService;
+import com.axiom.domain.service.industry.BlackMarketService;
+import com.axiom.domain.service.military.ResistanceMovementService;
+import com.axiom.domain.service.politics.MonumentService;
+import com.axiom.domain.service.state.PandemicService;
+import com.axiom.domain.service.infrastructure.InfrastructureService;
+import com.axiom.domain.service.state.RefugeeService;
+import com.axiom.domain.service.politics.GreatWorksService;
+import com.axiom.domain.service.military.RaidService;
+import com.axiom.domain.service.industry.TributeService;
+import com.axiom.domain.service.state.PlagueService;
+import com.axiom.domain.service.military.PartisanService;
+import com.axiom.domain.service.military.ConscriptionService;
+import com.axiom.domain.service.military.BlockadeService;
+import com.axiom.domain.service.infrastructure.HarborService;
+import com.axiom.domain.service.state.FamineService;
+import com.axiom.domain.service.military.AssassinationService;
+import com.axiom.domain.service.state.ColonizationService;
+import com.axiom.domain.service.state.CensusService;
+import com.axiom.domain.service.industry.ResourceDepletionService;
+import com.axiom.domain.service.military.SiegeService;
+import com.axiom.domain.service.military.FortificationService;
+import com.axiom.domain.service.politics.CoupService;
+import com.axiom.domain.service.industry.TradeAgreementService;
+import com.axiom.domain.service.military.TerrorismService;
+import com.axiom.domain.service.politics.CeasefireService;
+import com.axiom.domain.service.military.MilitaryService;
+import com.axiom.domain.service.military.ReligiousWarService;
+import com.axiom.domain.service.military.AdvancedWarSystem;
+import com.axiom.domain.service.industry.ImportExportService;
+import com.axiom.domain.service.industry.EnergyService;
+import com.axiom.domain.service.military.RebellionService;
+import com.axiom.domain.service.politics.TreatyViolationService;
+import com.axiom.domain.service.politics.SanctionService;
+import com.axiom.domain.service.industry.ResourceScarcityService;
+import com.axiom.domain.service.industry.TradeRouteService;
+import com.axiom.domain.service.politics.DiplomaticRecognitionService;
+import com.axiom.domain.service.politics.CultureShockService;
+import com.axiom.domain.service.politics.BorderControlService;
+import com.axiom.domain.service.industry.TaxEvasionService;
+import com.axiom.domain.service.industry.MonetaryPolicyService;
+import com.axiom.domain.service.technology.ResearchFundingService;
+import com.axiom.domain.service.industry.CommodityMarketService;
+import com.axiom.domain.service.state.ImmigrationControlService;
+import com.axiom.domain.service.state.EmergencyService;
+import com.axiom.domain.service.military.ArmsDealService;
+import com.axiom.domain.service.politics.TreatyRenegotiationService;
+import com.axiom.domain.service.industry.EconomicCrisisService;
+import com.axiom.domain.service.politics.CorruptionService;
+import com.axiom.domain.service.politics.DiplomaticImmunityService;
+import com.axiom.domain.service.industry.ResourceDiscoveryService;
+import com.axiom.domain.service.military.WarCrimeService;
+import com.axiom.domain.service.politics.PeaceTreatyService;
+import com.axiom.domain.service.politics.TradeEmbargoExpansionService;
+import com.axiom.domain.service.politics.RaceService;
+import com.axiom.domain.service.politics.RacialDiscriminationService;
+import com.axiom.domain.service.industry.TradeNetworkService;
+import com.axiom.domain.service.military.MilitaryExerciseService;
+import com.axiom.domain.service.industry.ResourceProcessingService;
+import com.axiom.domain.service.politics.PublicOpinionService;
+import com.axiom.domain.service.infrastructure.InfrastructureMaintenanceService;
+import com.axiom.domain.service.politics.DiplomaticProtocolService;
+import com.axiom.domain.service.politics.PropagandaCampaignService;
+import com.axiom.domain.service.industry.CurrencyManipulationService;
+import com.axiom.domain.service.industry.ResourceStockpileService;
+import com.axiom.domain.service.politics.CulturalExchangeService;
+import com.axiom.domain.service.military.MilitaryIntelligenceService;
+import com.axiom.domain.service.politics.EnvironmentalPolicyService;
+import com.axiom.domain.service.industry.TradeDisputeService;
+import com.axiom.domain.service.politics.SocialWelfareService;
+import com.axiom.domain.service.military.NuclearWeaponsService;
+import com.axiom.domain.service.military.ArmsControlService;
+import com.axiom.domain.service.state.RefugeeResettlementService;
+import com.axiom.domain.service.politics.InternationalCourtService;
+import com.axiom.domain.service.politics.CulturalHeritageService;
+import com.axiom.domain.service.industry.ResourceNationalizationService;
+import com.axiom.domain.service.industry.CurrencyUnionService;
+import com.axiom.domain.service.technology.ResearchCollaborationService;
+import com.axiom.domain.service.technology.SpaceProgramService;
+import com.axiom.domain.service.industry.TradeWarService;
+import com.axiom.domain.service.military.MilitaryAllianceService;
+import com.axiom.domain.service.industry.ResourceCartelService;
+import com.axiom.domain.service.state.PopulationGrowthService;
+import com.axiom.domain.service.politics.InternationalAidService;
+import com.axiom.domain.service.politics.DiplomaticSummitService;
+import com.axiom.domain.service.politics.CulturalRevolutionService;
+import com.axiom.domain.service.infrastructure.ModResourceService;
+import com.axiom.domain.service.infrastructure.ModWarfareService;
+import com.axiom.domain.service.infrastructure.ModEnergyService;
+import com.axiom.domain.service.infrastructure.BalancingService;
+import com.axiom.domain.service.infrastructure.BackupService;
+import com.axiom.domain.service.infrastructure.WebExportService;
+import com.axiom.domain.service.infrastructure.TerritorySyncService;
+import com.axiom.domain.service.infrastructure.TutorialService;
+import com.axiom.domain.service.infrastructure.PerformanceMetricsService;
+import com.axiom.domain.service.infrastructure.MultiWorldService;
+import com.axiom.domain.service.infrastructure.PlayerDashboardService;
+import com.axiom.domain.service.infrastructure.VisualEffectsService;
+import com.axiom.domain.service.infrastructure.ModPackBuilderService;
+import com.axiom.domain.service.military.CountryCaptureService;
+import com.axiom.domain.service.infrastructure.MapBoundaryVisualizationService;
+import com.axiom.domain.service.industry.EconomicIndicatorsService;
+import com.axiom.domain.service.infrastructure.ModCompatibilityChecker;
+import com.axiom.domain.service.state.TerritoryService;
+import com.axiom.app.listener.ModIntegrationListener;
+import com.axiom.app.listener.DashboardListener;
+import com.axiom.app.listener.VisualEffectsListener;
+import com.axiom.domain.service.infrastructure.RecipeIntegrationService;
+import com.axiom.domain.service.infrastructure.ModIntegrationEnhancementService;
+import com.axiom.domain.service.infrastructure.ModPackManagerService;
 import com.axiom.util.CacheManager;
-import com.axiom.controller.MilitaryController;
-import com.axiom.service.MilitaryServiceInterface;
-import com.axiom.service.EconomyServiceInterface;
+import com.axiom.app.controller.MilitaryController;
+import com.axiom.domain.service.military.MilitaryServiceInterface;
+import com.axiom.domain.service.industry.EconomyServiceInterface;
+import com.axiom.kernel.AxiomKernel;
+import com.axiom.kernel.modules.CoreStateModule;
+import com.axiom.kernel.modules.PoliticsModule;
+import com.axiom.kernel.modules.IndustryModule;
+import com.axiom.kernel.modules.MilitaryModule;
+import com.axiom.kernel.modules.TechnologyModule;
+import com.axiom.kernel.modules.InfrastructureModule;
 import com.axiom.api.ModIntegrationAPI;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * AXIOM Geopolitical Engine
@@ -224,6 +253,7 @@ public final class AXIOM extends JavaPlugin {
     private NationManager nationManager;
     private EconomyService economyService;
     private DiplomacySystem diplomacySystem;
+    private DiplomacyRelationService diplomacyRelationService;
     private ReligionManager religionManager;
     private CityGrowthEngine cityGrowthEngine;
     private PvpService pvpService;
@@ -235,6 +265,7 @@ public final class AXIOM extends JavaPlugin {
     private EconomicIndicatorsService economicIndicatorsService;
     private ModBalancerService modBalancerService;
     private static AXIOM instance;
+    private DomainServices domainServices;
     private NationMainMenu nationMainMenu;
     private ConfirmMenu confirmMenu;
     private TechnologyMenu technologyMenu;
@@ -259,6 +290,7 @@ public final class AXIOM extends JavaPlugin {
     private HolidayService holidayService;
     private HappinessService happinessService;
     private TransportService transportService;
+    private ResourceCatalogService resourceCatalogService;
     private ResourceService resourceService;
     private TreatyService treatyService;
     private NotificationService notificationService;
@@ -384,6 +416,7 @@ public final class AXIOM extends JavaPlugin {
     private BalancingService balancingService;
     private BackupService backupService;
     private WebExportService webExportService;
+    private TerritorySyncService territorySyncService;
     private TutorialService tutorialService;
     private PerformanceMetricsService performanceMetricsService;
     private MultiWorldService multiWorldService;
@@ -395,209 +428,34 @@ public final class AXIOM extends JavaPlugin {
     private ModPackManagerService modPackManagerService;
     private RecipeIntegrationService recipeIntegrationService;
     private ModIntegrationEnhancementService modIntegrationEnhancementService;
+    private boolean uiAutotestEnabled = false;
+    private int uiAutotestDelayTicks = 200;
+    private static final Gson GSON = new Gson();
 
     // New Architecture Components
-    private ServiceFactory serviceFactory;
-    private CacheManager cacheManager;
+    private AxiomKernel kernel;
     private MilitaryController militaryController;
-    private MilitaryServiceInterface militaryServiceInterface;
-    private EconomyServiceInterface economyServiceInterface;
+    private final Map<Class<?>, Field> serviceFieldIndex = new HashMap<>();
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
 
-        this.nationManager = new NationManager(this);
-        this.economyService = new EconomyService(this, nationManager);
-        this.diplomacySystem = new DiplomacySystem(this, nationManager);
-        this.religionManager = new ReligionManager(this);
-        this.cityGrowthEngine = new CityGrowthEngine(this, nationManager);
-        this.pvpService = new PvpService(this);
-        this.playerDataManager = new PlayerDataManager(this);
+        buildServiceFieldIndex();
+        bootstrapKernel();
+
         this.nationMainMenu = null; // Будет инициализироваться при открытии меню
         this.confirmMenu = new ConfirmMenu(this);
         this.technologyMenu = new TechnologyMenu(this);
-        this.confirmationService = new ConfirmationService();
-        this.doubleClickService = new DoubleClickService();
-        this.walletService = new WalletService(this, playerDataManager);
-        // this.religionMain = new ReligionMenu(this); // Per-player menu
-        // this.citiesMenu = new CitiesMenu(this, nationManager, cityGrowthEngine); // Per-player menu
-        this.stockMarketService = new StockMarketService(this);
-        this.corporationsMenu = new CorporationsMenu(this, stockMarketService);
-        this.newsService = new NewsService(this, nationManager);
-        this.rolePermissionService = new RolePermissionService(this);
-        this.eventGenerator = new EventGenerator(this, nationManager);
-        this.modIntegrationService = new ModIntegrationService(this);
-        this.mapBoundaryService = new MapBoundaryService(this, nationManager, cityGrowthEngine, modIntegrationService);
-        this.unifiedEspionageService = new UnifiedEspionageService(this, nationManager);
-        this.modPackBuilderService = new ModPackBuilderService(this);
-        this.modCompatibilityChecker = new ModCompatibilityChecker(this);
-        this.visualEffectsService = new VisualEffectsService(this);
-        this.countryCaptureService = new CountryCaptureService(this);
-        this.mapBoundaryVisualizationService = new MapBoundaryVisualizationService(this, nationManager, cityGrowthEngine, modIntegrationService, visualEffectsService);
-        this.tradeService = new TradeService(this, nationManager);
-        this.electionService = new ElectionService(this, nationManager);
-        this.crimeService = new CrimeService(this, nationManager);
-        this.educationService = new EducationService(this, nationManager);
-        this.achievementService = new AchievementService(this);
-        this.climateService = new ClimateService(this);
-        this.holidayService = new HolidayService(this, religionManager);
-        this.happinessService = new HappinessService(this, nationManager, cityGrowthEngine, crimeService, educationService);
-        this.transportService = new TransportService(this);
-        this.resourceService = new ResourceService(this);
-        this.treatyService = new TreatyService(this, nationManager);
-        this.notificationService = new NotificationService(this);
-        this.statisticsService = new StatisticsService(this);
-        this.bankingService = new BankingService(this, nationManager);
-        this.mobilizationService = new MobilizationService(this, nationManager, diplomacySystem);
-        this.chatService = new ChatService(this);
-        this.tradingPostService = new TradingPostService(this);
-        this.playerReputationService = new PlayerReputationService(this);
-        this.technologyTreeService = new TechnologyTreeService(this);
-        this.vassalService = new VassalService(this, nationManager);
-        this.questService = new QuestService(this);
-        this.nationModifierService = new NationModifierService(this);
-        this.pollutionService = new PollutionService(this, nationManager);
-        this.allianceService = new AllianceService(this, diplomacySystem);
-        this.crisisResponseService = new CrisisResponseService(this, nationManager);
-        this.dynastyService = new DynastyService(this);
-        this.influenceService = new InfluenceService(this);
-        this.migrationService = new MigrationService(this);
-        this.embargoService = new EmbargoService(this);
-        this.legacyService = new LegacyService(this);
-        this.ritualService = new RitualService(this);
-        this.conquestService = new ConquestService(this, nationManager);
-        this.cultureService = new CultureService(this);
-        this.propagandaService = new PropagandaService(this, nationManager);
-        this.disasterService = new DisasterService(this, nationManager);
-        this.festivalService = new FestivalService(this);
-        this.supplyChainService = new SupplyChainService(this);
-        this.revoltService = new RevoltService(this, nationManager, happinessService);
-        this.diplomaticMissionService = new DiplomaticMissionService(this);
-        this.currencyExchangeService = new CurrencyExchangeService(this, nationManager, economyService);
-        this.navalService = new NavalService(this);
-        this.sanitationService = new SanitationService(this, nationManager);
-        this.prisonService = new PrisonService(this);
-        this.blackMarketService = new BlackMarketService(this);
-        this.resistanceMovementService = new ResistanceMovementService(this);
-        this.monumentService = new MonumentService(this);
-        this.pandemicService = new PandemicService(this, nationManager);
-        this.infrastructureService = new InfrastructureService(this);
-        this.refugeeService = new RefugeeService(this, nationManager);
-        this.greatWorksService = new GreatWorksService(this);
-        this.raidService = new RaidService(this, nationManager);
-        this.tributeService = new TributeService(this, nationManager);
-        this.plagueService = new PlagueService(this, nationManager);
-        this.partisanService = new PartisanService(this);
-        this.conscriptionService = new ConscriptionService(this, nationManager);
-        this.blockadeService = new BlockadeService(this);
-        this.harborService = new HarborService(this);
-        this.diplomaticImmunityService = new DiplomaticImmunityService(this, nationManager);
-        this.famineService = new FamineService(this, nationManager);
-        this.assassinationService = new AssassinationService(this, nationManager);
-        this.colonizationService = new ColonizationService(this, nationManager);
-        this.censusService = new CensusService(this, nationManager);
-        this.resourceDepletionService = new ResourceDepletionService(this);
-        this.siegeService = new SiegeService(this, nationManager);
-        this.militaryService = new MilitaryService(this);
-        
-        // Advanced War System (requires Military, Conquest, Raid, Siege services)
-        this.advancedWarSystem = new AdvancedWarSystem(this, nationManager, diplomacySystem,
-            militaryService, conquestService, raidService, siegeService);
-        
-        this.fortificationService = new FortificationService(this);
-        this.coupService = new CoupService(this, nationManager);
-        this.tradeAgreementService = new TradeAgreementService(this);
-        this.terrorismService = new TerrorismService(this, nationManager);
-        this.ceasefireService = new CeasefireService(this, nationManager);
-        this.religiousWarService = new ReligiousWarService(this, nationManager);
-        this.importExportService = new ImportExportService(this);
-        this.energyService = new EnergyService(this);
-        this.rebellionService = new RebellionService(this, nationManager);
-        this.treatyViolationService = new TreatyViolationService(this, nationManager);
-        this.sanctionService = new SanctionService(this, nationManager);
-        this.resourceScarcityService = new ResourceScarcityService(this);
-        this.tradeRouteService = new TradeRouteService(this);
-        this.diplomaticRecognitionService = new DiplomaticRecognitionService(this, nationManager);
-        this.cultureShockService = new CultureShockService(this);
-        this.borderControlService = new BorderControlService(this);
-        this.taxEvasionService = new TaxEvasionService(this);
-        this.monetaryPolicyService = new MonetaryPolicyService(this);
-        this.researchFundingService = new ResearchFundingService(this);
-        this.commodityMarketService = new CommodityMarketService(this);
-        this.immigrationControlService = new ImmigrationControlService(this);
-        this.emergencyService = new EmergencyService(this, nationManager);
-        this.armsDealService = new ArmsDealService(this, nationManager);
-        this.treatyRenegotiationService = new TreatyRenegotiationService(this, nationManager);
-        this.economicCrisisService = new EconomicCrisisService(this, nationManager);
-        this.corruptionService = new CorruptionService(this, nationManager);
-        this.resourceDiscoveryService = new ResourceDiscoveryService(this, nationManager);
-        this.warCrimeService = new WarCrimeService(this, nationManager);
-        this.peaceTreatyService = new PeaceTreatyService(this, nationManager);
-        this.tradeEmbargoExpansionService = new TradeEmbargoExpansionService(this);
-        this.raceService = new RaceService(this);
-        this.racialDiscriminationService = new RacialDiscriminationService(this, nationManager);
-        this.tradeNetworkService = new TradeNetworkService(this, nationManager);
-        this.militaryExerciseService = new MilitaryExerciseService(this, nationManager);
-        this.resourceProcessingService = new ResourceProcessingService(this);
-        this.publicOpinionService = new PublicOpinionService(this, nationManager);
-        this.infrastructureMaintenanceService = new InfrastructureMaintenanceService(this, nationManager);
-        this.diplomaticProtocolService = new DiplomaticProtocolService(this);
-        this.propagandaCampaignService = new PropagandaCampaignService(this, nationManager);
-        this.currencyManipulationService = new CurrencyManipulationService(this);
-        this.resourceStockpileService = new ResourceStockpileService(this, nationManager);
-        this.culturalExchangeService = new CulturalExchangeService(this, nationManager);
-        this.militaryIntelligenceService = new MilitaryIntelligenceService(this, nationManager);
-        this.environmentalPolicyService = new EnvironmentalPolicyService(this, nationManager);
-        this.tradeDisputeService = new TradeDisputeService(this, nationManager);
-        this.socialWelfareService = new SocialWelfareService(this, nationManager);
-        this.nuclearWeaponsService = new NuclearWeaponsService(this, nationManager);
-        this.armsControlService = new ArmsControlService(this, nationManager);
-        this.refugeeResettlementService = new RefugeeResettlementService(this, nationManager);
-        this.internationalCourtService = new InternationalCourtService(this, nationManager);
-        this.culturalHeritageService = new CulturalHeritageService(this, nationManager);
-        this.resourceNationalizationService = new ResourceNationalizationService(this);
-        this.currencyUnionService = new CurrencyUnionService(this, nationManager);
-        this.researchCollaborationService = new ResearchCollaborationService(this, nationManager);
-        this.spaceProgramService = new SpaceProgramService(this, nationManager);
-        this.tradeWarService = new TradeWarService(this, nationManager);
-        this.militaryAllianceService = new MilitaryAllianceService(this, nationManager);
-        this.resourceCartelService = new ResourceCartelService(this, nationManager);
-        this.populationGrowthService = new PopulationGrowthService(this, nationManager);
-        this.internationalAidService = new InternationalAidService(this, nationManager);
-        this.diplomaticSummitService = new DiplomaticSummitService(this, nationManager);
-        this.culturalRevolutionService = new CulturalRevolutionService(this, nationManager);
-        
-        // Mod integration services (initialized after modIntegration)
-        this.modResourceService = new ModResourceService(this, modIntegrationService, resourceService);
-        this.modWarfareService = new ModWarfareService(this, modIntegrationService);
-        this.modEnergyService = new ModEnergyService(this, modIntegrationService);
-        this.modIntegrationAPI = new ModIntegrationAPI(this);
-        
-        // Advanced Mod Integration
-        this.recipeIntegrationService = new RecipeIntegrationService(this);
-        this.modIntegrationEnhancementService = new ModIntegrationEnhancementService(this);
-        this.modPackManagerService = new ModPackManagerService(this);
-
-        // New essential services
-        this.economicIndicatorsService = new EconomicIndicatorsService(this);
-        this.balancingService = new BalancingService(this, nationManager, playerDataManager);
-        this.backupService = new BackupService(this);
-        this.webExportService = new WebExportService(this, nationManager);
-        this.tutorialService = new TutorialService(this);
-        this.performanceMetricsService = new PerformanceMetricsService(this);
-        this.multiWorldService = new MultiWorldService(this, nationManager);
-        this.playerDashboardService = new PlayerDashboardService(this);
-        this.visualEffectsService = new VisualEffectsService(this);
-        this.modBalancerService = new ModBalancerService(this, nationManager, modIntegrationService);
+        this.corporationsMenu = new CorporationsMenu(this, getStockMarketService());
         
         // PlaceholderAPI integration (if available)
         // Note: PlaceholderAPI integration requires the plugin to be installed.
         // The expansion class will be loaded dynamically at runtime.
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             try {
-                com.axiom.expansion.AxiomPlaceholderExpansion expansion = new com.axiom.expansion.AxiomPlaceholderExpansion(this);
+                com.axiom.infra.integration.AxiomPlaceholderExpansion expansion = new com.axiom.infra.integration.AxiomPlaceholderExpansion(this);
                 expansion.register();
                 getLogger().info("PlaceholderAPI интеграция активирована!");
             } catch (Exception e) {
@@ -607,27 +465,22 @@ public final class AXIOM extends JavaPlugin {
             getLogger().info("PlaceholderAPI не найден. Интеграция пропущена.");
         }
 
-        // Initialize New Architecture Components
-        this.cacheManager = new CacheManager(this);
-        this.serviceFactory = new ServiceFactory(this);
-        
-        // Create services via factory
-        this.militaryServiceInterface = serviceFactory.createMilitaryService();
-        this.economyServiceInterface = serviceFactory.createEconomyService();
-        
         // Create controllers
         this.militaryController = new MilitaryController(
             this,
-            militaryServiceInterface,
-            economyServiceInterface,
-            nationManager,
-            cacheManager
+            kernel.services().require(MilitaryServiceInterface.class),
+            kernel.services().require(EconomyServiceInterface.class),
+            kernel.services().require(NationManager.class),
+            kernel.services().require(CacheManager.class)
         );
 
         // Commands
         if (getCommand("axiom") != null) {
             // Single root dispatcher handles subcommands
             getCommand("axiom").setExecutor(new AxiomCommand(this));
+        }
+        if (getCommand("nation") != null) {
+            getCommand("nation").setExecutor(new NationCommandAlias(this));
         }
         if (getCommand("military") != null) {
             getCommand("military").setExecutor(militaryController);
@@ -636,13 +489,13 @@ public final class AXIOM extends JavaPlugin {
             getCommand("testbot").setExecutor(new TestBotCommand(this));
         }
         if (getCommand("claim") != null) {
-            getCommand("claim").setExecutor(new ClaimCommand(this, nationManager));
+            getCommand("claim").setExecutor(new ClaimCommand(this, getNationManager()));
         }
         if (getCommand("unclaim") != null) {
-            getCommand("unclaim").setExecutor(new UnclaimCommand(this, nationManager));
+            getCommand("unclaim").setExecutor(new UnclaimCommand(this, getNationManager()));
         }
-        if (getCommand("create") != null) {
-            getCommand("create").setExecutor(new CreateNationCommand(this, nationManager, playerDataManager));
+        if (getCommand("test") != null) {
+            getCommand("test").setExecutor(new TestCommand(this));
         }
         if (getCommand("modpack") != null) {
             getCommand("modpack").setExecutor(new ModPackCommand(this));
@@ -659,41 +512,293 @@ public final class AXIOM extends JavaPlugin {
         if (getCommand("econom") != null) {
             getCommand("econom").setExecutor(new EconomicIndicatorsCommand(this));
         }
+        if (getCommand("mapvisual") != null) {
+            getCommand("mapvisual").setExecutor(new MapBoundaryVisualizationCommand(this));
+        }
+        if (getCommand("modbalance") != null) {
+            getCommand("modbalance").setExecutor(new ModBalanceCommand(this));
+        }
+        if (getCommand("modenhance") != null) {
+            getCommand("modenhance").setExecutor(new ModIntegrationEnhancementCommand(this));
+        }
+        if (getCommand("modpackmanager") != null) {
+            getCommand("modpackmanager").setExecutor(new ModPackManagerCommand(this));
+        }
+        if (getCommand("recipeintegration") != null) {
+            getCommand("recipeintegration").setExecutor(new RecipeIntegrationCommand(this));
+        }
 
         // Listeners
-        Bukkit.getPluginManager().registerEvents(new TerritoryProtectionListener(this, nationManager), this);
-        Bukkit.getPluginManager().registerEvents(new WarMobilizationListener(this, nationManager, diplomacySystem), this);
-        Bukkit.getPluginManager().registerEvents(new WarzoneVisualListener(this, diplomacySystem), this);
-        Bukkit.getPluginManager().registerEvents(new ReligionBuffListener(this, religionManager), this);
+        Bukkit.getPluginManager().registerEvents(new TerritoryProtectionListener(this, getNationManager()), this);
+        Bukkit.getPluginManager().registerEvents(new WarMobilizationListener(this, getNationManager(), getDiplomacySystem()), this);
+        Bukkit.getPluginManager().registerEvents(new WarzoneVisualListener(this, getDiplomacySystem()), this);
+        Bukkit.getPluginManager().registerEvents(new ReligionBuffListener(this, getReligionManager()), this);
         Bukkit.getPluginManager().registerEvents(new ModIntegrationListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new com.axiom.listener.LeaderActivityListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new com.axiom.app.listener.LeaderActivityListener(this), this);
         Bukkit.getPluginManager().registerEvents(new DashboardListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new VisualEffectsListener(this, visualEffectsService), this);
+        Bukkit.getPluginManager().registerEvents(new VisualEffectsListener(this, getVisualEffectsService()), this);
 
         // Register plugin messaging channel
         getServer().getMessenger().registerOutgoingPluginChannel(this, "axiom:ui");
-        getServer().getMessenger().registerIncomingPluginChannel(this, "axiom:ui", new com.axiom.network.ModCommunicationHandler(this));
+        getServer().getMessenger().registerIncomingPluginChannel(this, "axiom:ui", new com.axiom.infra.network.ModCommunicationHandler(this));
+
+        initUiAutotestConfig();
+        if (uiAutotestEnabled) {
+            Bukkit.getPluginManager().registerEvents(new UiAutotestStartListener(this), this);
+        }
 
         // Autosave
         long autosaveTicks = getConfig().getLong("autosave.intervalSeconds", 300) * 20L;
         if (autosaveTicks > 0) {
             Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
-                try { nationManager.flush(); } catch (Exception ignored) {}
+                try {
+                    NationManager manager = getNationManager();
+                    if (manager != null) {
+                        manager.flush();
+                    }
+                } catch (Exception ignored) {}
             }, autosaveTicks, autosaveTicks);
         }
 
+        maybeRunAutoTests();
         getLogger().info("AXIOM enabled with UI mod support.");
+    }
+
+    private void bootstrapKernel() {
+        this.kernel = new AxiomKernel(getLogger(), this::bindService);
+        kernel.registerModule(new CoreStateModule(this));
+        kernel.registerModule(new PoliticsModule(this));
+        kernel.registerModule(new IndustryModule(this));
+        kernel.registerModule(new TechnologyModule(this));
+        kernel.registerModule(new MilitaryModule(this));
+        kernel.registerModule(new InfrastructureModule(this));
+        kernel.start();
+        bindKernelServices();
+    }
+
+    private void buildServiceFieldIndex() {
+        serviceFieldIndex.clear();
+        for (Field field : AXIOM.class.getDeclaredFields()) {
+            int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
+                continue;
+            }
+            if (serviceFieldIndex.containsKey(field.getType())) {
+                continue;
+            }
+            field.setAccessible(true);
+            serviceFieldIndex.put(field.getType(), field);
+        }
+    }
+
+    private void bindService(Class<?> type, Object service) {
+        Field field = serviceFieldIndex.get(type);
+        if (field == null) {
+            return;
+        }
+        try {
+            field.set(this, service);
+        } catch (IllegalAccessException e) {
+            getLogger().warning("Failed to bind service: " + type.getName() + " -> " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void bindKernelServices() {
+        if (kernel == null) {
+            return;
+        }
+        for (Map.Entry<Class<?>, Field> entry : serviceFieldIndex.entrySet()) {
+            Field field = entry.getValue();
+            try {
+                if (field.get(this) != null) {
+                    continue;
+                }
+            } catch (IllegalAccessException ignored) {
+            }
+            kernel.services()
+                .resolve((Class<Object>) entry.getKey())
+                .ifPresent(service -> {
+                    try {
+                        field.set(this, service);
+                    } catch (IllegalAccessException ignored) {
+                    }
+                });
+        }
+    }
+
+    private <T> T resolveService(Class<T> type) {
+        if (kernel == null) {
+            return null;
+        }
+        return kernel.services().resolve(type).orElse(null);
+    }
+
+    private <T> T serviceOrField(T fallback, Class<T> type) {
+        T resolved = resolveService(type);
+        return resolved != null ? resolved : fallback;
+    }
+
+    private void maybeRunAutoTests() {
+        String autoTest = System.getenv("AXIOM_AUTOTEST");
+        if (autoTest == null || autoTest.trim().isEmpty() || "0".equals(autoTest)) {
+            return;
+        }
+
+        AutotestSupport.maybeResetDataFolder(this);
+
+        String delayRaw = System.getenv("AXIOM_AUTOTEST_DELAY_TICKS");
+        int delayTicks = 200;
+        if (delayRaw != null && !delayRaw.trim().isEmpty()) {
+            try {
+                delayTicks = Integer.parseInt(delayRaw.trim());
+            } catch (NumberFormatException ignored) {
+                delayTicks = 200;
+            }
+        }
+
+        String shutdownRaw = System.getenv("AXIOM_AUTOTEST_SHUTDOWN");
+        boolean shutdown = shutdownRaw != null && !shutdownRaw.trim().isEmpty() && !"0".equals(shutdownRaw);
+
+        getLogger().info("AXIOM autotest enabled. Delay ticks: " + delayTicks + ", shutdown: " + shutdown);
+
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            getLogger().info("AXIOM autotest: starting AutoTestBot + TestBot");
+            boolean autoOk = new AutoTestBot(this).runAllTests(Bukkit.getConsoleSender());
+            boolean testbotOk = new TestBot(this).runAllTests(Bukkit.getConsoleSender());
+            getLogger().info("AXIOM autotest: AutoTestBot=" + autoOk + ", TestBot=" + testbotOk);
+            if (shutdown) {
+                getLogger().info("AXIOM autotest: shutting down server");
+                Bukkit.shutdown();
+            }
+        }, delayTicks);
+    }
+
+    private void initUiAutotestConfig() {
+        uiAutotestEnabled = isEnvEnabled("AXIOM_UI_AUTOTEST") || isEnvEnabled("AXIOM_AUTOTEST");
+        uiAutotestDelayTicks = readEnvInt("AXIOM_UI_AUTOTEST_DELAY_TICKS", 200);
+    }
+
+    private boolean isEnvEnabled(String name) {
+        String raw = System.getenv(name);
+        if (raw == null || raw.trim().isEmpty()) {
+            return false;
+        }
+        return !"0".equals(raw.trim());
+    }
+
+    private int readEnvInt(String name, int fallback) {
+        String raw = System.getenv(name);
+        if (raw == null || raw.trim().isEmpty()) {
+            return fallback;
+        }
+        try {
+            return Integer.parseInt(raw.trim());
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
+    }
+
+    public boolean isUiAutotestEnabled() {
+        return uiAutotestEnabled;
+    }
+
+    public int getUiAutotestDelayTicks() {
+        return uiAutotestDelayTicks;
+    }
+
+    public void sendUiAutotestStart(Player player) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("enabled", true);
+        payload.put("autoStartDelayTicks", 0);
+        payload.put("stepDelayTicks", readEnvInt("AXIOM_UI_AUTOTEST_STEP_DELAY_TICKS", 5));
+        payload.put("commandTimeoutTicks", readEnvInt("AXIOM_UI_AUTOTEST_COMMAND_TIMEOUT_TICKS", 200));
+        payload.put("includeUiScreens", true);
+        payload.put("commands", resolveUiAutotestCommands());
+        payload.put("commandBlacklist", List.of());
+        payload.put("actions", List.of());
+
+        try {
+            ByteArrayOutputStream msgBytes = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(msgBytes);
+            out.writeUTF("ui_autotest_start");
+            out.writeUTF(GSON.toJson(payload));
+            player.sendPluginMessage(this, "axiom:ui", msgBytes.toByteArray());
+        } catch (IOException e) {
+            getLogger().warning("Failed to send UI autotest start: " + e.getMessage());
+        }
+    }
+
+    public void openUiMainMenu(Player player) {
+        sendUiMessage(player, "open_main_menu", "");
+    }
+
+    private void sendUiMessage(Player player, String type, Object data) {
+        try {
+            ByteArrayOutputStream msgBytes = new ByteArrayOutputStream();
+            DataOutputStream out = new DataOutputStream(msgBytes);
+            out.writeUTF(type);
+            out.writeUTF(GSON.toJson(data));
+            player.sendPluginMessage(this, "axiom:ui", msgBytes.toByteArray());
+        } catch (IOException e) {
+            getLogger().warning("Failed to send UI message '" + type + "': " + e.getMessage());
+        }
+    }
+
+    private List<String> resolveUiAutotestCommands() {
+        List<String> fallback = List.of("/test", "/testbot run all");
+        String raw = System.getenv("AXIOM_UI_AUTOTEST_COMMANDS");
+        if (raw == null || raw.trim().isEmpty()) {
+            return fallback;
+        }
+        String trimmed = raw.trim();
+        if (trimmed.startsWith("[")) {
+            try {
+                List<String> parsed = GSON.fromJson(trimmed, new TypeToken<List<String>>(){}.getType());
+                if (parsed != null && !parsed.isEmpty()) {
+                    return parsed;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        String[] parts = trimmed.split(",");
+        List<String> commands = new ArrayList<>();
+        for (String part : parts) {
+            String cmd = part.trim();
+            if (!cmd.isEmpty()) {
+                commands.add(cmd);
+            }
+        }
+        return commands.isEmpty() ? fallback : commands;
     }
 
     @Override
     public void onDisable() {
+        if (kernel != null) {
+            try {
+                kernel.stop();
+            } catch (Exception e) {
+                getLogger().warning("Kernel shutdown failed: " + e.getMessage());
+            }
+        }
         if (mapBoundaryService != null) {
             mapBoundaryService.shutdown();
         }
+        TerritorySyncService syncService = getTerritorySyncService();
+        if (syncService != null) {
+            syncService.shutdown();
+        }
         try {
-            nationManager.flush();
+            NationManager manager = getNationManager();
+            if (manager != null) {
+                manager.flush();
+            }
         } catch (Exception e) {
             getLogger().severe("Failed to flush data: " + e.getMessage());
+        }
+        TerritoryService territoryService = getTerritoryService();
+        if (territoryService != null) {
+            territoryService.save();
         }
         getLogger().info("AXIOM disabled.");
     }
@@ -701,22 +806,33 @@ public final class AXIOM extends JavaPlugin {
     /** Reloads config and propagates to systems. */
     public void reloadAxiomConfig() {
         reloadConfig();
-        economyService.reload();
+        EconomyService service = getEconomyService();
+        if (service != null) {
+            service.reload();
+        }
     }
 
-    public NationManager getNationManager() { return nationManager; }
-    public EconomyService getEconomyService() { return economyService; }
-    public DiplomacySystem getDiplomacySystem() { return diplomacySystem; }
-    public ReligionManager getReligionManager() { return religionManager; }
-    public CityGrowthEngine getCityGrowthEngine() { return cityGrowthEngine; }
-    public PvpService getPvpService() { return pvpService; }
-    public PlayerDataManager getPlayerDataManager() { return playerDataManager; }
-    public ModPackBuilderService getModPackBuilderService() { return modPackBuilderService; }
-    public ModCompatibilityChecker getModCompatibilityChecker() { return modCompatibilityChecker; }
-    public CountryCaptureService getCountryCaptureService() { return countryCaptureService; }
-    public MapBoundaryVisualizationService getMapBoundaryVisualizationService() { return mapBoundaryVisualizationService; }
-    public EconomicIndicatorsService getEconomicIndicatorsService() { return economicIndicatorsService; }
+    public NationManager getNationManager() { return serviceOrField(nationManager, NationManager.class); }
+    public EconomyService getEconomyService() { return serviceOrField(economyService, EconomyService.class); }
+    public DiplomacySystem getDiplomacySystem() { return serviceOrField(diplomacySystem, DiplomacySystem.class); }
+    public DiplomacyRelationService getDiplomacyRelationService() { return serviceOrField(diplomacyRelationService, DiplomacyRelationService.class); }
+    public ReligionManager getReligionManager() { return serviceOrField(religionManager, ReligionManager.class); }
+    public CityGrowthEngine getCityGrowthEngine() { return serviceOrField(cityGrowthEngine, CityGrowthEngine.class); }
+    public PvpService getPvpService() { return serviceOrField(pvpService, PvpService.class); }
+    public PlayerDataManager getPlayerDataManager() { return serviceOrField(playerDataManager, PlayerDataManager.class); }
+    public ModPackBuilderService getModPackBuilderService() { return serviceOrField(modPackBuilderService, ModPackBuilderService.class); }
+    public ModCompatibilityChecker getModCompatibilityChecker() { return serviceOrField(modCompatibilityChecker, ModCompatibilityChecker.class); }
+    public CountryCaptureService getCountryCaptureService() { return serviceOrField(countryCaptureService, CountryCaptureService.class); }
+    public MapBoundaryVisualizationService getMapBoundaryVisualizationService() { return serviceOrField(mapBoundaryVisualizationService, MapBoundaryVisualizationService.class); }
+    public EconomicIndicatorsService getEconomicIndicatorsService() { return serviceOrField(economicIndicatorsService, EconomicIndicatorsService.class); }
+    public TerritoryService getTerritoryService() { return resolveService(TerritoryService.class); }
     public static AXIOM getInstance() { return instance; }
+    public DomainServices domain() {
+        if (domainServices == null) {
+            domainServices = new DomainServices(this);
+        }
+        return domainServices;
+    }
     public void openNationMainMenu(Player player) {
         new NationMainMenu(this, player).open();
     }
@@ -815,7 +931,7 @@ public final class AXIOM extends JavaPlugin {
      * Открытие меню экономических индикаторов
      */
     public void openEconomicIndicatorsMenu(Player player) {
-        new com.axiom.gui.EconomicIndicatorsMenu(this, player).open();
+        new com.axiom.app.gui.EconomicIndicatorsMenu(this, player).open();
     }
     
     /**
@@ -842,74 +958,79 @@ public final class AXIOM extends JavaPlugin {
         return null; // Устаревшее, используйте openCitiesMenu()
     }
     public CorporationsMenu getCorporationsMenu() { return corporationsMenu; }
-    public NewsService getNewsService() { return newsService; }
-    public ElectionService getElectionService() { return electionService; }
-    public CrimeService getCrimeService() { return crimeService; }
-    public EducationService getEducationService() { return educationService; }
-    public AchievementService getAchievementService() { return achievementService; }
-    public ResourceService getResourceService() { return resourceService; }
-    public NationModifierService getNationModifierService() { return nationModifierService; }
-    public NavalService getNavalService() { return navalService; }
-    public HappinessService getHappinessService() { return happinessService; }
-    public MilitaryService getMilitaryService() { return militaryService; }
-    public CultureService getCultureService() { return cultureService; }
-    public RolePermissionService getRolePermissionService() { return rolePermissionService; }
-    public MigrationService getMigrationService() { return migrationService; }
-    public RaceService getRaceService() { return raceService; }
-    public PublicOpinionService getPublicOpinionService() { return publicOpinionService; }
-    public CorruptionService getCorruptionService() { return corruptionService; }
-    public PollutionService getPollutionService() { return pollutionService; }
-    public NuclearWeaponsService getNuclearWeaponsService() { return nuclearWeaponsService; }
-    public TechnologyTreeService getTechnologyTreeService() { return technologyTreeService; }
-    public ModIntegrationService getModIntegrationService() { return modIntegrationService; }
-    public ModResourceService getModResourceService() { return modResourceService; }
-    public ModWarfareService getModWarfareService() { return modWarfareService; }
-    public ModEnergyService getModEnergyService() { return modEnergyService; }
-    public ModIntegrationAPI getModIntegrationAPI() { return modIntegrationAPI; }
-    public StatisticsService getStatisticsService() { return statisticsService; }
-    public BalancingService getBalancingService() { return balancingService; }
-    public BackupService getBackupService() { return backupService; }
-    public WebExportService getWebExportService() { return webExportService; }
-    public TutorialService getTutorialService() { return tutorialService; }
-    public PerformanceMetricsService getPerformanceMetricsService() { return performanceMetricsService; }
-    public MultiWorldService getMultiWorldService() { return multiWorldService; }
-    public PlayerDashboardService getPlayerDashboardService() { return playerDashboardService; }
-    public VisualEffectsService getVisualEffectsService() { return visualEffectsService; }
-    public TreatyService getTreatyService() { return treatyService; }
-    public TradeService getTradeService() { return tradeService; }
-    public TradingPostService getTradingPostService() { return tradingPostService; }
-    public AdvancedWarSystem getAdvancedWarSystem() { return advancedWarSystem; }
-    public MapBoundaryService getMapBoundaryService() { return mapBoundaryService; }
-    public BankingService getBankingService() { return bankingService; }
-    public StockMarketService getStockMarketService() { return stockMarketService; }
-    public DiplomaticImmunityService getDiplomaticImmunityService() { return diplomaticImmunityService; }
+    public NewsService getNewsService() { return serviceOrField(newsService, NewsService.class); }
+    public ElectionService getElectionService() { return serviceOrField(electionService, ElectionService.class); }
+    public CrimeService getCrimeService() { return serviceOrField(crimeService, CrimeService.class); }
+    public EducationService getEducationService() { return serviceOrField(educationService, EducationService.class); }
+    public AchievementService getAchievementService() { return serviceOrField(achievementService, AchievementService.class); }
+    public ResourceCatalogService getResourceCatalogService() { return serviceOrField(resourceCatalogService, ResourceCatalogService.class); }
+    public ResourceService getResourceService() { return serviceOrField(resourceService, ResourceService.class); }
+    public NationModifierService getNationModifierService() { return serviceOrField(nationModifierService, NationModifierService.class); }
+    public NavalService getNavalService() { return serviceOrField(navalService, NavalService.class); }
+    public HappinessService getHappinessService() { return serviceOrField(happinessService, HappinessService.class); }
+    public MilitaryService getMilitaryService() { return serviceOrField(militaryService, MilitaryService.class); }
+    public CultureService getCultureService() { return serviceOrField(cultureService, CultureService.class); }
+    public RolePermissionService getRolePermissionService() { return serviceOrField(rolePermissionService, RolePermissionService.class); }
+    public MigrationService getMigrationService() { return serviceOrField(migrationService, MigrationService.class); }
+    public RaceService getRaceService() { return serviceOrField(raceService, RaceService.class); }
+    public PublicOpinionService getPublicOpinionService() { return serviceOrField(publicOpinionService, PublicOpinionService.class); }
+    public CorruptionService getCorruptionService() { return serviceOrField(corruptionService, CorruptionService.class); }
+    public PollutionService getPollutionService() { return serviceOrField(pollutionService, PollutionService.class); }
+    public NuclearWeaponsService getNuclearWeaponsService() { return serviceOrField(nuclearWeaponsService, NuclearWeaponsService.class); }
+    public TechnologyTreeService getTechnologyTreeService() { return serviceOrField(technologyTreeService, TechnologyTreeService.class); }
+    public ModIntegrationService getModIntegrationService() { return serviceOrField(modIntegrationService, ModIntegrationService.class); }
+    public ModResourceService getModResourceService() { return serviceOrField(modResourceService, ModResourceService.class); }
+    public ModWarfareService getModWarfareService() { return serviceOrField(modWarfareService, ModWarfareService.class); }
+    public ModEnergyService getModEnergyService() { return serviceOrField(modEnergyService, ModEnergyService.class); }
+    public CacheManager getCacheManager() { return resolveService(CacheManager.class); }
+    public ModIntegrationAPI getModIntegrationAPI() { return serviceOrField(modIntegrationAPI, ModIntegrationAPI.class); }
+    public StatisticsService getStatisticsService() { return serviceOrField(statisticsService, StatisticsService.class); }
+    public BalancingService getBalancingService() { return serviceOrField(balancingService, BalancingService.class); }
+    public CommodityMarketService getCommodityMarketService() { return serviceOrField(commodityMarketService, CommodityMarketService.class); }
+    public ResourceProcessingService getResourceProcessingService() { return serviceOrField(resourceProcessingService, ResourceProcessingService.class); }
+    public BackupService getBackupService() { return serviceOrField(backupService, BackupService.class); }
+    public WebExportService getWebExportService() { return serviceOrField(webExportService, WebExportService.class); }
+    public TerritorySyncService getTerritorySyncService() { return serviceOrField(territorySyncService, TerritorySyncService.class); }
+    public TutorialService getTutorialService() { return serviceOrField(tutorialService, TutorialService.class); }
+    public PerformanceMetricsService getPerformanceMetricsService() { return serviceOrField(performanceMetricsService, PerformanceMetricsService.class); }
+    public MultiWorldService getMultiWorldService() { return serviceOrField(multiWorldService, MultiWorldService.class); }
+    public PlayerDashboardService getPlayerDashboardService() { return serviceOrField(playerDashboardService, PlayerDashboardService.class); }
+    public VisualEffectsService getVisualEffectsService() { return serviceOrField(visualEffectsService, VisualEffectsService.class); }
+    public TreatyService getTreatyService() { return serviceOrField(treatyService, TreatyService.class); }
+    public TradeService getTradeService() { return serviceOrField(tradeService, TradeService.class); }
+    public TradingPostService getTradingPostService() { return serviceOrField(tradingPostService, TradingPostService.class); }
+    public AdvancedWarSystem getAdvancedWarSystem() { return serviceOrField(advancedWarSystem, AdvancedWarSystem.class); }
+    public MapBoundaryService getMapBoundaryService() { return serviceOrField(mapBoundaryService, MapBoundaryService.class); }
+    public BankingService getBankingService() { return serviceOrField(bankingService, BankingService.class); }
+    public StockMarketService getStockMarketService() { return serviceOrField(stockMarketService, StockMarketService.class); }
+    public DiplomaticImmunityService getDiplomaticImmunityService() { return serviceOrField(diplomaticImmunityService, DiplomaticImmunityService.class); }
     
     // Additional getters for SuperTestBot
-    public RaidService getRaidService() { return raidService; }
-    public SiegeService getSiegeService() { return siegeService; }
-    public ConquestService getConquestService() { return conquestService; }
-    public MobilizationService getMobilizationService() { return mobilizationService; }
-    public CurrencyUnionService getCurrencyUnionService() { return currencyUnionService; }
-    public ResourceCartelService getResourceCartelService() { return resourceCartelService; }
-    public MilitaryAllianceService getMilitaryAllianceService() { return militaryAllianceService; }
-    public RacialDiscriminationService getRacialDiscriminationService() { return racialDiscriminationService; }
-    public CulturalExchangeService getCulturalExchangeService() { return culturalExchangeService; }
-    public CulturalHeritageService getCulturalHeritageService() { return culturalHeritageService; }
-    public PropagandaService getPropagandaService() { return propagandaService; }
-    public SanctionService getSanctionService() { return sanctionService; }
-    public EmbargoService getEmbargoService() { return embargoService; }
-    public DiplomaticRecognitionService getDiplomaticRecognitionService() { return diplomaticRecognitionService; }
-    public CurrencyExchangeService getCurrencyExchangeService() { return currencyExchangeService; }
-    public HarborService getHarborService() { return harborService; }
-    public MonumentService getMonumentService() { return monumentService; }
-    public UnifiedEspionageService getUnifiedEspionageService() { return unifiedEspionageService; }
-    public DisasterService getDisasterService() { return disasterService; }
-    public InfrastructureService getInfrastructureService() { return infrastructureService; }
-    public InfluenceService getInfluenceService() { return influenceService; }
-    public TradeNetworkService getTradeNetworkService() { return tradeNetworkService; }
-    public ModBalancerService getModBalancerService() { return modBalancerService; }
-    public PropagandaCampaignService getPropagandaCampaignService() { return propagandaCampaignService; }
-    public RecipeIntegrationService getRecipeIntegrationService() { return recipeIntegrationService; }
-    public ModIntegrationEnhancementService getModIntegrationEnhancementService() { return modIntegrationEnhancementService; }
-    public ModPackManagerService getModPackManagerService() { return modPackManagerService; }
+    public RaidService getRaidService() { return serviceOrField(raidService, RaidService.class); }
+    public SiegeService getSiegeService() { return serviceOrField(siegeService, SiegeService.class); }
+    public ConquestService getConquestService() { return serviceOrField(conquestService, ConquestService.class); }
+    public MobilizationService getMobilizationService() { return serviceOrField(mobilizationService, MobilizationService.class); }
+    public CurrencyUnionService getCurrencyUnionService() { return serviceOrField(currencyUnionService, CurrencyUnionService.class); }
+    public ResourceCartelService getResourceCartelService() { return serviceOrField(resourceCartelService, ResourceCartelService.class); }
+    public MilitaryAllianceService getMilitaryAllianceService() { return serviceOrField(militaryAllianceService, MilitaryAllianceService.class); }
+    public RacialDiscriminationService getRacialDiscriminationService() { return serviceOrField(racialDiscriminationService, RacialDiscriminationService.class); }
+    public CulturalExchangeService getCulturalExchangeService() { return serviceOrField(culturalExchangeService, CulturalExchangeService.class); }
+    public CulturalHeritageService getCulturalHeritageService() { return serviceOrField(culturalHeritageService, CulturalHeritageService.class); }
+    public PropagandaService getPropagandaService() { return serviceOrField(propagandaService, PropagandaService.class); }
+    public SanctionService getSanctionService() { return serviceOrField(sanctionService, SanctionService.class); }
+    public EmbargoService getEmbargoService() { return serviceOrField(embargoService, EmbargoService.class); }
+    public DiplomaticRecognitionService getDiplomaticRecognitionService() { return serviceOrField(diplomaticRecognitionService, DiplomaticRecognitionService.class); }
+    public CurrencyExchangeService getCurrencyExchangeService() { return serviceOrField(currencyExchangeService, CurrencyExchangeService.class); }
+    public HarborService getHarborService() { return serviceOrField(harborService, HarborService.class); }
+    public MonumentService getMonumentService() { return serviceOrField(monumentService, MonumentService.class); }
+    public UnifiedEspionageService getUnifiedEspionageService() { return serviceOrField(unifiedEspionageService, UnifiedEspionageService.class); }
+    public DisasterService getDisasterService() { return serviceOrField(disasterService, DisasterService.class); }
+    public InfrastructureService getInfrastructureService() { return serviceOrField(infrastructureService, InfrastructureService.class); }
+    public InfluenceService getInfluenceService() { return serviceOrField(influenceService, InfluenceService.class); }
+    public TradeNetworkService getTradeNetworkService() { return serviceOrField(tradeNetworkService, TradeNetworkService.class); }
+    public ModBalancerService getModBalancerService() { return serviceOrField(modBalancerService, ModBalancerService.class); }
+    public PropagandaCampaignService getPropagandaCampaignService() { return serviceOrField(propagandaCampaignService, PropagandaCampaignService.class); }
+    public RecipeIntegrationService getRecipeIntegrationService() { return serviceOrField(recipeIntegrationService, RecipeIntegrationService.class); }
+    public ModIntegrationEnhancementService getModIntegrationEnhancementService() { return serviceOrField(modIntegrationEnhancementService, ModIntegrationEnhancementService.class); }
+    public ModPackManagerService getModPackManagerService() { return serviceOrField(modPackManagerService, ModPackManagerService.class); }
 }

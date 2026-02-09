@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public final class ReligionCatalog {
     private static final Gson GSON = new Gson();
-    private static final ResourceLocation RESOURCE = new ResourceLocation(AxiomUiMod.MOD_ID, "religions.json");
+    private static final ResourceLocation RESOURCE = ResourceLocation.fromNamespaceAndPath(AxiomUiMod.MOD_ID, "religions.json");
     private static List<ReligionCard> cached;
 
     private ReligionCatalog() {

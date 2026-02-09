@@ -38,45 +38,47 @@ public class EducationScreen extends Screen {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        super.render(graphics, mouseX, mouseY, delta);
+        UiTheme.drawBackdrop(graphics, width, height);
         
         // Title
-        graphics.drawCenteredString(font, "🎓 Система образования", width / 2, 20, 0xFFFFFF);
+        graphics.drawCenteredString(font, "Система образования", width / 2, 20, UiTheme.TEXT_PRIMARY);
         
         // Education level
         int y = 50;
-        graphics.fill(20, y, width - 20, y + 60, 0xAA1E3A5F);
-        graphics.drawString(font, "Уровень образования:", 30, y + 10, 0xFFFFFF);
-        graphics.drawString(font, String.format("%.1f%%", educationLevel), 30, y + 25, 0x00FF00);
+        UiTheme.drawMinimalCard(graphics, 20, y, width - 20, y + 60, 0xFF1E3A5F, false);
+        graphics.drawString(font, "Уровень образования:", 30, y + 10, UiTheme.TEXT_PRIMARY, false);
+        graphics.drawString(font, String.format("%.1f%%", educationLevel), 30, y + 25, UiTheme.ACCENT, false);
         
         // Progress bar
         int barWidth = width - 60;
-        graphics.fill(30, y + 40, 30 + barWidth, y + 50, 0xFF333333);
-        graphics.fill(30, y + 40, 30 + (int)(barWidth * educationLevel / 100), y + 50, 0xFF00AA00);
+        graphics.fill(30, y + 40, 30 + barWidth, y + 50, UiTheme.BUTTON_BG);
+        graphics.fill(30, y + 40, 30 + (int)(barWidth * educationLevel / 100), y + 50, UiTheme.ACCENT);
         
         // Researches
         y = 120;
-        graphics.drawString(font, "Исследования:", 30, y, 0xFFFFFF);
+        graphics.drawString(font, "Исследования:", 30, y, UiTheme.TEXT_PRIMARY, false);
         y += 20;
         
         for (Research r : researches) {
             if (y + CARD_HEIGHT > height - 10) break;
             
-            int color = r.completed ? 0xAA00AA00 : (r.progress > 0 ? 0xAA0066CC : 0xAA333333);
-            graphics.fill(20, y, width - 20, y + CARD_HEIGHT, color);
+            int accent = r.completed ? 0xFF00AA00 : (r.progress > 0 ? 0xFF1E6BC1 : 0xFF444C56);
+            UiTheme.drawMinimalCard(graphics, 20, y, width - 20, y + CARD_HEIGHT, accent, false);
             
             String icon = r.completed ? "✓" : (r.progress > 0 ? "⟳" : "○");
-            graphics.drawString(font, icon + " " + r.name, 30, y + 10, 0xFFFFFF);
-            graphics.drawString(font, "Прогресс: " + r.progress + "%", 30, y + 30, 0xCCCCCC);
+            graphics.drawString(font, icon + " " + r.name, 30, y + 10, UiTheme.TEXT_PRIMARY, false);
+            graphics.drawString(font, "Прогресс: " + r.progress + "%", 30, y + 30, UiTheme.TEXT_MUTED, false);
             
             if (r.progress > 0 && !r.completed) {
                 int rBarWidth = width - 60;
-                graphics.fill(30, y + 50, 30 + rBarWidth, y + 60, 0xFF222222);
+                graphics.fill(30, y + 50, 30 + rBarWidth, y + 60, UiTheme.BUTTON_BG);
                 graphics.fill(30, y + 50, 30 + (int)(rBarWidth * r.progress / 100), y + 60, 0xFF0088FF);
             }
             
             y += CARD_HEIGHT + 5;
         }
+
+        super.render(graphics, mouseX, mouseY, delta);
     }
 
     

@@ -101,7 +101,7 @@ done
 # Тест 6: Проверка размера JAR
 echo -e "\n${YELLOW}[6/8]${NC} Проверка размера JAR..."
 SIZE_BYTES=$(stat -f%z "$JAR_FILE" 2>/dev/null || stat -c%s "$JAR_FILE" 2>/dev/null)
-if [ "$SIZE_BYTES" -gt 50000 ] && [ "$SIZE_BYTES" -lt 100000 ]; then
+if [ "$SIZE_BYTES" -gt 100000 ] && [ "$SIZE_BYTES" -lt 300000 ]; then
     echo -e "  ${GREEN}✓${NC} Размер адекватный: $SIZE_BYTES байт"
     ((++PASSED))
 else

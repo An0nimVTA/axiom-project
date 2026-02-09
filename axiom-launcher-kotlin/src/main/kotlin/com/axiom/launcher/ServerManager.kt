@@ -28,9 +28,10 @@ class ServerManager {
             serverJar.absolutePath,
             "nogui"
         )
-        
+
         processBuilder.directory(serverDir)
         processBuilder.redirectErrorStream(true)
+        ServerStartEnv.apply(processBuilder)
         
         serverProcess = processBuilder.start()
         

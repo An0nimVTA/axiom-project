@@ -2,43 +2,35 @@ package com.axiom.ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
+import java.util.List;
 
 public class CommandCardWidget {
-    public static final int WIDTH = 420;
-    public static final int HEIGHT = 80;
+    public static final int DEFAULT_WIDTH = 220;
+    public static final int DEFAULT_HEIGHT = 280;
     
     private final CommandInfo command;
+    private final int width;
+    private final int height;
     private int x, y;
-    private final Button executeBtn;
-    private final Button detailsBtn;
-    private final Button favoriteBtn;
+    private final Runnable onExecute;
+    private final Runnable onDetails;
+    private final Runnable onFavorite;
     private boolean isFavorite;
 
-    public CommandCardWidget(int x, int y, CommandInfo command, Runnable onExecute, Runnable onDetails, Runnable onFavorite) {
+    public CommandCardWidget(int x, int y, int width, int height, CommandInfo command, Runnable onExecute, Runnable onDetails, Runnable onFavorite) {
         this.x = x;
         this.y = y;
+        this.width = width;
+        this.height = height;
         this.command = command;
         this.isFavorite = false;
-        
-        // Execute button
-        this.executeBtn = Button.builder(Component.literal("▶ Выполнить"), (b) -> onExecute.run())
-            .bounds(x + 280, y + 15, 120, 20)
-            .build();
-            
-        // Details button
-        this.detailsBtn = Button.builder(Component.literal("ℹ Подробнее"), (b) -> onDetails.run())
-            .bounds(x + 280, y + 45, 120, 20)
-            .build();
-        
-        // Favorite button (small star)
-        this.favoriteBtn = Button.builder(Component.literal("★"), (b) -> {
-            onFavorite.run();
-            isFavorite = !isFavorite;
-        })
-            .bounds(x + 250, y + 30, 20, 20)
-            .build();
+        this.onExecute = onExecute;
+        this.onDetails = onDetails;
+        this.onFavorite = onFavorite;
     }
     
     public void setFavorite(boolean favorite) {
@@ -47,78 +39,122 @@ public class CommandCardWidget {
 
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
         int categoryColor = command.getCategory().getColor();
-        int bgColor = (categoryColor & 0x00FFFFFF) | 0x40000000; // Semi-transparent
-        
-        // Background with category color
-        gfx.fill(x, y, x + WIDTH, y + HEIGHT, bgColor);
-        
-        // Left colored stripe (category indicator)
-        gfx.fill(x, y, x + 5, y + HEIGHT, categoryColor);
-        
-        // Border
-        gfx.renderOutline(x, y, WIDTH, HEIGHT, categoryColor);
-        
-        // Category badge (top-right)
-        String categoryName = command.getCategory().getDisplayName();
-        int badgeWidth = Minecraft.getInstance().font.width(categoryName) + 10;
-        gfx.fill(x + WIDTH - badgeWidth - 5, y + 5, x + WIDTH - 5, y + 18, categoryColor);
-        gfx.drawString(Minecraft.getInstance().font, categoryName, 
-            x + WIDTH - badgeWidth, y + 8, 0xFFFFFFFF, false);
-        
-        // Favorite star indicator (left side)
-        if (isFavorite) {
-            gfx.drawString(Minecraft.getInstance().font, "§e★", x + 10, y + 10, 0xFFFFAA00, false);
+        boolean compact = height < 140 || width < 140;
+        float scale = Mth.clamp(height / 260.0f, 0.35f, 1.2f);
+        int padding = Math.max(6, Math.round(14 * scale));
+        boolean hovered = isHovered(mouseX, mouseY);
+
+        if (hovered) {
+            gfx.fill(x - 2, y - 2, x + width + 2, y + height + 2, 0x16000000);
         }
-        
-        // Command title (bold)
-        gfx.drawString(Minecraft.getInstance().font, 
-            Component.literal("§l" + command.getDisplayName()), 
-            x + (isFavorite ? 25 : 15), y + 10, 0xFFFFFFFF, false);
-        
-        // Command syntax (gray)
-        gfx.drawString(Minecraft.getInstance().font, 
-            Component.literal("§7" + command.getCommand()), 
-            x + 15, y + 25, 0xFFAAAAAA, false);
-        
-        // Short description
-        gfx.drawString(Minecraft.getInstance().font, 
-            command.getShortDesc(), 
-            x + 15, y + 40, 0xFFCCCCCC, false);
-        
-        // Requirements indicator
+
+        UiTheme.drawMinimalCard(gfx, x, y, x + width, y + height, categoryColor, hovered);
+
+        int iconSize = Math.max(12, Math.round(Math.min(width, height) * (compact ? 0.42f : 0.16f)));
+        int iconX = x + padding;
+        int iconY = y + padding;
+        ItemStack icon = UiIcons.resolve(command);
+        gfx.renderItem(icon, iconX, iconY);
+
+        if (compact) {
+            int titleX = iconX + iconSize + 6;
+            int titleY = iconY + Math.max(0, (iconSize - Minecraft.getInstance().font.lineHeight) / 2);
+            String titleLine = Minecraft.getInstance().font.plainSubstrByWidth(command.getDisplayName(),
+                width - (titleX - x) - padding);
+            gfx.drawString(Minecraft.getInstance().font, titleLine, titleX, titleY, UiTheme.TEXT_PRIMARY, false);
+            return;
+        }
+
+        int textX = x + padding;
+        int titleY = iconY + iconSize + 10;
+        String titleLine = Minecraft.getInstance().font.plainSubstrByWidth(command.getDisplayName(), width - padding * 2);
+        gfx.drawString(Minecraft.getInstance().font, titleLine, textX, titleY, UiTheme.TEXT_PRIMARY, false);
+
+        int cmdY = titleY + 12;
+        String cmdLine = Minecraft.getInstance().font.plainSubstrByWidth(command.getCommand(), width - padding * 2);
+        gfx.drawString(Minecraft.getInstance().font, cmdLine, textX, cmdY, UiTheme.TEXT_DIM, false);
+
+        int descWidth = width - padding * 2;
+        List<FormattedCharSequence> lines = Minecraft.getInstance().font
+            .split(Component.literal(command.getShortDesc()), Math.max(10, descWidth));
+        int lineY = cmdY + 12;
+        int maxLines = Math.min(2, lines.size());
+        for (int i = 0; i < maxLines; i++) {
+            gfx.drawString(Minecraft.getInstance().font, lines.get(i), textX, lineY, UiTheme.TEXT_MUTED, false);
+            lineY += 10;
+        }
+
+        List<String> tags = new java.util.ArrayList<>();
+        if (command.getRarity() != UiRarity.COMMON) {
+            tags.add(rarityLabel(command.getRarity()));
+        }
         if (command.requiresNation()) {
-            gfx.drawString(Minecraft.getInstance().font, 
-                Component.literal("§e⚠ Требует нацию"), 
-                x + 15, y + 55, 0xFFFFAA00, false);
+            tags.add(UiText.pick("Нужна нация", "Nation required"));
         }
-        
-        // Render buttons
-        executeBtn.render(gfx, mouseX, mouseY, partialTick);
-        detailsBtn.render(gfx, mouseX, mouseY, partialTick);
-        
-        // Render favorite button with color
-        int oldColor = favoriteBtn.getMessage().getStyle().getColor() != null ? 
-            favoriteBtn.getMessage().getStyle().getColor().getValue() : 0xFFFFFFFF;
-        favoriteBtn.setMessage(Component.literal(isFavorite ? "§e★" : "§7☆"));
-        favoriteBtn.render(gfx, mouseX, mouseY, partialTick);
+        if (!tags.isEmpty()) {
+            String tagLine = String.join(" · ", tags);
+            int tagY = y + height - padding - 9;
+            gfx.drawString(Minecraft.getInstance().font, tagLine, textX, tagY, UiTheme.TEXT_DIM, false);
+        }
+
+        if (isFavorite) {
+            gfx.drawString(Minecraft.getInstance().font, "★", x + width - 18, y + 6, UiTheme.ACCENT_WARM, false);
+        }
     }
     
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (favoriteBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        if (executeBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        if (detailsBtn.mouseClicked(mouseX, mouseY, button)) return true;
-        return false;
+        if (mouseX < x || mouseX > x + width || mouseY < y || mouseY > y + height) {
+            return false;
+        }
+        float scale = Mth.clamp(height / 220.0f, 0.85f, 1.25f);
+        int favoriteX = x + width - 22;
+        int favoriteY = y + 6;
+        if (mouseX >= favoriteX && mouseX <= favoriteX + 12 && mouseY >= favoriteY && mouseY <= favoriteY + 12) {
+            onFavorite.run();
+            isFavorite = !isFavorite;
+            return true;
+        }
+        if (onExecute != null) {
+            onExecute.run();
+            return true;
+        }
+        return true;
     }
     
     public void setPosition(int x, int y) {
         this.x = x;
         this.y = y;
-        executeBtn.setPosition(x + 280, y + 15);
-        detailsBtn.setPosition(x + 280, y + 45);
-        favoriteBtn.setPosition(x + 250, y + 30);
+    }
+
+    public boolean isHovered(int mouseX, int mouseY) {
+        return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+    }
+
+    public CommandInfo getCommand() {
+        return command;
     }
     
     public int getY() {
         return y;
+    }
+
+    public void openDetails() {
+        onDetails.run();
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    private String rarityLabel(UiRarity rarity) {
+        return switch (rarity) {
+            case RARE -> UiText.pick("Редкая", "Rare");
+            case LEGENDARY -> UiText.pick("Легендарная", "Legendary");
+            default -> UiText.pick("Обычная", "Common");
+        };
     }
 }

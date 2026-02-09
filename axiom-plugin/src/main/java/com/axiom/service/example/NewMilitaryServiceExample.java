@@ -1,10 +1,10 @@
 package com.axiom.service.example;
 
-import com.axiom.service.MilitaryServiceInterface;
-import com.axiom.repository.NationRepository;
-import com.axiom.repository.MilitaryRepository;
-import com.axiom.model.Nation;
-import com.axiom.model.MilitaryData;
+import com.axiom.domain.service.military.MilitaryServiceInterface;
+import com.axiom.domain.repo.NationRepository;
+import com.axiom.domain.repo.MilitaryRepository;
+import com.axiom.domain.model.Nation;
+import com.axiom.domain.model.MilitaryData;
 import com.axiom.exception.MilitaryException;
 
 import java.util.HashMap;

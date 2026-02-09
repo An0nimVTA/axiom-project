@@ -17,26 +17,39 @@ import java.util.zip.ZipInputStream
 data class LauncherFilesInfo(
     val forgeUrl: String = "",
     val librariesUrl: String = "",
-    val forgeVersion: String = "47.1.3",
+    val forgeVersion: String = "47.4.4",
     val minecraftVersion: String = "1.20.1",
     val installerUrl: String = "",
     val totalSize: Long = 0
 )
 
+@Serializable
+private data class UiAutotestConfig(
+    val enabled: Boolean = false,
+    val autoStartDelayTicks: Int = 60,
+    val stepDelayTicks: Int = 5,
+    val commandTimeoutTicks: Int = 200,
+    val includeUiScreens: Boolean = true,
+    val commands: List<String> = listOf("/testbot run all"),
+    val commandBlacklist: List<String> = emptyList()
+)
+
 class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
     
-    private val baseDir = File(System.getProperty("user.home"), ".axiom-launcher")
-    private val instancesDir = File(baseDir, "instances")
-    private val librariesDir = File(baseDir, "libraries")
-    private val assetsDir = File(baseDir, "assets")
-    private val nativesDir = File(baseDir, "natives")
+    private val baseDir: File by lazy {
+        File(System.getProperty("user.dir"), ConfigManager.config.gameDir.ifBlank { "minecraft" }).absoluteFile
+    }
+    private val instancesDir: File get() = File(baseDir, "instances")
+    private val librariesDir: File get() = File(baseDir, "libraries")
+    private val assetsDir: File get() = File(baseDir, "assets")
+    private val nativesDir: File get() = File(baseDir, "natives")
     
     private val json = Json { ignoreUnknownKeys = true }
     private val sep = File.pathSeparator
     
     companion object {
         const val MC_VERSION = "1.20.1"
-        const val FORGE_VERSION = "47.1.3"
+        const val FORGE_VERSION = "47.4.4"
     }
 
     private data class ResolvedVersions(
@@ -45,7 +58,7 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
         val assetIndexId: String
     )
     
-    init {
+    private fun ensureDirs() {
         listOf(baseDir, instancesDir, librariesDir, assetsDir, nativesDir).forEach { it.mkdirs() }
     }
     
@@ -57,15 +70,24 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
         onProgress: (String, Float) -> Unit = { _, _ -> }
     ): Result<Process> = withContext(Dispatchers.IO) {
         runCatching {
+            ensureDirs()
             val instanceDir = File(instancesDir, modpack?.id ?: "default").apply { mkdirs() }
             val modsDir = File(instanceDir, "mods").apply { mkdirs() }
             onProgress("Подготовка окружения...", 0.05f)
             val versions = ensureForgeAndMinecraftInstalled(onProgress)
+
+            if (ConfigManager.config.autoUiTests) {
+                writeUiAutotestConfig(instanceDir)
+            }
             
-            if (modpack != null && !isModpackInstalled(modsDir)) {
-                downloadModpack(modpack, modsDir, onProgress)
-            } else if (modpack != null) {
-                onProgress("Модпак: ${modsDir.listFiles()?.size ?: 0} модов", 0.7f)
+            val syncedFromServer = syncModsFromServerDir(modsDir, onProgress)
+            if (!syncedFromServer) {
+                val resolvedModpack = modpack ?: resolveLocalModpack(server.modpack)
+                if (resolvedModpack != null && !isModpackInstalled(modsDir)) {
+                    downloadModpack(resolvedModpack, modsDir, onProgress)
+                } else if (resolvedModpack != null) {
+                    onProgress("Модпак: ${modsDir.listFiles()?.size ?: 0} модов", 0.7f)
+                }
             }
             
             onProgress("Запуск Forge...", 0.9f)
@@ -73,6 +95,32 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
             onProgress("Игра запущена!", 1.0f)
             process
         }
+    }
+
+    private fun writeUiAutotestConfig(instanceDir: File) {
+        val configDir = File(instanceDir, "config/axiomui").apply { mkdirs() }
+        val config = ConfigManager.config
+        val commands = if (config.autoUiTestCommands.isNotEmpty()) {
+            config.autoUiTestCommands
+        } else {
+            listOf("/testbot run all")
+        }
+        val blacklist = if (config.autoUiTestCommandBlacklist.isNotEmpty()) {
+            config.autoUiTestCommandBlacklist
+        } else {
+            emptyList()
+        }
+        val data = UiAutotestConfig(
+            enabled = true,
+            autoStartDelayTicks = config.autoUiTestAutoStartDelayTicks.coerceAtLeast(0),
+            stepDelayTicks = config.autoUiTestStepDelayTicks.coerceAtLeast(1),
+            commandTimeoutTicks = config.autoUiTestCommandTimeoutTicks.coerceAtLeast(1),
+            includeUiScreens = config.autoUiTestIncludeScreens,
+            commands = commands,
+            commandBlacklist = blacklist
+        )
+        val outFile = File(configDir, "autotest.json")
+        outFile.writeText(json.encodeToString(UiAutotestConfig.serializer(), data))
     }
     
     private fun isForgeInstalled(): Boolean {
@@ -84,9 +132,17 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
     
     private suspend fun downloadModpack(modpack: Modpack, modsDir: File, onProgress: (String, Float) -> Unit) = withContext(Dispatchers.IO) {
         onProgress("Скачивание модпака...", 0.35f)
-        val url = if (modpack.downloadUrl.startsWith("http")) modpack.downloadUrl else "$apiUrl${modpack.downloadUrl}"
+        val url = modpack.downloadUrl
         val zipFile = File(baseDir, "modpack.zip")
-        downloadFile(url, zipFile) { p -> onProgress("Модпак: ${(p * 100).toInt()}%", 0.35f + p * 0.3f) }
+        if (url.startsWith("file://")) {
+            val src = File(url.removePrefix("file://"))
+            src.copyTo(zipFile, overwrite = true)
+        } else if (File(url).exists()) {
+            File(url).copyTo(zipFile, overwrite = true)
+        } else {
+            val httpUrl = if (url.startsWith("http")) url else "$apiUrl$url"
+            downloadFile(httpUrl, zipFile) { p -> onProgress("Модпак: ${(p * 100).toInt()}%", 0.35f + p * 0.3f) }
+        }
         onProgress("Распаковка...", 0.66f)
         modsDir.listFiles()?.forEach { it.delete() }
         var count = 0
@@ -94,12 +150,19 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
             var entry = zis.nextEntry
             while (entry != null) {
                 if (!entry.isDirectory && entry.name.endsWith(".jar")) {
-                    FileOutputStream(File(modsDir, File(entry.name).name)).use { zis.copyTo(it) }
+                    val outFile = File(modsDir, File(entry.name).name)
+                    outFile.parentFile?.mkdirs()
+                    FileOutputStream(outFile).use { zis.copyTo(it) }
                     count++
                 }
                 zis.closeEntry()
                 entry = zis.nextEntry
             }
+        }
+        val removed = removeBlacklistedMods(modsDir, resolveClientModBlacklist())
+        if (removed > 0) {
+            count = (count - removed).coerceAtLeast(0)
+            onProgress("Модпак: удалено $removed модов по blacklist", 0.69f)
         }
         zipFile.delete()
         onProgress("Установлено $count модов", 0.7f)
@@ -138,9 +201,14 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
         buildLibraryClasspath(versionData, cpSet)
         buildLibraryClasspath(versions.vanilla, cpSet)
         
-        // Add client jar
-        val clientJar = File(baseDir, "versions/1.20.1/1.20.1.jar")
-        if (clientJar.exists()) cpSet.add(clientJar.absolutePath)
+        // Add vanilla client jar only if Forge client SRG jar isn't already on the classpath.
+        val hasForgeClientJar = File(librariesDir, "net/minecraft/client")
+            .walkTopDown()
+            .any { it.isFile && it.extension == "jar" && it.name.startsWith("client-") }
+        if (!hasForgeClientJar) {
+            val clientJar = File(baseDir, "versions/1.20.1/1.20.1.jar")
+            if (clientJar.exists()) cpSet.add(clientJar.absolutePath)
+        }
         
         val classpath = cpSet.joinToString(sep)
         
@@ -161,10 +229,12 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
             "--accessToken", "0",
             "--userType", "legacy",
             "--userProperties", "{}",
-            "--versionType", "release",
-            "--server", server.address,
-            "--port", server.port.toString()
+            "--versionType", "release"
         ))
+        // Use quickPlay for auto-connect on modern clients (Forge ignores --server/--port).
+        if (server.address.isNotBlank()) {
+            gameArgs.addAll(listOf("--quickPlayMultiplayer", "${server.address}:${server.port}"))
+        }
         
         // Final command
         val cmd = mutableListOf(java)
@@ -182,10 +252,61 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
         return ProcessBuilder(cmd).directory(instanceDir).inheritIO().start()
     }
     
-    private fun findJava(path: String): String {
-        if (File(path).exists()) return path
-        listOf("/usr/lib/jvm/java-17-openjdk-amd64/bin/java", "/usr/lib/jvm/java-21-openjdk-amd64/bin/java", "/usr/bin/java")
-            .forEach { if (File(it).exists()) return it }
+    fun findJava(customPath: String): String {
+        // 0. ПОРТАТИВНЫЙ РЕЖИМ: Ищем папку runtime рядом с лаунчером
+        val portableJava = File(System.getProperty("user.dir"), "runtime/bin/javaw.exe")
+        if (portableJava.exists()) {
+            println("Portable Java found: ${portableJava.absolutePath}")
+            return portableJava.absolutePath
+        }
+
+        // 1. Если пользователь задал путь и он валиден - используем его
+        if (customPath.isNotBlank() && File(customPath).let { it.exists() && it.canExecute() }) {
+            return customPath
+        }
+
+        val os = System.getProperty("os.name").lowercase()
+        val isWin = os.contains("win")
+        val javaBin = if (isWin) "javaw.exe" else "java"
+
+        // 2. Ищем в JAVA_HOME
+        val javaHome = System.getProperty("java.home")
+        if (javaHome != null) {
+            val bin = File(javaHome, "bin/$javaBin")
+            if (bin.exists()) return bin.absolutePath
+        }
+
+        // 3. Стандартные пути Windows
+        if (isWin) {
+            val roots = listOf(
+                File("C:\\Program Files\\Eclipse Adoptium"),
+                File("C:\\Program Files\\Java"),
+                File("C:\\Program Files\\Microsoft"),
+                File("C:\\Program Files (x86)\\Java")
+            )
+            
+            for (root in roots) {
+                if (root.exists()) {
+                    // Ищем jdk-17 или новее
+                    val found = root.walk()
+                        .maxDepth(3)
+                        .filter { it.name.equals("javaw.exe", true) }
+                        .filter { it.absolutePath.contains("jdk-17") || it.absolutePath.contains("jdk-21") || it.absolutePath.contains("1.20") }
+                        .firstOrNull()
+                    
+                    if (found != null) return found.absolutePath
+                }
+            }
+        } else {
+            // Linux/Mac standard paths
+            listOf(
+                "/usr/lib/jvm/java-17-openjdk-amd64/bin/java",
+                "/usr/lib/jvm/java-21-openjdk-amd64/bin/java",
+                "/usr/bin/java"
+            ).forEach { if (File(it).exists()) return it }
+        }
+
+        // 4. Последний шанс - просто команда java (из PATH)
         return "java"
     }
     
@@ -198,22 +319,42 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
     }
 
     private suspend fun ensureForgeAndMinecraftInstalled(onProgress: (String, Float) -> Unit): ResolvedVersions {
+        ensureLocalCore(onProgress)
         val forgeVersionId = "$MC_VERSION-forge-$FORGE_VERSION"
         val forgeVersionDir = File(baseDir, "versions/$forgeVersionId").apply { mkdirs() }
         val forgeVersionJson = File(forgeVersionDir, "$forgeVersionId.json")
 
-        val launcherInfo = runCatching { fetchLauncherFilesInfo() }.getOrNull()
+        // Direct URL to VPS
+        val forgeUrl = "http://193.23.201.6:8080/updates/forge-installer.jar"
 
         if (!forgeVersionJson.exists()) {
             onProgress("Скачивание Forge файлов...", 0.1f)
-            val info = launcherInfo ?: throw RuntimeException("Сервер недоступен для Forge файлов")
-            if (info.installerUrl.isBlank()) {
-                throw RuntimeException("Файлы Forge не найдены на сервере")
-            }
             val installerJar = File(baseDir, "forge-installer-$FORGE_VERSION.jar")
+            
+            // 1. Проверяем ресурсы (ВШИТЫЙ FORGE)
             if (!installerJar.exists()) {
-                downloadFile(apiUrl + info.installerUrl, installerJar) { p ->
-                    onProgress("Forge installer: ${(p * 100).toInt()}%", 0.1f + p * 0.1f)
+                val resourceStream = javaClass.getResourceAsStream("/forge-installer.jar")
+                if (resourceStream != null) {
+                    println("Извлечение вшитого Forge Installer...")
+                    onProgress("Извлечение Forge...", 0.15f)
+                    installerJar.outputStream().use { output ->
+                        resourceStream.copyTo(output)
+                    }
+                }
+            }
+
+            // 2. Если не нашли в ресурсах - пробуем качать (VPS/Official)
+            if (!installerJar.exists()) {
+                try {
+                    downloadFile(forgeUrl, installerJar) { p ->
+                        onProgress("Forge installer: ${(p * 100).toInt()}%", 0.1f + p * 0.1f)
+                    }
+                } catch (e: Exception) {
+                    // Fallback to official maven
+                    val officialUrl = "https://maven.minecraftforge.net/net/minecraftforge/forge/$MC_VERSION-$FORGE_VERSION/forge-$MC_VERSION-$FORGE_VERSION-installer.jar"
+                    downloadFile(officialUrl, installerJar) { p ->
+                        onProgress("Forge (Mirror): ${(p * 100).toInt()}%", 0.1f + p * 0.1f)
+                    }
                 }
             }
             extractJsonFromJar(installerJar, "version.json", forgeVersionJson)
@@ -222,17 +363,6 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
         val forgeJson = json.parseToJsonElement(forgeVersionJson.readText()).jsonObject
         val vanillaJson = ensureVanillaVersionInstalled(onProgress)
         val assetIndexId = vanillaJson["assetIndex"]?.jsonObject?.get("id")?.jsonPrimitive?.content ?: "1.20"
-
-        if (launcherInfo != null && launcherInfo.librariesUrl.isNotBlank() && !librariesPresent()) {
-            onProgress("Установка библиотек...", 0.45f)
-            val libsZip = File(baseDir, "forge-libraries-$MC_VERSION.zip")
-            if (!libsZip.exists()) {
-                downloadFile(apiUrl + launcherInfo.librariesUrl, libsZip) { p ->
-                    onProgress("Библиотеки: ${(p * 100).toInt()}%", 0.45f + p * 0.1f)
-                }
-            }
-            extractZip(libsZip, librariesDir)
-        }
 
         ensureLibrariesInstalled(forgeJson, vanillaJson, onProgress)
         ensureAssetsInstalled(vanillaJson, onProgress)
@@ -259,6 +389,9 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
 
         val vanillaJson = json.parseToJsonElement(versionJsonFile.readText()).jsonObject
         if (!clientJar.exists()) {
+            copyLocalVanillaJarIfPresent(clientJar)
+        }
+        if (!clientJar.exists()) {
             val clientUrl = vanillaJson["downloads"]?.jsonObject?.get("client")?.jsonObject?.get("url")?.jsonPrimitive?.content
                 ?: throw RuntimeException("Не удалось получить URL клиента")
             downloadFile(clientUrl, clientJar) { p ->
@@ -270,6 +403,13 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
     }
 
     private suspend fun ensureAssetsInstalled(vanillaJson: JsonObject, onProgress: (String, Float) -> Unit) {
+        if (assetsDir.exists() && File(assetsDir, "objects").exists()) {
+            return
+        }
+        extractLocalAssetsIfPresent(onProgress)
+        if (assetsDir.exists() && File(assetsDir, "objects").exists()) {
+            return
+        }
         val assetIndex = vanillaJson["assetIndex"]?.jsonObject ?: return
         val indexId = assetIndex["id"]?.jsonPrimitive?.content ?: return
         val indexUrl = assetIndex["url"]?.jsonPrimitive?.content ?: return
@@ -417,6 +557,11 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
             while (entry != null) {
                 if (!entry.isDirectory) {
                     val out = File(targetDir, entry.name)
+                    val canonicalTarget = targetDir.canonicalPath
+                    val canonicalOut = out.canonicalPath
+                    if (!canonicalOut.startsWith(canonicalTarget)) {
+                        throw SecurityException("Zip Slip: ${entry.name}")
+                    }
                     out.parentFile?.mkdirs()
                     FileOutputStream(out).use { zis.copyTo(it) }
                 }
@@ -443,6 +588,9 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
     }
 
     private suspend fun downloadText(url: String): String = withContext(Dispatchers.IO) {
+        if (isOffline() && url.startsWith("http")) {
+            throw IOException("Offline mode: network disabled ($url)")
+        }
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 30000; conn.readTimeout = 300000
         conn.setRequestProperty("User-Agent", "AXIOM-Launcher/1.0")
@@ -451,6 +599,9 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
     }
     
     private suspend fun downloadFile(url: String, dest: File, onProgress: (Float) -> Unit = {}) = withContext(Dispatchers.IO) {
+        if (isOffline() && url.startsWith("http")) {
+            throw IOException("Offline mode: network disabled ($url)")
+        }
         dest.parentFile?.mkdirs()
         if (dest.exists() && dest.length() > 0) return@withContext
         val conn = URL(url).openConnection() as HttpURLConnection
@@ -463,4 +614,178 @@ class MinecraftLauncher(private val apiUrl: String = "http://localhost:5000") {
             while (i.read(buf).also { n = it } != -1) { o.write(buf, 0, n); dl += n; if (total > 0) onProgress(dl.toFloat() / total) }
         }}
     }
+
+    private fun localPackageDirs(): List<File> {
+        val cwd = File(System.getProperty("user.dir")).absoluteFile
+        val configDir = ConfigManager.config.localPackagesDir.trim().ifBlank { null }?.let { File(it) }
+        val envDir = System.getenv("AXIOM_PACKAGES_DIR")?.trim()?.takeIf { it.isNotBlank() }?.let { File(it) }
+        val candidates = listOfNotNull(
+            configDir,
+            envDir,
+            File(cwd, "packages"),
+            cwd,
+            File(cwd, "build_portable/AxiomClient"),
+            File(cwd, "../build_portable/AxiomClient")
+        )
+        return candidates.filter { it.exists() }.distinctBy { it.canonicalPath }
+    }
+
+    private fun findLocalFile(vararg names: String): File? {
+        val dirs = localPackageDirs()
+        for (dir in dirs) {
+            for (name in names) {
+                val file = File(dir, name)
+                if (file.exists() && file.isFile) return file
+            }
+        }
+        return null
+    }
+
+    private fun ensureLocalCore(onProgress: (String, Float) -> Unit) {
+        val versionsDir = File(baseDir, "versions")
+        val libsDir = File(baseDir, "libraries")
+
+        val coreZip = findLocalFile("client_core.zip")
+        if (coreZip != null && (!versionsDir.exists() || !libsDir.exists())) {
+            onProgress("Распаковка core...", 0.05f)
+            extractZip(coreZip, baseDir)
+        }
+
+        val assetsZip = findLocalFile("assets.zip")
+        if (assetsZip != null && !assetsDir.exists()) {
+            onProgress("Распаковка assets...", 0.08f)
+            extractZip(assetsZip, baseDir)
+        }
+    }
+
+    private fun copyLocalVanillaJarIfPresent(dest: File) {
+        val localJar = findLocalFile(
+            "$MC_VERSION.jar",
+            "minecraft-$MC_VERSION.jar",
+            "client-$MC_VERSION.jar"
+        ) ?: return
+        dest.parentFile?.mkdirs()
+        localJar.copyTo(dest, overwrite = true)
+    }
+
+    private fun extractLocalAssetsIfPresent(onProgress: (String, Float) -> Unit) {
+        val assetsZip = findLocalFile("assets.zip") ?: return
+        onProgress("Распаковка assets (локально)...", 0.55f)
+        extractZip(assetsZip, baseDir)
+    }
+
+    private fun resolveLocalModpack(id: String): Modpack? {
+        val cwd = File(System.getProperty("user.dir")).absoluteFile
+        val modpackDirs = listOf(
+            File(cwd, "modpacks"),
+            File(cwd, "../modpacks")
+        ).filter { it.exists() }
+
+        val candidates = mutableListOf<File>()
+        if (id.isNotBlank()) {
+            for (dir in modpackDirs) {
+                candidates.add(File(dir, "$id.zip"))
+                candidates.add(File(dir, "modpack_$id.zip"))
+            }
+        }
+
+        val found = candidates.firstOrNull { it.exists() && it.isFile }
+            ?: modpackDirs.flatMap { dir -> dir.listFiles { f -> f.extension == "zip" }?.toList() ?: emptyList() }
+                .firstOrNull()
+
+        return found?.let {
+            Modpack(
+                id = it.nameWithoutExtension,
+                name = it.nameWithoutExtension,
+                version = "local",
+                minecraftVersion = MC_VERSION,
+                downloadUrl = it.absolutePath,
+                size = it.length()
+            )
+        }
+    }
+
+    private fun resolveServerModsDir(): File? {
+        val cwd = File(System.getProperty("user.dir")).absoluteFile
+        val configPath = ConfigManager.config.serverStartPath.trim()
+        val envServerDir = System.getenv("AXIOM_SERVER_DIR")?.trim()?.takeIf { it.isNotBlank() }?.let { File(it) }
+        val envModsDir = System.getenv("AXIOM_SERVER_MODS")?.trim()?.takeIf { it.isNotBlank() }?.let { File(it) }
+        val configModsDir = if (configPath.isNotBlank()) File(configPath).parentFile?.let { File(it, "mods") } else null
+
+        val candidates = listOfNotNull(
+            envModsDir,
+            envServerDir?.let { File(it, "mods") },
+            configModsDir,
+            File(cwd, "server/mods"),
+            File(cwd, "../server/mods"),
+            File(System.getProperty("user.home"), "axiom plugin/server/mods")
+        )
+
+        return candidates.firstOrNull { it.exists() && it.isDirectory }
+    }
+
+    private fun syncModsFromServerDir(modsDir: File, onProgress: (String, Float) -> Unit): Boolean {
+        val serverModsDir = resolveServerModsDir() ?: return false
+        val serverMods = serverModsDir.listFiles { f -> f.isFile && f.extension == "jar" }?.toList() ?: emptyList()
+        if (serverMods.isEmpty()) return false
+        val blacklist = resolveClientModBlacklist()
+        val filteredMods = if (blacklist.isEmpty()) {
+            serverMods
+        } else {
+            serverMods.filterNot { mod ->
+                val name = mod.name.lowercase()
+                blacklist.any { name.contains(it) }
+            }
+        }
+        if (filteredMods.isEmpty()) return false
+
+        onProgress("Копирование модов с сервера...", 0.35f)
+        val targetMods = modsDir.listFiles { f -> f.isFile && f.extension == "jar" }?.toList() ?: emptyList()
+        val serverNames = filteredMods.map { it.name }.toSet()
+        targetMods.filter { it.name !in serverNames }.forEach { it.delete() }
+
+        var copied = 0
+        for ((idx, src) in filteredMods.withIndex()) {
+            val dest = File(modsDir, src.name)
+            if (!dest.exists() || dest.length() != src.length()) {
+                src.copyTo(dest, overwrite = true)
+                copied++
+            }
+            if (idx % 10 == 0) {
+                val progress = if (filteredMods.isNotEmpty()) idx.toFloat() / filteredMods.size else 1.0f
+                onProgress("Моды: ${idx}/${filteredMods.size}", 0.35f + progress * 0.35f)
+            }
+        }
+
+        onProgress("Моды: ${filteredMods.size} (обновлено $copied)", 0.7f)
+        return true
+    }
+
+    private fun resolveClientModBlacklist(): List<String> {
+        val defaultBlacklist = listOf("tl_skin_cape", "trender", "transition", "entityculling")
+        val env = System.getenv("AXIOM_CLIENT_MOD_BLACKLIST")
+            ?.split(",")
+            ?.map { it.trim().lowercase() }
+            ?.filter { it.isNotEmpty() }
+            ?: emptyList()
+        return (defaultBlacklist + env).distinct()
+    }
+
+    private fun removeBlacklistedMods(modsDir: File, blacklist: List<String>): Int {
+        if (blacklist.isEmpty()) return 0
+        val candidates = modsDir.listFiles { f -> f.isFile && f.extension == "jar" }?.toList() ?: emptyList()
+        if (candidates.isEmpty()) return 0
+        var removed = 0
+        candidates.forEach { mod ->
+            val name = mod.name.lowercase()
+            if (blacklist.any { name.contains(it) }) {
+                if (mod.delete()) {
+                    removed++
+                }
+            }
+        }
+        return removed
+    }
+
+    private fun isOffline(): Boolean = ConfigManager.config.offlineMode
 }

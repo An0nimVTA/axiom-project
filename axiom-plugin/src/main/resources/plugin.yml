@@ -2,7 +2,6 @@ name: AXIOM
 version: 1.0.0
 main: com.axiom.AXIOM
 api-version: 1.20
-depend: [WorldEdit]
 softdepend: [PlaceholderAPI, Vault]
 authors: [AxiomTeam]
 description: Comprehensive geopolitical and economic engine for Minecraft servers with 165+ systems
@@ -13,72 +12,79 @@ commands:
     description: Main AXIOM command
     usage: /axiom <subcommand>
     aliases: [ax]
+    permission: axiom.use
   nation:
     description: Nation management commands
     usage: /nation <subcommand>
     aliases: [n, country]
+    permission: axiom.use
   claim:
     description: Claim territory for your nation
     usage: /claim
+    permission: axiom.nation.claim
   unclaim:
     description: Unclaim territory from your nation
     usage: /unclaim
+    permission: axiom.nation.claim
   testbot:
     description: Test bot commands for auto testing
     usage: /testbot <subcommand>
     aliases: [tb, autotest]
+    permission: axiom.testbot.use
+  test:
+    description: Run AXIOM autotests
+    usage: /test [suite|test|list]
+    permission: axiom.test
   technology:
     description: Technology tree menu
     usage: /technology
     aliases: [tech]
+    permission: axiom.technology.research
   modpack:
     description: Mod pack builder and manager
     usage: /modpack [create|list|info|enable|disable|build|download]
     aliases: [mp, modbuilder]
+    permission: axiom.modpack.builder
   econom:
     description: Economic indicators and statistics
-    usage: /econom [global|gdp|development|inflation|unemployment|trade|budget|my|trends|help]
+    usage: /econom [stats|global|gdp|development|inflation|unemployment|trade|budget|my|trends|help]
     aliases: [economic, economy, indicators]
+    permission: axiom.economic.indicators
   mapvisual:
     description: Map boundary visualization system
     usage: /mapvisual [stats|nations|cities|enable|disable|reload]
     aliases: [mapvis, boundaryvis]
+    permission: axiom.map.visualize
   capture:
     description: Dynamic capture system for countries and cities
     usage: /capture [begin_siege|damage_core|capture_chunk|info|trenches|list_cores]
     aliases: [conquest, siege]
+    permission: axiom.capture.use
   military:
     description: New military management commands (Architecture 2.0)
     usage: /military <recruit|stats|disband|upgrade>
     aliases: [mil, army]
-  war:
-    description: Advanced warfare and conflict systems
-    usage: /war [declare|status|peace|mobilize|strategy]
-    aliases: [conflict, battle]
-  diplomacy:
-    description: International relations and diplomacy
-    usage: /diplomacy [relations|treaties|allies|embassies|summits]
-    aliases: [diplomat, foreign]
-  culture:
-    description: Cultural heritage and artistic systems
-    usage: /culture [heritage|festival|exchanges|arts]
-    aliases: [arts, heritage]
-  environment:
-    description: Environmental protection and policies
-    usage: /environment [pollution|conservation|climate|green]
-    aliases: [eco, climate, conservation]
-  media:
-    description: News and media broadcasting
-    usage: /media [publish|news|broadcast|journalist]
-    aliases: [news, press, journalism]
-  election:
-    description: Political elections and campaigns
-    usage: /election [vote|candidates|campaign|results|positions]
-    aliases: [vote, politics, democracy]
-  crime:
-    description: Crime detection and justice system
-    usage: /crime [detect|justice|court|police|investigation]
-    aliases: [justice, police, law]
+    permission: axiom.military.use
+  modbalance:
+    description: Mod balance management
+    usage: /modbalance <check|stats|list|enable|disable|config>
+    aliases: [modbal, mbalance]
+    permission: axiom.modbalance.use
+  modenhance:
+    description: Mod integration enhancement tools
+    usage: /modenhance <mappings|compat|check|stats|list>
+    aliases: [modint, menhance]
+    permission: axiom.modenhance.check
+  modpackmanager:
+    description: Modpack manager operations
+    usage: /modpackmanager <list|info|enable|disable|stats|available|reload>
+    aliases: [mpm, modpm]
+    permission: axiom.modpackmanager.admin
+  recipeintegration:
+    description: Recipe integration management
+    usage: /recipeintegration <list|enable|disable|stats|usage|player|reload|check|search|compat|recipes>
+    aliases: [reintegrate, rint]
+    permission: axiom.recipeintegration.use
 
 permissions:
   axiom.use:
@@ -141,3 +147,147 @@ permissions:
   axiom.election.run:
     description: Run for election positions
     default: true
+  axiom.admin.debug:
+    description: Access admin debug tools
+    default: op
+  axiom.admin.reload:
+    description: Reload AXIOM configuration
+    default: op
+  axiom.admin.testbot:
+    description: Run TestBot admin tests
+    default: op
+  axiom.ally.create:
+    description: Create alliances
+    default: true
+  axiom.bank.use:
+    description: Use bank features
+    default: true
+  axiom.capture.use:
+    description: Use capture system
+    default: true
+  axiom.military.use:
+    description: Use military commands
+    default: true
+  axiom.recipeintegration.use:
+    description: Use recipe integration tools
+    default: op
+  axiom.city.build:
+    description: Build city structures
+    default: true
+  axiom.city.create:
+    description: Create cities
+    default: true
+  axiom.history.view:
+    description: View history
+    default: true
+  axiom.modbalance.admin:
+    description: Admin access to mod balance tools
+    default: op
+  axiom.modbalance.check:
+    description: Check mod balance
+    default: op
+  axiom.modbalance.config:
+    description: Configure mod balance
+    default: op
+  axiom.modbalance.use:
+    description: Use mod balance tools
+    default: op
+  axiom.modenhance.check:
+    description: Check mod integration enhancements
+    default: op
+  axiom.modenhance.compat:
+    description: Check mod compatibility
+    default: op
+  axiom.modenhance.list:
+    description: List mod enhancements
+    default: op
+  axiom.modenhance.mappings:
+    description: View mod enhancement mappings
+    default: op
+  axiom.modenhance.stats:
+    description: View mod enhancement stats
+    default: op
+  axiom.modpackmanager.admin:
+    description: Admin access to modpack manager
+    default: op
+  axiom.modpackmanager.info:
+    description: View modpack info
+    default: op
+  axiom.modpackmanager.list:
+    description: List modpacks
+    default: op
+  axiom.modpackmanager.modify:
+    description: Modify modpacks
+    default: op
+  axiom.modpackmanager.stats:
+    description: View modpack statistics
+    default: op
+  axiom.nation.info:
+    description: View nation info
+    default: true
+  axiom.nation.invite:
+    description: Invite players to a nation
+    default: true
+  axiom.nation.join:
+    description: Join a nation
+    default: true
+  axiom.nation.kick:
+    description: Kick players from a nation
+    default: true
+  axiom.nation.leave:
+    description: Leave a nation
+    default: true
+  axiom.profile.view:
+    description: View profile
+    default: true
+  axiom.recipeint.admin:
+    description: Admin access to recipe integration
+    default: op
+  axiom.recipeint.check:
+    description: Check recipe compatibility
+    default: op
+  axiom.recipeint.list:
+    description: List recipe integrations
+    default: op
+  axiom.recipeint.stats:
+    description: View recipe integration stats
+    default: op
+  axiom.religion.create:
+    description: Create religions
+    default: true
+  axiom.religion.join:
+    description: Join religions
+    default: true
+  axiom.tech.list:
+    description: List technologies
+    default: true
+  axiom.tech.research:
+    description: Research technologies
+    default: true
+  axiom.tech.view:
+    description: View technology tree
+    default: true
+  axiom.territory.claim:
+    description: Claim territory
+    default: true
+  axiom.territory.unclaim:
+    description: Unclaim territory
+    default: true
+  axiom.test:
+    description: Use test commands
+    default: op
+  axiom.trade.use:
+    description: Use trade system
+    default: true
+  axiom.treaty.create:
+    description: Create treaties
+    default: true
+  axiom.wallet.check:
+    description: Check wallet balance
+    default: true
+  axiom.wallet.pay:
+    description: Pay from wallet
+    default: true
+  axiom.war.peace:
+    description: Offer peace in war
+    default: op

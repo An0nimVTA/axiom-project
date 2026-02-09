@@ -1,10 +1,10 @@
 package com.axiom.api;
 
 import com.axiom.AXIOM;
-import com.axiom.service.ModIntegrationService;
-import com.axiom.service.ModResourceService;
-import com.axiom.service.ModWarfareService;
-import com.axiom.service.ModEnergyService;
+import com.axiom.domain.service.infrastructure.ModIntegrationService;
+import com.axiom.domain.service.infrastructure.ModResourceService;
+import com.axiom.domain.service.infrastructure.ModWarfareService;
+import com.axiom.domain.service.infrastructure.ModEnergyService;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

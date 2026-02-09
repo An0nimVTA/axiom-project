@@ -19,9 +19,10 @@ public class CommandSearchWidget {
         this.searchField = new EditBox(
             net.minecraft.client.Minecraft.getInstance().font,
             x, y, width, 20,
-            Component.literal("Поиск команд...")
+            UiText.text("Поиск команд...", "Search commands...")
         );
-        searchField.setHint(Component.literal("🔍 Введите название команды..."));
+        this.searchField.setBordered(false);
+        searchField.setHint(UiText.text("Введите название команды...", "Type a command name..."));
         searchField.setResponder(this::onSearchChanged);
     }
 
@@ -43,11 +44,17 @@ public class CommandSearchWidget {
     }
 
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
+        int x0 = searchField.getX();
+        int y0 = searchField.getY();
+        int x1 = x0 + searchField.getWidth();
+        int y1 = y0 + searchField.getHeight();
+        gfx.fill(x0, y0, x1, y1, UiTheme.BUTTON_BG);
+        gfx.renderOutline(x0, y0, x1 - x0, y1 - y0, UiTheme.BUTTON_BORDER);
         searchField.render(gfx, mouseX, mouseY, partialTick);
         
         // Results count
         if (!searchField.getValue().isEmpty()) {
-            String resultsText = "§7Найдено: §f" + filteredCommands.size();
+            String resultsText = UiText.pick("§7Найдено: §f", "§7Found: §f") + filteredCommands.size();
             gfx.drawString(
                 net.minecraft.client.Minecraft.getInstance().font,
                 resultsText,

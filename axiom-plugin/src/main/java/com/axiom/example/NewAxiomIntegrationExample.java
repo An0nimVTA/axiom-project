@@ -1,13 +1,13 @@
 package com.axiom.example;
 
 import com.axiom.AXIOM;
-import com.axiom.service.ServiceFactory;
-import com.axiom.service.MilitaryServiceInterface;
-import com.axiom.service.SiegeServiceInterface;
-import com.axiom.service.EconomyServiceInterface;
-import com.axiom.controller.MilitaryController;
-import com.axiom.repository.NationRepository;
-import com.axiom.repository.MilitaryRepository;
+import com.axiom.domain.service.infrastructure.ServiceFactory;
+import com.axiom.domain.service.military.MilitaryServiceInterface;
+import com.axiom.domain.service.military.SiegeServiceInterface;
+import com.axiom.domain.service.industry.EconomyServiceInterface;
+import com.axiom.app.controller.MilitaryController;
+import com.axiom.domain.repo.NationRepository;
+import com.axiom.domain.repo.MilitaryRepository;
 import com.axiom.util.CacheManager;
 import org.bukkit.plugin.java.JavaPlugin;
 

@@ -1,16 +1,27 @@
 package com.axiom.test;
 
 import com.axiom.AXIOM;
-import com.axiom.service.*;
+import com.axiom.domain.service.state.*;
+import com.axiom.domain.service.politics.*;
+import com.axiom.domain.service.industry.*;
+import com.axiom.domain.service.military.*;
+import com.axiom.domain.service.technology.*;
+import com.axiom.domain.service.infrastructure.*;
 import com.axiom.service.adapter.*;
-import com.axiom.repository.*;
-import com.axiom.repository.impl.*;
+import com.axiom.domain.repo.*;
+import com.axiom.infra.persistence.*;
 import com.axiom.util.*;
-import com.axiom.model.*;
+import com.axiom.domain.model.*;
 import com.axiom.exception.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,12 +45,21 @@ public class AutoTestBot {
      * Инициализация всех тестовых сюитов
      */
     private void initializeTestSuites() {
+        boolean safeMode = AutotestSupport.isSafeMode();
         testSuites.add(new ServiceTestSuite());
         testSuites.add(new RepositoryTestSuite());
         testSuites.add(new CacheTestSuite());
         testSuites.add(new ValidationTestSuite());
         testSuites.add(new IntegrationTestSuite());
-        testSuites.add(new PerformanceTestSuite());
+        if (!safeMode) {
+            testSuites.add(new PerformanceTestSuite());
+        } else {
+            plugin.getLogger().info("AutoTestBot: safe mode enabled, skipping PerformanceTestSuite");
+        }
+    }
+
+    public List<TestSuite> getTestSuites() {
+        return Collections.unmodifiableList(testSuites);
     }
     
     /**
@@ -59,17 +79,19 @@ public class AutoTestBot {
             List<TestCase> testCases = suite.getTestCases();
             for (TestCase testCase : testCases) {
                 totalTests.incrementAndGet();
-                
+                long startedAt = System.currentTimeMillis();
                 try {
                     boolean result = testCase.execute(sender);
+                    long durationMs = System.currentTimeMillis() - startedAt;
                     if (result) {
                         passedTests.incrementAndGet();
-                        reporter.testPassed(sender, testCase.getName());
+                        reporter.testPassed(sender, testCase.getName(), durationMs);
                     } else {
-                        reporter.testFailed(sender, testCase.getName(), "Тест вернул false");
+                        reporter.testFailed(sender, testCase.getName(), "Тест вернул false", durationMs);
                     }
                 } catch (Exception e) {
-                    reporter.testFailed(sender, testCase.getName(), e.getMessage());
+                    long durationMs = System.currentTimeMillis() - startedAt;
+                    reporter.testFailed(sender, testCase.getName(), e.getMessage(), durationMs);
                 }
             }
             
@@ -90,18 +112,20 @@ public class AutoTestBot {
             for (TestCase testCase : suite.getTestCases()) {
                 if (testCase.getName().equalsIgnoreCase(testName)) {
                     reporter.startSingleTest(sender, testName);
-                    
+                    long startedAt = System.currentTimeMillis();
                     try {
                         boolean result = testCase.execute(sender);
+                        long durationMs = System.currentTimeMillis() - startedAt;
                         if (result) {
-                            reporter.testPassed(sender, testName);
+                            reporter.testPassed(sender, testName, durationMs);
                             return true;
                         } else {
-                            reporter.testFailed(sender, testName, "Тест вернул false");
+                            reporter.testFailed(sender, testName, "Тест вернул false", durationMs);
                             return false;
                         }
                     } catch (Exception e) {
-                        reporter.testFailed(sender, testName, e.getMessage());
+                        long durationMs = System.currentTimeMillis() - startedAt;
+                        reporter.testFailed(sender, testName, e.getMessage(), durationMs);
                         return false;
                     }
                 }
@@ -129,16 +153,19 @@ public class AutoTestBot {
                 for (TestCase testCase : suite.getTestCases()) {
                     total.incrementAndGet();
                     
+                    long startedAt = System.currentTimeMillis();
                     try {
                         boolean result = testCase.execute(sender);
+                        long durationMs = System.currentTimeMillis() - startedAt;
                         if (result) {
                             passed.incrementAndGet();
-                            reporter.testPassed(sender, testCase.getName());
+                            reporter.testPassed(sender, testCase.getName(), durationMs);
                         } else {
-                            reporter.testFailed(sender, testCase.getName(), "Тест вернул false");
+                            reporter.testFailed(sender, testCase.getName(), "Тест вернул false", durationMs);
                         }
                     } catch (Exception e) {
-                        reporter.testFailed(sender, testCase.getName(), e.getMessage());
+                        long durationMs = System.currentTimeMillis() - startedAt;
+                        reporter.testFailed(sender, testCase.getName(), e.getMessage(), durationMs);
                     }
                 }
                 
@@ -509,6 +536,8 @@ public class AutoTestBot {
     private static class TestReporter {
         private final AXIOM plugin;
         private long startTime;
+        private final List<TestRecord> records = new ArrayList<>();
+        private String currentSuite = "Unknown";
         
         public TestReporter(AXIOM plugin) {
             this.plugin = plugin;
@@ -516,19 +545,33 @@ public class AutoTestBot {
         
         public void startReport(CommandSender sender) {
             startTime = System.currentTimeMillis();
+            records.clear();
+            currentSuite = "Unknown";
             sender.sendMessage(ChatColor.GOLD + "=== AUTO TEST BOT ===");
             sender.sendMessage(ChatColor.YELLOW + "Starting comprehensive testing...");
         }
         
         public void startSuite(CommandSender sender, String suiteName) {
+            currentSuite = suiteName;
             sender.sendMessage(ChatColor.BLUE + "Running suite: " + suiteName);
         }
         
         public void testPassed(CommandSender sender, String testName) {
+            testPassed(sender, testName, 0);
+        }
+
+        public void testPassed(CommandSender sender, String testName, long durationMs) {
+            records.add(new TestRecord(currentSuite, testName, true, "", durationMs));
             sender.sendMessage(ChatColor.GREEN + "  ✓ " + testName);
         }
         
         public void testFailed(CommandSender sender, String testName, String error) {
+            testFailed(sender, testName, error, 0);
+        }
+
+        public void testFailed(CommandSender sender, String testName, String error, long durationMs) {
+            String reason = error == null ? "" : error;
+            records.add(new TestRecord(currentSuite, testName, false, reason, durationMs));
             sender.sendMessage(ChatColor.RED + "  ✗ " + testName + ": " + error);
         }
         
@@ -553,10 +596,96 @@ public class AutoTestBot {
             
             if (passedTests == totalTests) {
                 sender.sendMessage(ChatColor.GREEN + "All tests passed! 🎉");
+                saveReport(totalTests, passedTests, duration);
                 return true;
             } else {
                 sender.sendMessage(ChatColor.RED + "Some tests failed! ❌");
+                saveReport(totalTests, passedTests, duration);
                 return false;
+            }
+        }
+
+        private void saveReport(int totalTests, int passedTests, long durationMs) {
+            try {
+                File reportsDir = new File(plugin.getDataFolder(), "test-reports");
+                reportsDir.mkdirs();
+
+                SimpleDateFormat fileFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+                String timestamp = fileFormat.format(new Date());
+                File reportFile = new File(reportsDir, "autotest-report_" + timestamp + ".json");
+
+                Map<String, Object> report = new LinkedHashMap<>();
+                report.put("type", "auto-testbot");
+                report.put("timestamp", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+                report.put("axiomVersion", plugin.getDescription().getVersion());
+                report.put("totalTests", totalTests);
+                report.put("passedTests", passedTests);
+                report.put("failedTests", totalTests - passedTests);
+                report.put("durationMs", durationMs);
+
+                Map<String, List<TestRecord>> bySuite = new LinkedHashMap<>();
+                for (TestRecord record : records) {
+                    bySuite.computeIfAbsent(record.suite, k -> new ArrayList<>()).add(record);
+                }
+
+                List<Map<String, Object>> suites = new ArrayList<>();
+                for (Map.Entry<String, List<TestRecord>> entry : bySuite.entrySet()) {
+                    Map<String, Object> suiteMap = new LinkedHashMap<>();
+                    suiteMap.put("name", entry.getKey());
+                    List<Map<String, Object>> tests = new ArrayList<>();
+                    int suiteTotal = 0;
+                    int suitePassed = 0;
+                    long suiteDuration = 0;
+                    for (TestRecord record : entry.getValue()) {
+                        Map<String, Object> testMap = new LinkedHashMap<>();
+                        suiteTotal++;
+                        if (record.success) {
+                            suitePassed++;
+                        }
+                        suiteDuration += Math.max(0, record.durationMs);
+                        testMap.put("id", record.id);
+                        testMap.put("name", record.name);
+                        testMap.put("success", record.success);
+                        testMap.put("durationMs", record.durationMs);
+                        if (!record.error.isEmpty()) {
+                            testMap.put("error", record.error);
+                        }
+                        tests.add(testMap);
+                    }
+                    suiteMap.put("total", suiteTotal);
+                    suiteMap.put("passed", suitePassed);
+                    suiteMap.put("failed", suiteTotal - suitePassed);
+                    suiteMap.put("durationMs", suiteDuration);
+                    suiteMap.put("tests", tests);
+                    suites.add(suiteMap);
+                }
+                report.put("suites", suites);
+
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                try (FileWriter writer = new FileWriter(reportFile, false)) {
+                    gson.toJson(report, writer);
+                }
+                plugin.getLogger().info("AutoTestBot report saved: " + reportFile.getAbsolutePath());
+            } catch (IOException e) {
+                plugin.getLogger().warning("Failed to save AutoTestBot report: " + e.getMessage());
+            }
+        }
+
+        private static class TestRecord {
+            private final String suite;
+            private final String name;
+            private final boolean success;
+            private final String error;
+            private final long durationMs;
+            private final String id;
+
+            private TestRecord(String suite, String name, boolean success, String error, long durationMs) {
+                this.suite = suite;
+                this.name = name;
+                this.success = success;
+                this.error = error == null ? "" : error;
+                this.durationMs = durationMs;
+                this.id = suite + "::" + name;
             }
         }
     }

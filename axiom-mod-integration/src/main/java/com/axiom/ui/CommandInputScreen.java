@@ -15,7 +15,7 @@ public class CommandInputScreen extends Screen {
     private Button cancelButton;
 
     public CommandInputScreen(Screen parent, CommandInfo command) {
-        super(Component.literal("Выполнить команду"));
+        super(UiText.text("Выполнить команду", "Execute command"));
         this.parent = parent;
         this.command = command;
     }
@@ -25,20 +25,20 @@ public class CommandInputScreen extends Screen {
         super.init();
         
         // Input field
-        inputField = new EditBox(font, width / 2 - 200, height / 2 - 10, 400, 20, Component.literal("Команда"));
+        inputField = new EditBox(font, width / 2 - 200, height / 2 - 10, 400, 20, UiText.text("Команда", "Command"));
         inputField.setMaxLength(256);
         inputField.setValue(command.getCommand());
         inputField.setFocused(true);
         addRenderableWidget(inputField);
         
         // Execute button
-        executeButton = Button.builder(Component.literal("✓ Выполнить"), (btn) -> {
+        executeButton = Button.builder(UiText.text("Выполнить", "Execute"), (btn) -> {
             String cmd = inputField.getValue();
             if (cmd.startsWith("/")) {
                 cmd = cmd.substring(1);
             }
             Minecraft.getInstance().player.connection.sendCommand(cmd);
-            NotificationManager.getInstance().success("Команда выполнена: /" + cmd);
+            NotificationManager.getInstance().success(UiText.pick("Команда выполнена: /", "Command executed: /") + cmd);
             Minecraft.getInstance().setScreen(parent);
         })
         .bounds(width / 2 - 105, height / 2 + 30, 100, 20)
@@ -46,7 +46,7 @@ public class CommandInputScreen extends Screen {
         addRenderableWidget(executeButton);
         
         // Cancel button
-        cancelButton = Button.builder(Component.literal("✗ Отмена"), (btn) -> {
+        cancelButton = Button.builder(UiText.text("Отмена", "Cancel"), (btn) -> {
             Minecraft.getInstance().setScreen(parent);
         })
         .bounds(width / 2 + 5, height / 2 + 30, 100, 20)
@@ -68,11 +68,11 @@ public class CommandInputScreen extends Screen {
         gfx.drawCenteredString(font, Component.literal("§7" + command.getShortDesc()), centerX, height / 2 - 45, 0xFFAAAAAA);
         
         // Input label
-        gfx.drawString(font, "§eВведите параметры команды:", centerX - 200, height / 2 - 25, 0xFFFFAA00, false);
+        gfx.drawString(font, UiText.pick("§eВведите параметры команды:", "§eEnter command parameters:"), centerX - 200, height / 2 - 25, 0xFFFFAA00, false);
         
         // Help text
         if (!command.getExamples().isEmpty()) {
-            gfx.drawString(font, "§7Пример: §a" + command.getExamples().get(0), 
+            gfx.drawString(font, UiText.pick("§7Пример: §a", "§7Example: §a") + command.getExamples().get(0),
                 centerX - 200, height / 2 + 60, 0xFF00FF00, false);
         }
         

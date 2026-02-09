@@ -6,15 +6,15 @@ import java.io.File
 
 object ConfigManager {
     
-    private val configDir = File(System.getProperty("user.home"), ".axiom-launcher")
-    private val configFile = File(configDir, "config.json")
+    // Portable config: store in the launcher directory
+    private val configDir = File(System.getProperty("user.dir")).absoluteFile
+    private val configFile = File(configDir, "launcher_config.json")
     private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
     
     var config: LauncherConfig = LauncherConfig()
         private set
     
     fun load() {
-        configDir.mkdirs()
         if (configFile.exists()) {
             runCatching {
                 config = json.decodeFromString(configFile.readText())
@@ -32,6 +32,6 @@ object ConfigManager {
         save()
     }
     
-    fun getGameDir(): File = File(configDir, "instances")
-    fun getModpacksDir(): File = File(configDir, "modpacks")
+    // Use the portable folder for game instances/files
+    fun getGameDir(): File = File(configDir, config.gameDir.ifBlank { "minecraft" })
 }

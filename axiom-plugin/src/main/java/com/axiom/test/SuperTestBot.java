@@ -1,8 +1,8 @@
 package com.axiom.test;
 
 import com.axiom.AXIOM;
-import com.axiom.model.Nation;
-import com.axiom.service.NationManager;
+import com.axiom.domain.model.Nation;
+import com.axiom.domain.service.state.NationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -1176,7 +1176,7 @@ public class SuperTestBot {
             }
             
             String nationId = testNations.values().iterator().next();
-            List<com.axiom.service.TechnologyTreeService.Technology> available = 
+            List<com.axiom.domain.service.technology.TechnologyTreeService.Technology> available = 
                 plugin.getTechnologyTreeService().getAvailableTechs(nationId);
             
             recordResult("Технологии", "ДеревоТехнологий", available != null, 
@@ -1266,8 +1266,8 @@ public class SuperTestBot {
                 
                 // Пропускаем несервисные поля
                 if (!typeName.contains("com.axiom.service") && 
-                    !typeName.contains("com.axiom.gui") &&
-                    !typeName.contains("com.axiom.model")) {
+                    !typeName.contains("com.axiom.app.gui") &&
+                    !typeName.contains("com.axiom.domain.model")) {
                     continue;
                 }
                 
@@ -1494,7 +1494,7 @@ public class SuperTestBot {
             try {
                 // Пропускаем несервисные поля
                 if (!field.getType().getName().contains("com.axiom.service") && 
-                    !field.getType().getName().contains("com.axiom.gui")) {
+                    !field.getType().getName().contains("com.axiom.app.gui")) {
                     continue;
                 }
                 

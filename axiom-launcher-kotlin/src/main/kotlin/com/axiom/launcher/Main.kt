@@ -1,26 +1,50 @@
 package com.axiom.launcher
 
+import com.axiom.launcher.config.ConfigManager
 import com.axiom.launcher.ui.LauncherApp
 import javafx.application.Application
+import java.io.File
 
 fun main(args: Array<String>) {
-    // Автоматическая установка при первом запуске
+    println("=== AXIOM CLIENT LAUNCHER (Portable) ===")
+    
+    // 1. Initialize Config
+    println("Инициализация конфигурации...")
+    ConfigManager.load()
+    val headless = args.contains("--headless") || System.getenv("AXIOM_HEADLESS") == "1"
+    
+    // 2. Run Auto-Installer / Updater
+    // In a real GUI app, this might be better inside the GUI with a progress bar,
+    // but for simplicity and robustness, we do a quick check here.
     val installer = AutoInstaller()
-    val serverManager = ServerManager()
-    val gameLauncher = GameLauncher()
+    val gameDir = ConfigManager.getGameDir()
     
-    println("=== AXIOM LAUNCHER ===")
-    println("Проверка установки...")
+    // Check if we need a full install or just an update
+    if (!gameDir.exists() || !File(gameDir, "versions").exists()) {
+        println("Обнаружена первая установка или поврежденные файлы.")
+    }
     
-    // Проверить, установлено ли всё
-    val baseDir = java.io.File(System.getProperty("user.home"), ".axiom")
-    if (!baseDir.exists() || !java.io.File(baseDir, "server/server.jar").exists()) {
-        println("Первый запуск - установка...")
+    println("Проверка обновлений...")
+    try {
         installer.install { message, progress ->
             println("[$progress%] $message")
         }
+    } catch (e: Exception) {
+        println("Ошибка при обновлении: ${e.message}")
+        println("Продолжаем запуск (возможно, оффлайн режим)...")
     }
     
-    // Запустить GUI
-    Application.launch(LauncherApp::class.java, *args)
+    if (headless) {
+        HeadlessRunner.run()
+        return
+    }
+
+    // 3. Launch GUI
+    println("Запуск интерфейса...")
+    try {
+        Application.launch(LauncherApp::class.java, *args)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        println("Ошибка запуска GUI. Убедитесь, что JavaFX доступен.")
+    }
 }

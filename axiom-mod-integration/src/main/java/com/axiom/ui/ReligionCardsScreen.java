@@ -5,15 +5,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.FormattedCharSequence;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReligionCardsScreen extends Screen {
-    private static final int CARD_WIDTH = 220;
-    private static final int CARD_HEIGHT = 56;
-    private static final int CARD_GAP = 10;
-    private static final int DETAIL_HEIGHT = 14;
+    private int cardWidth = 200;
+    private int cardHeight = 220;
+    private int cardGap = 12;
 
     private final List<ReligionCard> cards;
     private final List<CardEntry> entries = new ArrayList<>();
@@ -34,24 +34,28 @@ public class ReligionCardsScreen extends Screen {
         entries.clear();
         scrollOffset = 0;
 
-        int padding = 24;
+        float scale = UiLayout.scaleFor(width, height);
+        int padding = UiLayout.scaled(24, scale);
         int availableWidth = Math.max(0, width - padding * 2);
-        int columns = Math.max(1, Math.min(3, (availableWidth + CARD_GAP) / (CARD_WIDTH + CARD_GAP)));
+        cardWidth = UiCardSizing.religionCardWidth(scale, availableWidth);
+        cardHeight = UiCardSizing.religionCardHeight(scale);
+        cardGap = UiCardSizing.religionGap(scale);
+        int columns = Math.max(1, (availableWidth + cardGap) / (cardWidth + cardGap));
         int rows = (int) Math.ceil(cards.size() / (double) columns);
 
-        int totalWidth = columns * CARD_WIDTH + (columns - 1) * CARD_GAP;
+        int totalWidth = columns * cardWidth + (columns - 1) * cardGap;
         int startX = Math.max(padding, (width - totalWidth) / 2);
-        int startY = 32;
+        int startY = UiCardSizing.religionStartY(scale);
 
         for (int i = 0; i < cards.size(); i++) {
             int col = i % columns;
             int row = i / columns;
-            int x = startX + col * (CARD_WIDTH + CARD_GAP);
-            int y = startY + row * (CARD_HEIGHT + CARD_GAP);
+            int x = startX + col * (cardWidth + cardGap);
+            int y = startY + row * (cardHeight + cardGap);
             entries.add(new CardEntry(cards.get(i), x, y));
         }
 
-        int totalHeight = rows * CARD_HEIGHT + Math.max(0, rows - 1) * CARD_GAP;
+        int totalHeight = rows * cardHeight + Math.max(0, rows - 1) * cardGap;
         int viewHeight = height - startY - 24;
         maxScroll = Math.max(0, totalHeight - viewHeight);
     }
@@ -70,10 +74,7 @@ public class ReligionCardsScreen extends Screen {
         for (CardEntry entry : entries) {
             int drawY = entry.y - scrollOffset;
             if (entry.contains(mouseX, mouseY, drawY)) {
-                if (entry.isDetailsClick(mouseY, drawY)) {
-                    Minecraft.getInstance().setScreen(new ReligionDetailScreen(this, entry.card));
-                    return true;
-                }
+                Minecraft.getInstance().setScreen(new ReligionDetailScreen(this, entry.card));
                 return true;
             }
         }
@@ -82,40 +83,62 @@ public class ReligionCardsScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        guiGraphics.fill(0, 0, width, height, 0xFF000000);
+        UiTheme.drawBackdrop(guiGraphics, width, height);
 
         if (entries.isEmpty()) {
-            guiGraphics.drawCenteredString(font, Component.literal("Нет данных о религиях"), width / 2, height / 2, 0xFFFFFFFF);
+            guiGraphics.drawCenteredString(font, Component.literal("Нет данных о религиях"), width / 2, height / 2, UiTheme.TEXT_PRIMARY);
             return;
         }
 
-        guiGraphics.drawCenteredString(font, title, width / 2, 12, 0xFFFFFFFF);
-        guiGraphics.drawCenteredString(font, Component.literal("Низ карточки — подробности"), width / 2, height - 12, 0xFFAAAAAA);
+        guiGraphics.drawCenteredString(font, title, width / 2, 12, UiTheme.TEXT_PRIMARY);
+        guiGraphics.drawCenteredString(font, Component.literal("Выберите религию"), width / 2, 26, UiTheme.TEXT_MUTED);
 
         for (CardEntry entry : entries) {
             int drawY = entry.y - scrollOffset;
-            if (drawY + CARD_HEIGHT < 0 || drawY > height) {
+            if (drawY + cardHeight < 0 || drawY > height) {
                 continue;
             }
             boolean hovered = entry.contains(mouseX, mouseY, drawY);
-            int borderColor = hovered ? 0xFFFFFFFF : 0xFFCCCCCC;
+            int accent = resolveAccent(entry.card);
+            UiTheme.drawMinimalCard(guiGraphics, entry.x, drawY, entry.x + cardWidth, drawY + cardHeight, accent, hovered);
 
-            guiGraphics.fill(entry.x, drawY, entry.x + CARD_WIDTH, drawY + CARD_HEIGHT, 0xFF000000);
-            guiGraphics.renderOutline(entry.x, drawY, CARD_WIDTH, CARD_HEIGHT, borderColor);
+            boolean compact = cardHeight < 140 || cardWidth < 140;
+            float scale = Mth.clamp(cardHeight / 240.0f, 0.35f, 1.2f);
+            int padding = Math.max(6, Math.round(14 * scale));
+            int textX = entry.x + padding;
+            int textY = drawY + padding;
 
-            int titleX = entry.x + (CARD_WIDTH - font.width(entry.card.getName())) / 2;
-            guiGraphics.drawString(font, entry.card.getName(), titleX, drawY + 10, 0xFFFFFFFF, false);
+            String symbol = entry.card.getSymbol();
+            if (symbol == null || symbol.isBlank()) {
+                symbol = entry.card.getName().isEmpty() ? "?" : entry.card.getName().substring(0, 1);
+            }
+            guiGraphics.drawString(font, symbol, textX, textY, UiTheme.TEXT_DIM, false);
 
-            int lineY = drawY + CARD_HEIGHT - DETAIL_HEIGHT;
-            guiGraphics.hLine(entry.x + 8, entry.x + CARD_WIDTH - 8, lineY, 0xFF666666);
+            String name = entry.card.getName();
+            String nameLine = font.plainSubstrByWidth(name, cardWidth - padding * 2);
+            int nameY = textY + (compact ? 8 : 16);
+            guiGraphics.drawString(font, nameLine, textX, nameY, UiTheme.TEXT_PRIMARY, false);
 
-            Component detail = Component.literal("Подробнее");
-            int detailX = entry.x + (CARD_WIDTH - font.width(detail)) / 2;
-            guiGraphics.drawString(font, detail, detailX, lineY + 2, 0xFFFFFFFF, false);
+            if (!compact) {
+                String tagline = entry.card.getTagline();
+                if (tagline != null && !tagline.isBlank()) {
+                    String cleanTagline = tagline.replace('|', ' ');
+                    List<FormattedCharSequence> lines = font.split(Component.literal(cleanTagline), cardWidth - padding * 2);
+                    int lineY = textY + 32;
+                    int maxLines = Math.min(3, lines.size());
+                    for (int i = 0; i < maxLines; i++) {
+                        guiGraphics.drawString(font, lines.get(i), textX, lineY, UiTheme.TEXT_MUTED, false);
+                        lineY += 10;
+                    }
+                }
+
+                String hint = "Открыть";
+                guiGraphics.drawString(font, hint, textX, drawY + cardHeight - padding - 9, UiTheme.TEXT_DIM, false);
+            }
         }
     }
 
-    private static final class CardEntry {
+    private final class CardEntry {
         private final ReligionCard card;
         private final int x;
         private final int y;
@@ -127,11 +150,28 @@ public class ReligionCardsScreen extends Screen {
         }
 
         private boolean contains(double mouseX, double mouseY, int drawY) {
-            return mouseX >= x && mouseX <= x + CARD_WIDTH && mouseY >= drawY && mouseY <= drawY + CARD_HEIGHT;
+            return mouseX >= x && mouseX <= x + cardWidth && mouseY >= drawY && mouseY <= drawY + cardHeight;
         }
+    }
 
-        private boolean isDetailsClick(double mouseY, int drawY) {
-            return mouseY >= drawY + CARD_HEIGHT - DETAIL_HEIGHT;
+    private int resolveAccent(ReligionCard card) {
+        String raw = card.getColor();
+        if (raw == null) {
+            return UiTheme.ACCENT;
         }
+        String cleaned = raw.trim();
+        if (cleaned.startsWith("#")) {
+            cleaned = cleaned.substring(1);
+        }
+        try {
+            if (cleaned.length() == 6) {
+                return 0xFF000000 | Integer.parseInt(cleaned, 16);
+            }
+            if (cleaned.length() == 8) {
+                return (int) Long.parseLong(cleaned, 16);
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        return UiTheme.ACCENT;
     }
 }

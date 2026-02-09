@@ -185,7 +185,7 @@ public class CommandCatalog {
             "Открыть дерево технологий",
             "Открывает интерактивное меню дерева технологий с 5 уровнями и 5 ветвями развития.",
             CommandCategory.TECHNOLOGY,
-            List.of("/technology", "/research"),
+            List.of("/technology"),
             List.of("/tech", "/tech research firearms_tech"),
             "axiom.tech.view",
             true
@@ -359,7 +359,7 @@ public class CommandCatalog {
             "Запускает автоматические тесты всех систем плагина.",
             CommandCategory.ADMIN,
             List.of("/tb", "/autotest"),
-            List.of("/testbot", "/tb run all"),
+            List.of("/testbot", "/tb run"),
             "axiom.admin.testbot",
             false
         ));

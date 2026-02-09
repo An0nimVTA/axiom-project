@@ -8,102 +8,98 @@ import java.nio.file.StandardCopyOption
 import java.util.zip.ZipInputStream
 
 class AutoInstaller {
-    private val baseDir = File(System.getProperty("user.home"), ".axiom")
-    private val serverDir = File(baseDir, "server")
-    private val clientDir = File(baseDir, "client")
-    private val modsDir = File(clientDir, "mods")
-
-    // GitHub Config
-    private val REPO_OWNER = "An0nimVTA"
-    private val REPO_NAME = "axiom-project"
-    private val RELEASE_TAG = "v2.0.0"
-    private val BASE_URL = "https://github.com/$REPO_OWNER/$REPO_NAME/releases/download/$RELEASE_TAG"
+    // Portable paths
+    private val baseDir = File(".").absoluteFile
+    private val clientDir = File(baseDir, "minecraft")
+    
+    // URL сервера обновлений
+    private val BASE_URL = "http://193.23.201.6:8080/updates"
 
     fun install(onProgress: (String, Int) -> Unit) {
-        onProgress("Создание директорий...", 0)
-        baseDir.mkdirs()
-        serverDir.mkdirs()
+        onProgress("Проверка структуры папок...", 0)
         clientDir.mkdirs()
-        modsDir.mkdirs()
         
-        onProgress("Скачивание Forge...", 10)
-        downloadForge()
+        onProgress("Проверка Java...", 5)
+        checkJava()
         
-        onProgress("Скачивание модов...", 30)
+        onProgress("Загрузка ядра клиента...", 20)
+        downloadClientCore()
+        
+        onProgress("Загрузка модов...", 60)
         downloadMods()
         
-        onProgress("Скачивание сервера...", 60)
-        downloadServer()
-        
-        onProgress("Настройка конфигурации...", 80)
-        setupConfig()
-        
-        onProgress("Готово!", 100)
+        onProgress("Готово к запуску!", 100)
     }
     
-    private fun downloadForge() {
-        println("Forge нужно установить вручную:")
-        println("1. Скачать: https://files.minecraftforge.net/net/minecraftforge/forge/index_1.20.1.html")
-        println("2. Версия: 1.20.1-47.4.4")
-        println("3. Запустить installer и выбрать 'Install client'")
+    private fun downloadClientCore() {
+        println("Проверка файлов клиента...")
+        
+        // Проверяем наличие критичных файлов
+        val versionsDir = File(clientDir, "versions")
+        val librariesDir = File(clientDir, "libraries")
+        
+        if (versionsDir.exists() && librariesDir.exists()) {
+            println("Файлы клиента уже установлены.")
+            return
+        }
+        
+        val coreZip = findLocalFile("client_core.zip")
+        if (coreZip != null) {
+            println("Найден локальный client_core.zip, распаковка...")
+            unzip(coreZip, clientDir)
+            return
+        }
+
+        println("⚠️  Файлы клиента не найдены!")
+        println("client_core.zip не найден. Продолжаем без ручной установки.")
     }
     
     private fun downloadMods() {
-        println("Скачивание пакета модов с GitHub...")
+        println("Проверка модов...")
         
-        // 1. Скачать mods.zip (библиотеки и зависимости)
-        val zipFile = File(clientDir, "mods.zip")
-        try {
-            downloadFile("$BASE_URL/mods.zip", zipFile)
-            println("Распаковка модов...")
-            unzip(zipFile, modsDir)
-            zipFile.delete()
-        } catch (e: Exception) {
-            println("Ошибка скачивания mods.zip: ${e.message}")
-            println("Пропускаем, возможно это первая версия...")
+        val modsDir = File(clientDir, "mods")
+        if (modsDir.exists() && modsDir.listFiles()?.isNotEmpty() == true) {
+            println("Моды уже установлены (${modsDir.listFiles()?.size} файлов).")
+            return
+        }
+        
+        val modsZip = findLocalFile("modpack.zip")
+        if (modsZip != null) {
+            println("Найден локальный modpack.zip, распаковка модов...")
+            var count = 0
+            ZipInputStream(modsZip.inputStream()).use { zis ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    if (!entry.isDirectory && entry.name.endsWith(".jar")) {
+                        val outFile = File(modsDir, File(entry.name).name)
+                        outFile.parentFile?.mkdirs()
+                        FileOutputStream(outFile).use { zis.copyTo(it) }
+                        count++
+                    }
+                    zis.closeEntry()
+                    entry = zis.nextEntry
+                }
+            }
+            println("Установлено модов: $count")
+            return
         }
 
-        // 2. Скачать наш мод (Axiom UI)
-        try {
-            val modFile = File(modsDir, "axiomui-mod.jar")
-            downloadFile("$BASE_URL/axiomui-mod.jar", modFile)
-            println("✓ axiomui-mod.jar загружен")
-        } catch (e: Exception) {
-             println("Ошибка скачивания axiomui-mod.jar: ${e.message}")
-        }
+        println("⚠️  Моды не найдены!")
+        println("Продолжаем — модпак будет установлен при запуске игры.")
     }
     
-    private fun downloadServer() {
-        val serverJar = File(serverDir, "server.jar")
-        if (!serverJar.exists()) {
-            println("Скачивание ядра сервера...")
-            try {
-                downloadFile("$BASE_URL/server-core.jar", serverJar)
-            } catch (e: Exception) {
-                println("Ошибка скачивания ядра сервера: ${e.message}")
-            }
+    private fun checkJava() {
+        val runtimeDir = File(baseDir, "runtime")
+        val javaExe = File(runtimeDir, "bin/java.exe")
+        val javaBin = File(runtimeDir, "bin/java")
+        
+        if (javaExe.exists() || javaBin.exists()) {
+            println("Java уже установлена")
+            return
         }
         
-        // Копировать моды в папку сервера
-        val serverModsDir = File(serverDir, "mods")
-        serverModsDir.mkdirs()
-        
-        println("Синхронизация модов с сервером...")
-        modsDir.listFiles()?.forEach { mod ->
-            if (mod.extension == "jar") {
-                mod.copyTo(File(serverModsDir, mod.name), true)
-            }
-        }
-    }
-    
-    private fun setupConfig() {
-        File(serverDir, "eula.txt").writeText("eula=true")
-        File(serverDir, "server.properties").writeText("""
-            server-port=25565
-            max-players=100
-            motd=AXIOM Server
-            online-mode=false
-        """.trimIndent())
+        println("⚠️  Java не найдена!")
+        println("Будет использована системная Java (если установлена)")
     }
     
     private fun downloadFile(urlStr: String, target: File) {
@@ -111,18 +107,30 @@ class AutoInstaller {
         val url = URL(urlStr)
         val connection = url.openConnection()
         connection.connectTimeout = 5000
-        connection.readTimeout = 10000
+        connection.readTimeout = 60000 // 60 sec timeout
         
         connection.getInputStream().use { input ->
             Files.copy(input, target.toPath(), StandardCopyOption.REPLACE_EXISTING)
         }
     }
 
-    private fun unzip(zipFile: File, targetDir: File) {
+    private fun unzip(zipFile: File, targetDir: File, ignorePath: String? = null) {
         ZipInputStream(zipFile.inputStream()).use { zis ->
             var entry = zis.nextEntry
             while (entry != null) {
+                // Логика пропуска модов
+                if (ignorePath != null && entry.name.startsWith(ignorePath)) {
+                    println("Пропуск: ${entry.name}")
+                    entry = zis.nextEntry
+                    continue
+                }
+
                 val newFile = File(targetDir, entry.name)
+                // Защита от Zip Slip
+                if (!newFile.canonicalPath.startsWith(targetDir.canonicalPath)) {
+                    throw SecurityException("Zip Slip vulnerability detected: ${entry.name}")
+                }
+                
                 if (entry.isDirectory) {
                     newFile.mkdirs()
                 } else {
@@ -134,5 +142,16 @@ class AutoInstaller {
                 entry = zis.nextEntry
             }
         }
+    }
+
+    private fun findLocalFile(name: String): File? {
+        val cwd = File(System.getProperty("user.dir")).absoluteFile
+        val candidates = listOf(
+            File(cwd, name),
+            File(cwd, "packages/$name"),
+            File(cwd, "build_portable/AxiomClient/$name"),
+            File(cwd, "../build_portable/AxiomClient/$name")
+        )
+        return candidates.firstOrNull { it.exists() && it.isFile }
     }
 }

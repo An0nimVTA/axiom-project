@@ -45,10 +45,24 @@ data class LauncherConfig(
     val javaPath: String = "java",
     val minRam: Int = 2048,
     val maxRam: Int = 4096,
-    val gameDir: String = ".axiom",
+    val gameDir: String = "minecraft",
     val serverStartPath: String = "",
+    val serverAddress: String = "localhost",
+    val serverPort: Int = 25565,
     val lastUser: String? = null,
-    val token: String? = null
+    val token: String? = null,
+    val localPackagesDir: String = "",
+    val offlineMode: Boolean = false,
+    val autoLaunch: Boolean = false,
+    val autoStartServer: Boolean = false,
+    val autoStartServerDelayMs: Long = 15000,
+    val autoUiTests: Boolean = false,
+    val autoUiTestIncludeScreens: Boolean = true,
+    val autoUiTestAutoStartDelayTicks: Int = 60,
+    val autoUiTestStepDelayTicks: Int = 5,
+    val autoUiTestCommandTimeoutTicks: Int = 200,
+    val autoUiTestCommands: List<String> = emptyList(),
+    val autoUiTestCommandBlacklist: List<String> = emptyList()
 )
 
 @Serializable

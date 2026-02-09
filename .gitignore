@@ -66,6 +66,26 @@ desktop.ini
 *.swp
 *~.nib
 
+# Build outputs / bundles
+build_portable/
+builds/
+release_assets/
+launcher-files/
+modpacks/
+
+# Runtime / local data
+minecraft/
+instances/
+reports/
+chat_exports/
+server/plugins/
+server/mods/
+server/libraries/
+server/tmp/
+server/tacz_backup/
+server/*.jar
+installer.log
+
 # Large files (>100MB)
 modpacks/*.zip
 modpacks_temp/
@@ -75,6 +95,11 @@ launcher-files/forge-*.zip
 # Maven
 target/
 **/target/
+.m2/
+**/.mvn/repository/
+
+# Runtime
+*.pid
 
 # Backup
 backups/

@@ -1,0 +1,126 @@
+# AXIOM Resource Catalog
+# Canonical list of resources, pricing, scarcity, discovery, and processing recipes.
+
+resources:
+  food:
+    category: consumer
+    tradable: true
+    scarcity: true
+    discoverable: false
+    basePrice: 10.0
+    decayPerHour: 0.006
+    perCitizenNeed: 10.0
+    volatility: 0.08
+  wood:
+    category: raw
+    tradable: true
+    scarcity: true
+    discoverable: false
+    basePrice: 5.0
+    decayPerHour: 0.006
+    perCitizenNeed: 2.0
+    volatility: 0.08
+  stone:
+    category: raw
+    tradable: false
+    scarcity: true
+    discoverable: false
+    basePrice: 3.0
+    perCitizenNeed: 1.0
+  iron:
+    category: refined
+    tradable: true
+    scarcity: true
+    discoverable: true
+    basePrice: 15.0
+    volatility: 0.10
+  gold:
+    category: refined
+    tradable: true
+    scarcity: true
+    discoverable: true
+    basePrice: 50.0
+    volatility: 0.12
+  coal:
+    category: raw
+    tradable: true
+    scarcity: false
+    discoverable: true
+    basePrice: 8.0
+    volatility: 0.10
+  oil:
+    category: raw
+    tradable: true
+    scarcity: false
+    discoverable: true
+    basePrice: 20.0
+    volatility: 0.12
+  rare_metals:
+    category: rare
+    tradable: false
+    scarcity: false
+    discoverable: true
+    basePrice: 60.0
+    volatility: 0.15
+  raw_iron:
+    category: raw
+    tradable: false
+    scarcity: false
+    discoverable: false
+    basePrice: 8.0
+  raw_gold:
+    category: raw
+    tradable: false
+    scarcity: false
+    discoverable: false
+    basePrice: 30.0
+  raw_coal:
+    category: raw
+    tradable: false
+    scarcity: false
+    discoverable: false
+    basePrice: 4.0
+  raw_oil:
+    category: raw
+    tradable: false
+    scarcity: false
+    discoverable: false
+    basePrice: 10.0
+  raw_rare_metals:
+    category: raw
+    tradable: false
+    scarcity: false
+    discoverable: false
+    basePrice: 25.0
+
+processing:
+  iron:
+    inputs:
+      raw_iron: 1.0
+    outputAmount: 0.8
+    baseRatePerHour: 10.0
+    baseEfficiency: 80.0
+  gold:
+    inputs:
+      raw_gold: 1.0
+    outputAmount: 0.7
+    baseRatePerHour: 8.0
+    baseEfficiency: 75.0
+  coal:
+    inputs:
+      raw_coal: 1.0
+    outputAmount: 0.9
+    baseRatePerHour: 12.0
+    baseEfficiency: 85.0
+  oil:
+    inputs:
+      raw_oil: 1.0
+    outputAmount: 0.9
+    baseRatePerHour: 10.0
+    baseEfficiency: 80.0
+  rare_metals:
+    inputs:
+      raw_rare_metals: 1.0
+    outputAmount: 0.6
+    baseRatePerHour: 6.0
+    baseEfficiency: 70.0

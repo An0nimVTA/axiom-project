@@ -1,0 +1,5 @@
+# AXIOM Recipe Integration Configuration
+# Used to map custom recipes and integrations
+
+recipes:
+  enabled: true

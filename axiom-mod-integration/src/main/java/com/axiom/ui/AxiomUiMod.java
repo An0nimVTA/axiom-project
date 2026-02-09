@@ -1,21 +1,15 @@
 package com.axiom.ui;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.network.MCRegisterPacketHandler;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.event.EventNetworkChannel;
-import net.minecraftforge.fml.common.Mod;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
@@ -26,187 +20,175 @@ import io.netty.buffer.Unpooled;
 public class AxiomUiMod {
     public static final String MOD_ID = "axiomui";
     private static final String UI_PROTOCOL = "1";
-    private static final ResourceLocation UI_CHANNEL = new ResourceLocation("axiom", "ui");
-    private static final EventNetworkChannel UI_NETWORK = NetworkRegistry.newEventChannel(
+    public static final ResourceLocation UI_CHANNEL = ResourceLocation.fromNamespaceAndPath("axiom", "ui");
+    public static final EventNetworkChannel UI_NETWORK = NetworkRegistry.newEventChannel(
         UI_CHANNEL,
         () -> UI_PROTOCOL,
         NetworkRegistry.acceptMissingOr(UI_PROTOCOL),
         NetworkRegistry.acceptMissingOr(UI_PROTOCOL)
     );
     
-    private static final Gson gson = new Gson();
     public static Map<String, Object> cachedStats = new HashMap<>();
     public static List<Map<String, Object>> cachedTechs = new ArrayList<>();
     public static List<Map<String, Object>> cachedNations = new ArrayList<>();
+    public static List<Map<String, Object>> cachedTerritories = new ArrayList<>();
+    private static final Map<String, TerritoryTile> territoryIndex = new HashMap<>();
+    private static List<TerritoryTile> territoryList = new ArrayList<>();
+    private static boolean territoryListDirty = true;
+    private static long cachedTerritoryVersion = -1L;
+    private static long cachedTerritoryRevision = 0L;
+    private static boolean loggedTerritorySync = false;
+    private static boolean nationsSynced = false;
+    private static boolean territoriesSynced = false;
 
     public AxiomUiMod() {
-        MinecraftForge.EVENT_BUS.addListener(this::onRegisterClientCommands);
-        MinecraftForge.EVENT_BUS.addListener(this::onClientLogin);
-        MinecraftForge.EVENT_BUS.addListener(this::onKeyInput);
-        MinecraftForge.EVENT_BUS.addListener(this::onRenderOverlay);
-        UI_NETWORK.addListener(this::onClientPayload);
-        
-        System.out.println("[AXIOM UI] Mod loaded with server integration");
-    }
-
-    private void onRenderOverlay(net.minecraftforge.client.event.RenderGuiOverlayEvent.Post event) {
-        if (event.getOverlay().id().toString().equals("minecraft:hotbar")) {
-            NotificationManager.getInstance().render(
-                event.getGuiGraphics(),
-                event.getWindow().getGuiScaledWidth(),
-                event.getWindow().getGuiScaledHeight()
-            );
-        }
-    }
-
-    private void onKeyInput(net.minecraftforge.client.event.InputEvent.Key event) {
-        if (event.getKey() == 290 && event.getAction() == 1) { // F1
-            Minecraft.getInstance().setScreen(new CommandMenuScreen());
-        }
-    }
-
-    private void onRegisterClientCommands(RegisterClientCommandsEvent event) {
-        event.getDispatcher().register(
-            Commands.literal("axiomui")
-                .executes(context -> {
-                    Minecraft.getInstance().setScreen(new CommandMenuScreen());
-                    return 1;
-                })
-                .then(Commands.literal("commands")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new CommandMenuScreen());
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("religions")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new ReligionCardsScreen());
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("tech")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new TechnologyTreeScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("stats")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new StatsOverlayScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("map")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new NationMapScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("education")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new EducationScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("culture")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new CultureScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("ecology")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new EcologyScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("espionage")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new EspionageScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("analytics")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new AnalyticsScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("balance")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new ItemBalanceScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("recipes")
-                    .executes(context -> {
-                        Minecraft.getInstance().setScreen(new RecipeEditorScreen(null));
-                        return 1;
-                    })
-                )
-                .then(Commands.literal("test")
-                    .executes(context -> {
-                        NotificationManager.getInstance().info("Тестовое уведомление INFO");
-                        NotificationManager.getInstance().success("Тестовое уведомление SUCCESS");
-                        NotificationManager.getInstance().warning("Тестовое уведомление WARNING");
-                        NotificationManager.getInstance().error("Тестовое уведомление ERROR");
-                        return 1;
-                    })
-                )
-        );
-    }
-
-    private void onClientLogin(ClientPlayerNetworkEvent.LoggingIn event) {
-        Connection connection = event.getConnection();
-        if (connection == null) return;
-        
-        MCRegisterPacketHandler.INSTANCE.addChannels(Set.of(UI_CHANNEL), connection);
-        MCRegisterPacketHandler.INSTANCE.sendRegistry(connection, NetworkDirection.PLAY_TO_SERVER);
-        
-        // Request initial data
-        sendToServer(connection, "get_stats");
-        sendToServer(connection, "get_techs");
-        sendToServer(connection, "get_nations");
-    }
-
-    private void onClientPayload(NetworkEvent.ClientCustomPayloadEvent event) {
-        FriendlyByteBuf buf = event.getPayload();
-        if (buf == null || buf.readableBytes() == 0) {
-            event.getSource().get().setPacketHandled(true);
-            return;
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            UI_NETWORK.addListener(AxiomUiClientEvents::onClientPayload);
         }
         
-        String type = buf.readUtf(64);
-        String json = buf.readUtf(32767);
-        
-        event.getSource().get().enqueueWork(() -> {
-            switch (type) {
-                case "stats":
-                    cachedStats = gson.fromJson(json, new TypeToken<Map<String, Object>>(){}.getType());
-                    break;
-                case "techs":
-                    cachedTechs = gson.fromJson(json, new TypeToken<List<Map<String, Object>>>(){}.getType());
-                    break;
-                case "nations":
-                    cachedNations = gson.fromJson(json, new TypeToken<List<Map<String, Object>>>(){}.getType());
-                    break;
-            }
-        });
-        event.getSource().get().setPacketHandled(true);
-    }
-
-    private void sendToServer(Connection connection, String action) {
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf(action);
-        connection.send(NetworkDirection.PLAY_TO_SERVER.buildPacket(Pair.of(buf, 0), UI_CHANNEL).getThis());
+        System.out.println("[AXIOM UI] Mod loaded (Side: " + FMLEnvironment.dist + ")");
     }
     
     public static void requestUpdate(String type) {
-        var player = Minecraft.getInstance().player;
-        if (player == null) return;
-        
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeUtf("get_" + type);
-        player.connection.send(NetworkDirection.PLAY_TO_SERVER.buildPacket(Pair.of(buf, 0), UI_CHANNEL).getThis());
+        // Safe check for client side usage
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            var player = Minecraft.getInstance().player;
+            if (player == null) return;
+            
+            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            buf.writeUtf("get_" + type);
+            player.connection.send(NetworkDirection.PLAY_TO_SERVER.buildPacket(Pair.of(buf, 0), UI_CHANNEL).getThis());
+        }
+    }
+
+    public static void applyTerritorySnapshot(List<Map<String, Object>> territories, long version) {
+        territoryIndex.clear();
+        if (territories != null) {
+            for (Map<String, Object> entry : territories) {
+                if (entry == null) continue;
+                String world = readString(entry.get("world"));
+                String nationId = readString(entry.get("nationId"));
+                int x = readInt(entry.get("x"), 0);
+                int z = readInt(entry.get("z"), 0);
+                if (world == null || world.isBlank()) continue;
+                territoryIndex.put(chunkKey(world, x, z), new TerritoryTile(world, x, z, nationId));
+            }
+        }
+        cachedTerritoryVersion = version;
+        territoriesSynced = true;
+        cachedTerritoryRevision++;
+        territoryListDirty = true;
+        cachedTerritories = territories != null ? territories : new ArrayList<>();
+        if (!loggedTerritorySync) {
+            System.out.println("[AXIOM UI] territories snapshot received: " + territoryIndex.size() + " chunks, v" + version);
+            loggedTerritorySync = true;
+        }
+    }
+
+    public static void applyTerritoryDelta(List<Map<String, Object>> changes, long version) {
+        if (changes == null || changes.isEmpty()) {
+            cachedTerritoryVersion = version;
+            territoriesSynced = true;
+            return;
+        }
+        int applied = 0;
+        for (Map<String, Object> entry : changes) {
+            if (entry == null) continue;
+            String op = readString(entry.get("op"));
+            String world = readString(entry.get("world"));
+            int x = readInt(entry.get("x"), 0);
+            int z = readInt(entry.get("z"), 0);
+            String nationId = readString(entry.get("nationId"));
+            if (world == null || world.isBlank()) continue;
+            String key = chunkKey(world, x, z);
+            if ("claim".equalsIgnoreCase(op)) {
+                territoryIndex.put(key, new TerritoryTile(world, x, z, nationId));
+                applied++;
+            } else if ("unclaim".equalsIgnoreCase(op)) {
+                territoryIndex.remove(key);
+                applied++;
+            }
+        }
+        cachedTerritoryVersion = version;
+        territoriesSynced = true;
+        if (applied > 0) {
+            cachedTerritoryRevision++;
+            territoryListDirty = true;
+            if (loggedTerritorySync) {
+                System.out.println("[AXIOM UI] territories delta applied: " + applied + " changes, v" + version);
+            }
+        }
+    }
+
+    public static List<TerritoryTile> getTerritoryTiles() {
+        if (territoryListDirty) {
+            territoryList = new ArrayList<>(territoryIndex.values());
+            territoryListDirty = false;
+        }
+        return territoryList;
+    }
+
+    public static String getTerritoryOwner(String world, int x, int z) {
+        if (world == null) {
+            return null;
+        }
+        TerritoryTile tile = territoryIndex.get(chunkKey(world, x, z));
+        return tile != null ? tile.nationId : null;
+    }
+
+    public static long getTerritoryVersion() {
+        return cachedTerritoryVersion;
+    }
+
+    public static long getTerritoryRevision() {
+        return cachedTerritoryRevision;
+    }
+
+    public static void markNationsSynced() {
+        nationsSynced = true;
+    }
+
+    public static boolean hasNationSnapshot() {
+        return nationsSynced;
+    }
+
+    public static boolean hasTerritorySnapshot() {
+        return territoriesSynced;
+    }
+
+    private static String readString(Object value) {
+        if (value == null) return null;
+        String s = value.toString();
+        return s.isBlank() ? null : s;
+    }
+
+    private static int readInt(Object value, int fallback) {
+        if (value == null) return fallback;
+        if (value instanceof Number num) {
+            return num.intValue();
+        }
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
+    }
+
+    private static String chunkKey(String world, int x, int z) {
+        return world + ":" + x + ":" + z;
+    }
+
+    public static final class TerritoryTile {
+        public final String world;
+        public final int x;
+        public final int z;
+        public final String nationId;
+
+        public TerritoryTile(String world, int x, int z, String nationId) {
+            this.world = world;
+            this.x = x;
+            this.z = z;
+            this.nationId = nationId;
+        }
     }
 }

@@ -1,9 +1,9 @@
 package com.axiom.service.adapter;
 
-import com.axiom.service.SiegeService;
-import com.axiom.service.SiegeServiceInterface;
+import com.axiom.domain.service.military.SiegeService;
+import com.axiom.domain.service.military.SiegeServiceInterface;
 import com.axiom.AXIOM;
-import com.axiom.service.NationManager;
+import com.axiom.domain.service.state.NationManager;
 import java.util.Map;
 
 /**

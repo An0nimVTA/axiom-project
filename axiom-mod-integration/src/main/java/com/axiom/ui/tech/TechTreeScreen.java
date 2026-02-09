@@ -1,5 +1,6 @@
 package com.axiom.ui.tech;
 
+import com.axiom.ui.UiTheme;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -22,12 +23,13 @@ public class TechTreeScreen extends Screen {
         cards.clear();
         int startX = (width - HorizontalCardWidget.WIDTH) / 2;
         int startY = 40;
+        int spacing = 12;
         
         // Mock Data (In reality, this comes from Server Packets)
         addMockCard(startX, startY, "Горное дело", "Добыча руды и камня.", Items.IRON_PICKAXE);
-        addMockCard(startX, startY + 70, "Бронза", "Сплав меди и олова.", Items.COPPER_INGOT);
-        addMockCard(startX, startY + 140, "Железо", "Обработка железа.", Items.IRON_INGOT);
-        addMockCard(startX, startY + 210, "Сила Пара", "Энергия пара и машин.", Items.CAMPFIRE);
+        addMockCard(startX, startY + HorizontalCardWidget.HEIGHT + spacing, "Бронза", "Сплав меди и олова.", Items.COPPER_INGOT);
+        addMockCard(startX, startY + (HorizontalCardWidget.HEIGHT + spacing) * 2, "Железо", "Обработка железа.", Items.IRON_INGOT);
+        addMockCard(startX, startY + (HorizontalCardWidget.HEIGHT + spacing) * 3, "Сила Пара", "Энергия пара и машин.", Items.CAMPFIRE);
     }
     
     private void addMockCard(int x, int y, String title, String desc, net.minecraft.world.item.Item item) {
@@ -47,10 +49,10 @@ public class TechTreeScreen extends Screen {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTick) {
-        renderBackground(gfx);
+        UiTheme.drawBackdrop(gfx, width, height);
         
         // Title
-        gfx.drawCenteredString(font, title, width / 2, 10, 0xFFFFFFFF);
+        gfx.drawCenteredString(font, title, width / 2, 10, UiTheme.TEXT_PRIMARY);
         
         // Render cards
         for (HorizontalCardWidget card : cards) {
