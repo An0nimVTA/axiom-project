@@ -22,6 +22,10 @@ bin/
 *.swo
 *~
 
+# Python
+__pycache__/
+*.pyc
+
 # Minecraft
 server/world/
 server/world_nether/
